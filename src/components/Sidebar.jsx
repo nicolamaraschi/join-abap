@@ -4,9 +4,7 @@ const TableList = ({ tables, onSelectTable }) => {
     const groupedTables = useMemo(() => {
         return tables.reduce((acc, table) => {
             const subModule = table.subModule || 'Generale';
-            if (!acc[subModule]) {
-                acc[subModule] = [];
-            }
+            if (!acc[subModule]) acc[subModule] = [];
             acc[subModule].push(table);
             return acc;
         }, {});
@@ -14,7 +12,7 @@ const TableList = ({ tables, onSelectTable }) => {
 
     const subModules = Object.keys(groupedTables);
 
-    if (tables.length === 0) return <div className="text-slate-500 p-4 text-center">Nessuna tabella trovata.</div>;
+    if (tables.length === 0) return <div style={{textAlign: 'center', color: '#64748b', padding: '1rem'}}>Nessuna tabella trovata.</div>;
 
     return (
         <div>
@@ -25,10 +23,9 @@ const TableList = ({ tables, onSelectTable }) => {
                         {groupedTables[subModule].map(table => (
                             <li key={table.name} onClick={() => onSelectTable(table.name)} className="table-list-item">
                                 <div>
-                                    <span className="table-name">{table.name}</span>
-                                    <span className="table-description">{table.description || 'N/A'}</span>
+                                    <p className="table-name">{table.name}</p>
+                                    <p className="table-description">{table.description || 'N/A'}</p>
                                 </div>
-                                <span className="table-module-badge">{table.module}</span>
                             </li>
                         ))}
                     </ul>
@@ -37,7 +34,6 @@ const TableList = ({ tables, onSelectTable }) => {
         </div>
     );
 };
-
 
 const Sidebar = ({ searchTerm, onSearchChange, tables, onSelectTable }) => {
     return (
