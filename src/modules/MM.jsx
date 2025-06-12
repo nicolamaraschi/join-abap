@@ -78,7 +78,7 @@ export const mmData = `
 
 **VETVG (Delivery Due Index for Stock Transfer)**
 
-* Chiavi Primarie: \`EBELN, EBELP\`
+* Chiavi Primarie: \`VSTEL, LEDAT, LRRIO, ROUTE, SPDNR, WADAT, KUNWE,VBELN\`
 * Descrizione: Indice per le scadenze di consegna relative ai trasferimenti di stock.
 * Possibili Join:
 
@@ -86,7 +86,7 @@ export const mmData = `
 
 **EKES (Order Acceptance/Fulfillment Confirmations)**
 
-* Chiavi Primarie: \`EBELN, EBELP, ETENR, ZAEHL\`
+* Chiavi Primarie: \`EBELN, EBELP, ETENS\`
 * Descrizione: Conferme di accettazione o evasione dell'ordine (es. conferme d'ordine, avvisi di spedizione).
 * Possibili Join:
 
@@ -94,7 +94,7 @@ export const mmData = `
 
 **EKKN (Account assignment in purchasing)**
 
-* Chiavi Primarie: \`EBELN, EBELP, ZEBEL\`
+* Chiavi Primarie: \`EBELN, EBELP, ZEKKEN\`
 * Descrizione: Assegnazioni contabili nei documenti d'acquisto (es. centro di costo, ordine).
 * Possibili Join:
 
@@ -104,7 +104,7 @@ export const mmData = `
 
 **EKAN (Vendor address purchasing)**
 
-* Chiavi Primarie: \`EBELN, ADDR\_NO\`
+* Chiavi Primarie: \`EBELN\`
 * Descrizione: Indirizzi del fornitore associati ai documenti d'acquisto.
 * Possibili Join:
 
@@ -112,7 +112,7 @@ export const mmData = `
 
 **EKPA (Partner functions)**
 
-* Chiavi Primarie: \`EBELN, PARVW, PARZA\`
+* Chiavi Primarie: \`EBELN, EBELP,EKORG,LTSNR,WERKS, PARVW,PARZA\`
 * Descrizione: Funzioni dei partner commerciali nel documento d'acquisto (es. fornitore, ricevitore merce).
 * Possibili Join:
 
@@ -120,7 +120,7 @@ export const mmData = `
 
 **EIPO (Item export / import data)**
 
-* Chiavi Primarie: \`EBELN, EBELP\`
+* Chiavi Primarie: \`EXNUM, EXPOS\`
 * Descrizione: Dati di esportazione/importazione a livello di posizione del documento d'acquisto.
 * Possibili Join:
 
@@ -145,7 +145,7 @@ export const mmData = `
 
 **EORD (Source list)**
 
-* Chiavi Primarie: \`MATNR, WERKS, LIFNR, GUEBG, GUEEN\`
+* Chiavi Primarie: \`MATNR, WERKS, ZEORD\`
 * Descrizione: Elenco fonti, definisce i fornitori validi per un materiale in uno specifico impianto.
 * Possibili Join:
 
