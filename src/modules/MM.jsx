@@ -168,7 +168,7 @@ export const mmData = `
 * Possibili Join:
 
   * **EBAN** (Purchase Requisition): su \`BANFN, BNFPO\`
-  * **EKKN** (Account assignment in purchasing): su \`BANFN, BNFPO, ZEBEL\`
+  * **EKKN** (Account assignment in purchasing): su \`BANFN, BNFPO, ZEBEL\` 
 
 
 
