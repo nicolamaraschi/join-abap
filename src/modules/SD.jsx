@@ -2,178 +2,160 @@ export const sdData = `
 ### Modulo SD (Sales and Distribution)
 
 **VBFA (Document flow (alg.))**
-* Chiavi Primarie: \`MANDT, VBELV, POSNV, VBELN, POSNN, VBTYP_N\`
-* Descrizione: Tabella del flusso documenti. Collega i documenti di vendita in sequenza (es. ordine -> consegna -> fattura).
+* Chiavi Primarie: \`RUUID\`
+* Descrizione: Tabella del flusso documenti. Collega i documenti di vendita in sequenza.
 * Possibili Join:
-  * **VBAK** (Sales Document Header): su \`MANDT, VBELV=VBELN\` (come precedente) o \`VBELN=VBELN\` (come successivo)
-  * **LIKP** (Delivery Header): su \`MANDT, VBELV=VBELN\` (come precedente) o \`VBELN=VBELN\` (come successivo)
-  * **VBRK** (Billing Document Header): su \`MANDT, VBELV=VBELN\` (come precedente) o \`VBELN=VBELN\` (come successivo)
+  * Nessun join all'interno di questa sottocategoria.
 
 **VTFA (Flow shipping documents)**
-* Chiavi Primarie: \`MANDT, VFART, RFART\`
+* Chiavi Primarie: \`TKNUM, VBELV, POSNV, VBTYP_V, VBELN, POSNN, VBTYP_N\`
 * Descrizione: Tabella di customizing che controlla il flusso tra tipi di documenti di fatturazione e di vendita.
 * Possibili Join:
-  * **TVFK** (Billing Document Types): su \`MANDT, VFART=FKART\`
-  * **TVAK** (Sales Document Types): su \`MANDT, RFART=AUART\`
+  * Nessun join all'interno di questa sottocategoria.
 
 #### Sales order :
 **VBAK (Header data)**
-* Chiavi Primarie: \`MANDT, VBELN\`
+* Chiavi Primarie: \`VBELN\`
 * Descrizione: Testata dei documenti di vendita (ordini, offerte, contratti).
 * Possibili Join:
-  * **VBAP** (Item data): su \`MANDT, VBELN\`
-  * **VBPA** (Partners in sales order): su \`MANDT, VBELN\` (con POSNR = '000000')
-  * **VBKD** (Sales district data): su \`MANDT, VBELN\` (con POSNR = '000000')
-  * **VBFA** (Document Flow): su \`MANDT, VBELV=VBELN\`
-  * **KNA1** (Customer Master): su \`MANDT, KUNNR\`
+  * **VBAP** (Item data): su \`VBELN\`
+  * **VBPA** (Partners in sales order): su \`VBELN\` (con POSNR = '000000')
+  * **VBKD** (Sales district data): su \`VBELN\` (con POSNR = '000000')
 
 **VBAP (Item data)**
-* Chiavi Primarie: \`MANDT, VBELN, POSNR\`
+* Chiavi Primarie: \`VBELN, POSNR\`
 * Descrizione: Posizioni dei documenti di vendita.
 * Possibili Join:
-  * **VBAK** (Header data): su \`MANDT, VBELN\`
-  * **VBEP** (Data related to line items): su \`MANDT, VBELN, POSNR\`
-  * **MARA** (Material Master): su \`MANDT, MATNR\`
-  * **VBPA** (Partners in sales order): su \`MANDT, VBELN, POSNR\`
+  * **VBAK** (Header data): su \`VBELN\`
+  * **VBEP** (Data related to line items): su \`VBELN, POSNR\`
+  * **VBPA** (Partners in sales order): su \`VBELN, POSNR\`
+  * **VBKD** (Sales district data): su \`VBELN, POSNR\`
 
 **VBPA (Partners in sales order)**
-* Chiavi Primarie: \`MANDT, VBELN, POSNR, PARVW\`
+* Chiavi Primarie: \`VBELN, POSNR, PARVW\`
 * Descrizione: Funzioni partner per testata e posizioni dei documenti di vendita.
 * Possibili Join:
-  * **VBAK** (Header data): su \`MANDT, VBELN\`
-  * **KNA1** (Customer Master): su \`MANDT, KUNNR\` (KUNNR è il numero del partner in VBPA)
-  * **LFA1** (Vendor Master): su \`MANDT, LIFNR\` (se il partner è un fornitore)
+  * **VBAK** (Header data): su \`VBELN\`
+  * **VBAP** (Item data): su \`VBELN, POSNR\`
 
 **VBKD (Sales district data)**
-* Chiavi Primarie: \`MANDT, VBELN, POSNR\`
-* Descrizione: Dati commerciali aggiuntivi per i documenti di vendita (es. termini di pagamento, Incoterms).
+* Chiavi Primarie: \`VBELN, POSNR\`
+* Descrizione: Dati commerciali aggiuntivi per i documenti di vendita.
 * Possibili Join:
-  * **VBAK** (Header data): su \`MANDT, VBELN\`
-  * **VBAP** (Item data): su \`MANDT, VBELN, POSNR\`
+  * **VBAK** (Header data): su \`VBELN\`
+  * **VBAP** (Item data): su \`VBELN, POSNR\`
 
 **VBEP (Data related to line items, delivery lines)**
-* Chiavi Primarie: \`MANDT, VBELN, POSNR, ETENR\`
+* Chiavi Primarie: \`VBELN, POSNR, ETENR\`
 * Descrizione: Schedulazioni di consegna per una posizione di un documento di vendita.
 * Possibili Join:
-  * **VBAP** (Item data): su \`MANDT, VBELN, POSNR\`
+  * **VBAP** (Item data): su \`VBELN, POSNR\`
 
 #### Billing document :
 **VBRK (header data)**
-* Chiavi Primarie: \`MANDT, VBELN\`
+* Chiavi Primarie: \`VBELN\`
 * Descrizione: Testata dei documenti di fatturazione.
 * Possibili Join:
-  * **VBRP** (Item data): su \`MANDT, VBELN\`
-  * **BKPF** (Accounting documents): su \`MANDT, AWKEY\` (contenente VBRK-VBELN), \`AWSYS\`
-  * **VBFA** (Document Flow): su \`MANDT, VBELN\` (come doc. successivo)
-  * **KNA1** (Customer Master): su \`MANDT, KUNAG\` (Pagatore)
+  * **VBRP** (Item data): su \`VBELN\`
 
 **VBRP (Item data)**
-* Chiavi Primarie: \`MANDT, VBELN, POSNR\`
+* Chiavi Primarie: \`VBELN, POSNR\`
 * Descrizione: Posizioni dei documenti di fatturazione.
 * Possibili Join:
-  * **VBRK** (Header data): su \`MANDT, VBELN\`
-  * **MARA** (Material Master): su \`MANDT, MATNR\`
-  * **VBAP** (Sales Order Item): su \`MANDT, AUBEL=VBELN, AUPOS=POSNR\`
-  * **LIPS** (Delivery Item): su \`MANDT, VGBEL=VBELN, VGPOS=POSNR\`
+  * **VBRK** (header data): su \`VBELN\`
 
 #### Shipping :
 **VTTK (Shipment header)**
-* Chiavi Primarie: \`MANDT, TKNUM\`
+* Chiavi Primarie: \`TKNUM\`
 * Descrizione: Testata del documento di trasporto/spedizione.
 * Possibili Join:
-  * **VTTP** (Shipment item): su \`MANDT, TKNUM\`
-  * **VTPA** (Shipment partners): su \`MANDT, TKNUM\`
-  * **VEKP** (Handling Unit Header): su \`MANDT, VPOBJKEY=TKNUM\` (con VPOBJ = '03')
+  * **VTTP** (Shipment item): su \`TKNUM\`
+  * **VTTS** (Stage in transport): su \`TKNUM\`
+  * **VTPA** (Shipment partners): su \`TKNUM\`
+  * **VEKP** (Handling Unit - Header Table): su \`VPOBJKEY=TKNUM\` (con VPOBJ = '03')
 
 **VTTP (Shipment item)**
-* Chiavi Primarie: \`MANDT, TKNUM, TPNUM\`
+* Chiavi Primarie: \`TKNUM, TPNUM\`
 * Descrizione: Posizioni del documento di trasporto (tipicamente le consegne incluse).
 * Possibili Join:
-  * **VTTK** (Shipment header): su \`MANDT, TKNUM\`
-  * **LIKP** (Delivery header): su \`MANDT, VBELN\`
+  * **VTTK** (Shipment header): su \`TKNUM\`
+  * **VTSP** (Stage in transport per shipment item): su \`TKNUM, TPNUM\`
 
 **VTTS (Stage in transport)**
-* Chiavi Primarie: \`MANDT, TKNUM, TSNUM\`
+* Chiavi Primarie: \`TKNUM, TSNUM\`
 * Descrizione: Tappe (stages) definite per un trasporto.
 * Possibili Join:
-  * **VTTK** (Shipment header): su \`MANDT, TKNUM\`
+  * **VTTK** (Shipment header): su \`TKNUM\`
+  * **VTSP** (Stage in transport per shipment item): su \`TKNUM, TSNUM\`
 
 **VTSP (Stage in transport per shipment item)**
-* Chiavi Primarie: \`MANDT, TKNUM, TPNUM, TSNUM\`
+* Chiavi Primarie: \`TKNUM, TSNUM, TPNUM\`
 * Descrizione: Associazione tra posizione di trasporto (consegna) e tappa.
 * Possibili Join:
-  * **VTTP** (Shipment item): su \`MANDT, TKNUM, TPNUM\`
-  * **VTTS** (Stage in transport): su \`MANDT, TKNUM, TSNUM\`
+  * **VTTP** (Shipment item): su \`TKNUM, TPNUM\`
+  * **VTTS** (Stage in transport): su \`TKNUM, TSNUM\`
 
 **VTPA (Shipment partners)**
-* Chiavi Primarie: \`MANDT, TKNUM, PARVW\`
+* Chiavi Primarie: \`VBELN, POSNR, PARVW\`
 * Descrizione: Funzioni partner per il documento di trasporto (es. spedizioniere).
 * Possibili Join:
-  * **VTTK** (Shipment header): su \`MANDT, TKNUM\`
-  * **LFA1** (Vendor Master): su \`MANDT, LIFNR\` (LIFNR è il numero del partner)
+  * **VTTK** (Shipment header): su \`TKNUM\`
 
 **VEKP (Handling Unit - Header Table)**
-* Chiavi Primarie: \`MANDT, VENUM\`
+* Chiavi Primarie: \`VENUM\`
 * Descrizione: Testata dell'Handling Unit (unità di imballaggio/movimentazione).
 * Possibili Join:
-  * **VEPO** (Handling Unit Item): su \`MANDT, VENUM\`
-  * **VTTK** (Shipment Header): su \`MANDT, VPOBJKEY=TKNUM\` (se HU assegnata al trasporto)
-  * **LIKP** (Delivery Header): su \`MANDT, VPOBJKEY=VBELN\` (se HU assegnata alla consegna)
+  * **VEPO** (Packing: Handling Unit Item (Contents)): su \`VENUM\`
+  * **VTTK** (Shipment header): su \`VPOBJKEY=TKNUM\` (se HU assegnata al trasporto)
 
 **VEPO (Packing: Handling Unit Item (Contents))**
-* Chiavi Primarie: \`MANDT, VENUM, VEPOST\`
+* Chiavi Primarie: \`VENUM, VEPOS\`
 * Descrizione: Contenuto (posizioni) di un'Handling Unit.
 * Possibili Join:
-  * **VEKP** (Handling Unit Header): su \`MANDT, VENUM\`
-  * **MARA** (Material Master): su \`MANDT, MATNR\`
-  * **LIPS** (Delivery Item): su \`MANDT, VBELN, POSNR\` (se il contenuto è una posizione di consegna)
+  * **VEKP** (Handling Unit - Header Table): su \`VENUM\`
 
 #### Delivery :
 **LIKP (Delivery header)**
-* Chiavi Primarie: \`MANDT, VBELN\`
+* Chiavi Primarie: \`VBELN\`
 * Descrizione: Testata del documento di consegna.
 * Possibili Join:
-  * **LIPS** (Delivery item): su \`MANDT, VBELN\`
-  * **VTTP** (Shipment item): su \`MANDT, VBELN\`
-  * **VBFA** (Document Flow): su \`MANDT, VBELN\`
+  * **LIPS** (Delivery item): su \`VBELN\`
 
 **LIPS (Delivery item)**
-* Chiavi Primarie: \`MANDT, VBELN, POSNR\`
+* Chiavi Primarie: \`VBELN, POSNR\`
 * Descrizione: Posizioni del documento di consegna.
 * Possibili Join:
-  * **LIKP** (Delivery header): su \`MANDT, VBELN\`
-  * **VBAP** (Sales Order Item): su \`MANDT, VGBEL=VBELN, VGPOS=POSNR\`
-  * **MARA** (Material Master): su \`MANDT, MATNR\`
+  * **LIKP** (Delivery header): su \`VBELN\`
 
 #### Pricing :
 **KONH (Conditions header)**
-* Chiavi Primarie: \`MANDT, KNUMH\`
+* Chiavi Primarie: \`KNUMH\`
 * Descrizione: Testata dei record di condizione di prezzo (anagrafica).
 * Possibili Join:
-  * **KONP** (Conditions items): su \`MANDT, KNUMH\`
-  * **Axxx** (Tabelle di condizione): su \`MANDT, KNUMH\`
+  * **KONP** (Conditions items): su \`KNUMH\`
 
 **KONP (Conditions items)**
-* Chiavi Primarie: \`MANDT, KNUMH, KOPOS\`
-* Descrizione: Posizioni dei record di condizione di prezzo (dettagli come scaglioni, importi).
+* Chiavi Primarie: \`KNUMH, KOPOS\`
+* Descrizione: Posizioni dei record di condizione di prezzo.
 * Possibili Join:
-  * **KONH** (Conditions header): su \`MANDT, KNUMH\`
+  * **KONH** (Conditions header): su \`KNUMH\`
 
 **KONV (Procedure (billing doc or sales order))**
-* Chiavi Primarie: \`MANDT, KNUMV, KPOSN, STUNR, ZAEHK\`
-* Descrizione: Condizioni di prezzo trovate in un documento transazionale (Nota: In S/4HANA sostituita da PRCD_ELEMENTS per nuovi processi).
+* Chiavi Primarie: \`KNUMV, KPOSN, STUNR, ZAEHK\`
+* Descrizione: Condizioni di prezzo in un documento transazionale. Nota: Sostituita da PRCD_ELEMENTS in S/4HANA.
 * Possibili Join:
-  * **VBAK** (Sales Document Header): su \`MANDT, KNUMV\`
-  * **VBRK** (Billing Document Header): su \`MANDT, KNUMV\`
+  * Nessun join all'interno di questa sottocategoria.
 
 **KOND (Conditions: Data part)**
+* Chiavi Primarie: \`KNUMD, ZUSKO\`
 * Descrizione: Tabella cluster che contiene i dati dei record di condizione (obsoleta, dati ora in KONH/KONP).
+* Possibili Join:
+  * Nessun join all'interno di questa sottocategoria.
 
 #### contracts :
 **VEDA (Contract data)**
-* Chiavi Primarie: \`MANDT, VBELN, POSNR, ETENR\`
-* Descrizione: Dati specifici dei contratti (es. date di fatturazione, quantità target).
+* Chiavi Primarie: \`VBELN, VPOSN\`
+* Descrizione: Dati specifici dei contratti.
 * Possibili Join:
-  * **VBAK** (Sales Document Header): su \`MANDT, VBELN\` (se VEDA è a livello testata)
-  * **VBAP** (Sales Document Item): su \`MANDT, VBELN, POSNR\`
+  * Nessun join all'interno di questa sottocategoria.
 `;

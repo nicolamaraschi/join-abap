@@ -1,302 +1,346 @@
-// FILE: src/modules/PP.jsx
-// Contiene i dati per il modulo Production Planning (PP)
 
 export const ppData = `
 ### Modulo PP (Production Planning)
 
 #### Work center
 **CRHH (Work Center Hierarchy)**
-* Chiavi Primarie: \`MANDT, HIERA_ID\`
+* Chiavi Primarie: \`OBJTY, OBJTY\`
 * Descrizione: Contiene la definizione delle gerarchie dei posti di lavoro.
 * Possibili Join:
-  * **CRHS** (Hierarchy Structure): su \`MANDT, HIERA_ID\`
+  * **CRHS** (Hierarchy Structure): su \`HIERA_ID\`
 
 **CRHS (Hierarchy Structure)**
-* Chiavi Primarie: \`MANDT, OBJID_O, OBJID_U\`
-* Descrizione: Definisce la struttura gerarchica, collegando i posti di lavoro (o altre gerarchie) tra loro.
+* Chiavi Primarie: \`OBJTY_HY, OBJID_HY, OBJTY_HO, OBJID_HO, OBJTY_UP, OBJID_UP\`
+* Descrizione: Definisce la struttura gerarchica, collegando i posti di lavoro.
 * Possibili Join:
-  * **CRHH** (Work Center Hierarchy): su \`MANDT, HIERA_ID\` (per trovare la gerarchia di appartenenza)
-  * **CRHD** (Work Center Header): su \`MANDT, OBJID_O=OBJID\` (per il posto di lavoro superiore) o \`MANDT, OBJID_U=OBJID\` (per il posto di lavoro subordinato)
+  * **CRHH** (Work Center Hierarchy): su \`HIERA_ID\`
+  * **CRHD** (Work Center Header): su \`OBJID_O=OBJID\` o \`OBJID_U=OBJID\`
 
 **CRHD (Work Center Header)**
-* Chiavi Primarie: \`MANDT, OBJTY, OBJID\`
+* Chiavi Primarie: \`OBJTY, OBJID\`
 * Descrizione: Testata del posto di lavoro, contenente i dati principali.
 * Possibili Join:
-  * **CRTX** (Text for the Work Center): su \`MANDT, OBJTY, OBJID, SPRAS\`
-  * **CRCO** (Assignment of Work Center to Cost Center): su \`MANDT, OBJTY, OBJID\`
-  * **CRCA** (Work Center Capacity Allocation): su \`MANDT, OBJTY, OBJID\`
-  * **AFVC** (Order Operations): su \`MANDT, ARBID=OBJID\`
-  * **PLPO** (Task List Operations): su \`MANDT, ARBID=OBJID\`
+  * **CRTX** (Text for the Work Center): su \`OBJTY, OBJID, SPRAS\`
+  * **CRCO** (Assignment of Work Center to Cost Center): su \`OBJTY, OBJID\`
+  * **CRCA** (Work Center Capacity Allocation): su \`OBJTY, OBJID\`
 
 **CRTX (Text for the Work Center or Production Resource/Tool)**
-* Chiavi Primarie: \`MANDT, SPRAS, OBJTY, OBJID\`
+* Chiavi Primarie: \`SPRAS, OBJTY, OBJID\`
 * Descrizione: Testi descrittivi per il posto di lavoro.
 * Possibili Join:
-  * **CRHD** (Work Center Header): su \`MANDT, OBJTY, OBJID\`
+  * **CRHD** (Work Center Header): su \`OBJTY, OBJID\`
 
 **CRCO (Assignment of Work Center to Cost Center)**
-* Chiavi Primarie: \`MANDT, OBJTY, OBJID, LASET, ENDDA\`
+* Chiavi Primarie: \`OBJTY, OBJID, LASET, ENDDA, LANUM\`
 * Descrizione: Collega il posto di lavoro al centro di costo per le imputazioni contabili.
 * Possibili Join:
-  * **CRHD** (Work Center Header): su \`MANDT, OBJTY, OBJID\`
-  * **CSKS** (Cost Center Master Data): su \`MANDT, KOSTL, KOKRS\`
+  * **CRHD** (Work Center Header): su \`OBJTY, OBJID\`
 
 **KAKO (Capacity Header Segment)**
-* Chiavi Primarie: \`MANDT, KAPID\`
+* Chiavi Primarie: \`KAPID\`
 * Descrizione: Dati di testata per una specifica capacità (es. capacità macchina, manodopera).
 * Possibili Join:
-  * **CRCA** (Work Center Capacity Allocation): su \`MANDT, KAPID\`
+  * **CRCA** (Work Center Capacity Allocation): su \`KAPID\`
 
 **CRCA (Work Center Capacity Allocation)**
-* Chiavi Primarie: \`MANDT, OBJTY, OBJID, CANUM\`
+* Chiavi Primarie: \`OBJTY, OBJID, CANUM\`
 * Descrizione: Assegna una o più capacità a un posto di lavoro.
 * Possibili Join:
-  * **CRHD** (Work Center Header): su \`MANDT, OBJTY, OBJID\`
-  * **KAKO** (Capacity Header Segment): su \`MANDT, KAPID\`
-  * **TC23** (Capacity categories): su \`MANDT, CAPID=CAPID\` (CAPID è il tipo di capacità)
+  * **CRHD** (Work Center Header): su \`OBJTY, OBJID\`
+  * **KAKO** (Capacity Header Segment): su \`KAPID\`
 
 **TC24 (Person responsible for the workcenter)**
-* Chiavi Primarie: \`MANDT, VERAN, WERKS\`
+* Chiavi Primarie: \`VERAN, WERKS\`
 * Descrizione: Tabella di customizing per definire le persone responsabili.
 * Possibili Join:
-  * **CRHD** (Work Center Header): su \`MANDT, VERAN\`
+  * **CRHD** (Work Center Header): su \`VERAN\`
 
 **CRC (Logical DB for Work centers)**
-* Descrizione: Non è una tabella di database, ma una Logical Database (LDB). Le LDB sono programmi ABAP speciali che recuperano dati da più tabelle collegate gerarchicamente. 'CRC' è usata per report standard sui posti di lavoro.
+* Descrizione: Non è una tabella di database, ma una Logical Database (LDB) usata per i report standard.
 
 #### Routings/operations
 **MAPL (Allocation of task lists to materials)**
-* Chiavi Primarie: \`MANDT, MATNR, WERKS, PLNTY, PLNNR, ZAEHL\`
+* Chiavi Primarie: \`MATNR, WERKS, PLNTY, PLNNR, ZAEHL, PLNAL, ZKRIZ\`
 * Descrizione: Collega i materiali ai loro cicli di lavoro specifici.
 * Possibili Join:
-  * **MARA** (Material Master): su \`MANDT, MATNR\`
-  * **PLKO** (Task List - Header): su \`MANDT, PLNTY, PLNNR, PLNAL\` (PLNAL da MAPL)
-  * **MARC** (Plant Data for Material): su \`MANDT, MATNR, WERKS\`
+  * **PLKO** (Task List - Header): su \`PLNTY, PLNNR, PLNAL\` (PLNAL da MAPL)
 
 **PLAS (Task list - selection of operations/activities)**
-* Chiavi Primarie: \`MANDT, PLNTY, PLNNR, PLNAL, PLNKN, ZAEHL\`
+* Chiavi Primarie: \`PLNTY, PLNNR, PLNAL, PLNKN, ZAEHL, PLNFL\`
 * Descrizione: Gestisce la selezione e la sequenza delle operazioni all'interno di un ciclo di lavoro.
 * Possibili Join:
-  * **PLKO** (Task List - Header): su \`MANDT, PLNTY, PLNNR, PLNAL\`
-  * **PLPO** (Task List Operation): su \`MANDT, PLNTY, PLNNR, PLNKN\`
+  * **PLKO** (Task List - Header): su \`PLNTY, PLNNR, PLNAL\`
+  * **PLPO** (Task List Operation): su \`PLNTY, PLNNR, PLNKN\`
 
 **PLFH (Task list - production resources/tools)**
-* Chiavi Primarie: \`MANDT, PLNTY, PLNNR, PLNKN, ZAEHL_V, FHMNR\`
+* Chiavi Primarie: \`PLNTY, PLNNR, PZLFH, ZAEHL\`
 * Descrizione: Assegna i production resources/tools (PRT) alle operazioni del ciclo.
 * Possibili Join:
-  * **PLPO** (Task List Operation): su \`MANDT, PLNTY, PLNNR, PLNKN\`
-  * **CRFH** (PRT Master Data): su \`MANDT, PRTNR=FHMNR\`
+  * **PLPO** (Task List Operation): su \`PLNTY, PLNNR, PLNKN\`
 
 **PLFL (Task list - sequences)**
-* Chiavi Primarie: \`MANDT, PLNTY, PLNNR, FLNKN, ZAEHL\`
+* Chiavi Primarie: \`PLNTY, PLNNR, PLNAL, PLNFL, ZAEHL\`
 * Descrizione: Definisce le sequenze (standard, alternative, parallele) delle operazioni.
 * Possibili Join:
-  * **PLKO** (Task List - Header): su \`MANDT, PLNTY, PLNNR\`
+  * **PLKO** (Task list - header): su \`PLNTY, PLNNR\`
 
 **PLKO (Task list - header)**
-* Chiavi Primarie: \`MANDT, PLNTY, PLNNR, PLNAL\`
+* Chiavi Primarie: \`PLNTY, PLNNR, PLNAL, ZAEHL\`
 * Descrizione: Dati di testata per i cicli di lavoro (Routings).
 * Possibili Join:
-  * **PLAS** (Task list - selection of operations/activities): su \`MANDT, PLNTY, PLNNR, PLNAL\`
-  * **PLPO** (Task List Operation): su \`MANDT, PLNTY, PLNNR, PLNAL\` (tramite PLAS)
-  * **MAPL** (Allocation of task lists to materials): su \`MANDT, PLNTY, PLNNR, PLNAL\`
-  * **PLKZ** (Task list: main header): su \`MANDT, PLNTY, PLNNR\`
+  * **PLAS** (Task list - selection of operations/activities): su \`PLNTY, PLNNR, PLNAL\`
+  * **PLPO** (Task List Operation): su \`PLNTY, PLNNR, PLNAL\` (tramite PLAS)
+  * **MAPL** (Allocation of task lists to materials): su \`PLNTY, PLNNR, PLNAL\`
+  * **PLKZ** (Task list: main header): su \`PLNTY, PLNNR\`
+  * **PLFL** (Task list - sequences): su \`PLNTY, PLNNR\`
 
 **PLKZ (Task list: main header)**
-* Chiavi Primarie: \`MANDT, PLNTY, PLNNR\`
+* Chiavi Primarie: \`PLNTY, PLNNR, PLNAL\`
 * Descrizione: Dati di testata principali per un gruppo di cicli di lavoro.
 * Possibili Join:
-  * **PLKO** (Task List - Header): su \`MANDT, PLNTY, PLNNR\`
+  * **PLKO** (Task List - Header): su \`PLNTY, PLNNR\`
 
 **PLPH (Phases / suboperations)**
-* Chiavi Primarie: \`MANDT, PLNTY, PLNNR, PLNKN, ZAEHL, PHLKN\`
+* Chiavi Primarie: \`PLNTY, PLNNR, PLNKN, PLNPH, ZAEHL\`
 * Descrizione: Definisce le fasi o le sotto-operazioni per un'operazione del ciclo.
 * Possibili Join:
-  * **PLPO** (Task List Operation): su \`MANDT, PLNTY, PLNNR, PLNKN\`
+  * **PLPO** (Task List Operation): su \`PLNTY, PLNNR, PLNKN\`
 
 **PLPO (Task list operation / activity)**
-* Chiavi Primarie: \`MANDT, PLNTY, PLNNR, PLNKN\`
+* Chiavi Primarie: \`PLNTY, PLNNR, PLNKN, ZAEHL\`
 * Descrizione: Dettagli di una singola operazione all'interno di un ciclo di lavoro.
 * Possibili Join:
-  * **PLKO** (Task List - Header): su \`MANDT, PLNTY, PLNNR\` (tramite PLAS)
-  * **PLAS** (Task list - selection): su \`MANDT, PLNTY, PLNNR, PLNKN\`
-  * **CRHD** (Work Center Header): su \`MANDT, ARBID=OBJID\`
-  * **PLMZ** (Allocation of BOM - items to operations): su \`MANDT, PLNTY, PLNNR, PLNKN\`
-  * **PLFH** (Task list - PRT): su \`MANDT, PLNTY, PLNNR, PLNKN\`
+  * **PLAS** (Task list - selection): su \`PLNTY, PLNNR, PLNKN\`
+  * **PLMZ** (Allocation of BOM - items to operations): su \`PLNTY, PLNNR, PLNKN\`
+  * **PLFH** (Task list - PRT): su \`PLNTY, PLNNR, PLNKN\`
+  * **PLPH** (Phases / suboperations): su \`PLNTY, PLNNR, PLNKN\`
 
 **PLPR (Log collector for tasklists)**
-* Chiavi Primarie: \`MANDT, LOG_GROUP\`
+* Chiavi Primarie: \`DATUM, UZEIT, PLNNR\`
 * Descrizione: Raccoglie i log di modifica per i cicli di lavoro.
+* Possibili Join:
+  * Nessun join all'interno di questa sottocategoria.
 
 **PLMZ (Allocation of BOM - items to operations)**
-* Chiavi Primarie: \`MANDT, PLNTY, PLNNR, PLNKN, STLTY, STLNR, STLKN\`
+* Chiavi Primarie: \`PLNTY, PLNNR, ZUONR, ZAEHL\`
 * Descrizione: Collega i componenti di una distinta base (BOM) a specifiche operazioni del ciclo.
 * Possibili Join:
-  * **PLPO** (Task List Operation): su \`MANDT, PLNTY, PLNNR, PLNKN\`
-  * **STPO** (BOM Item): su \`MANDT, STLTY, STLNR, STLKN\`
+  * **PLPO** (Task List Operation): su \`PLNTY, PLNNR, PLNKN\`
 
 #### Bill of material
 **STKO (BOM - header)**
-* Chiavi Primarie: \`MANDT, STLNR, STLAL, STLTY\`
+* Chiavi Primarie: \`STLTY, STLNR, STLAL, STKOZ\`
 * Descrizione: Dati di testata della distinta base (Bill of Material).
 * Possibili Join:
-  * **STPO** (BOM Item): su \`MANDT, STLNR, STLTY\` (STLAL è implicito dalla testata)
-  * **MAST** (Material to BOM Link): su \`MANDT, STLNR, STLAL, STLTY\`
-  * **STAS** (BOMs Item Selection): su \`MANDT, STLNR, STLAL, STLTY\`
+  * **STPO** (BOM Item): su \`STLNR, STLTY\`
+  * **MAST** (Material to BOM Link): su \`STLNR, STLAL, STLTY\`
+  * **STAS** (BOMs Item Selection): su \`STLNR, STLAL, STLTY\`
+  * **STZU** (Permanent BOM data): su \`STLTY, STLNR\`
+  * **KDST** (Sales order to BOM link): su \`STLNR, STLTY\`
 
 **STPO (BOM – item)**
-* Chiavi Primarie: \`MANDT, STLTY, STLNR, STLKN\`
+* Chiavi Primarie: \`STLTY, STLNR, STLKN, STPOZ\`
 * Descrizione: Posizioni (componenti) di una distinta base.
 * Possibili Join:
-  * **STKO** (BOM Header): su \`MANDT, STLTY, STLNR\` (e \`STLAL\` da STKO)
-  * **STAS** (BOMs Item Selection): su \`MANDT, STLTY, STLNR, STLKN\`
-  * **MARA** (Material Master): su \`MANDT, IDNRK=MATNR\`
-  * **PLMZ** (Allocation of BOM to operations): su \`MANDT, STLTY, STLNR, STLKN\`
+  * **STKO** (BOM Header): su \`STLTY, STLNR\`
+  * **STAS** (BOMs Item Selection): su \`STLTY, STLNR, STLKN\`
+  * **STPN** (BOMs - follow-up control): su \`STLTY, STLNR, STLKN\`
+  * **STPU** (BOM - sub-item): su \`STLTY, STLNR, STLKN\`
 
 **STAS (BOMs Item Selection)**
-* Chiavi Primarie: \`MANDT, STLTY, STLNR, STLAL, STLKN\`
+* Chiavi Primarie: \`STLTY, STLNR, STLAL, STLKN, STASZ\`
 * Descrizione: Selezione delle posizioni della BOM (es. per validità data o altri criteri).
 * Possibili Join:
-  * **STPO** (BOM Item): su \`MANDT, STLTY, STLNR, STLKN\`
-  * **STKO** (BOM Header): su \`MANDT, STLTY, STLNR, STLAL\`
+  * **STPO** (BOM Item): su \`STLTY, STLNR, STLKN\`
+  * **STKO** (BOM Header): su \`STLTY, STLNR, STLAL\`
 
 **STPN (BOMs - follow-up control)**
-* Chiavi Primarie: \`MANDT, STLTY, STLNR, STLKN, DATUV\`
+* Chiavi Primarie: \`MATNR, STLTY, STLNR, DPMAT\`
 * Descrizione: Dati di controllo per le modifiche alle posizioni della BOM.
 * Possibili Join:
-  * **STPO** (BOM Item): su \`MANDT, STLTY, STLNR, STLKN\`
+  * **STPO** (BOM Item): su \`STLTY, STLNR, STLKN\`
 
 **STPU (BOM - sub-item)**
-* Chiavi Primarie: \`MANDT, STLTY, STLNR, STLKN, SANKA, UPKNZ\`
+* Chiavi Primarie: \`STLTY, STLNR, STLKN, STPOZ, UPOSZ\`
 * Descrizione: Sotto-posizioni di una distinta base (es. per indicare punti di installazione).
 * Possibili Join:
-  * **STPO** (BOM Item): su \`MANDT, STLTY, STLNR, STLKN\`
+  * **STPO** (BOM Item): su \`STLTY, STLNR, STLKN\`
 
 **STZU (Permanent BOM data)**
-* Chiavi Primarie: \`MANDT, STLTY, STLNR\`
+* Chiavi Primarie: \`STLTY, STLNR\`
 * Descrizione: Dati anagrafici permanenti/addizionali per una BOM.
 * Possibili Join:
-  * **STKO** (BOM Header): su \`MANDT, STLTY, STLNR\`
+  * **STKO** (BOM Header): su \`STLTY, STLNR\`
+
+**PLMZ (Allocation of BOM - items to operations)**
+* Chiavi Primarie: \`PLNTY, PLNNR, ZUONR, ZAEHL\`
+* Descrizione: Collega i componenti di una distinta base (BOM) a specifiche operazioni del ciclo.
+* Possibili Join:
+  * **STPO** (BOM Item): su \`STLTY, STLNR, STLKN\`
 
 **MAST (Material to BOM link)**
-* Chiavi Primarie: \`MANDT, MATNR, WERKS, STLAN\`
+* Chiavi Primarie: \`MATNR, WERKS, STLAN, STLNR, STLAL\`
 * Descrizione: Collega un materiale (in un certo impianto e per un certo utilizzo) alla sua distinta base.
 * Possibili Join:
-  * **MARA** (Material Master): su \`MANDT, MATNR\`
-  * **STKO** (BOM Header): su \`MANDT, STLNR, STLAL, STLTY\`
-  * **MARC** (Plant Data for Material): su \`MANDT, MATNR, WERKS\`
+  * **STKO** (BOM Header): su \`STLNR, STLAL, STLTY\`
 
 **KDST (Sales order to BOM link)**
-* Chiavi Primarie: \`MANDT, SDKNR\`
+* Chiavi Primarie: \`VBELN, VBPOS, MATNR, WERKS, STLAN, STLNR, STLAL\`
 * Descrizione: Collega un ordine di vendita a una distinta base specifica per l'ordine (Order BOM).
 * Possibili Join:
-  * **VBAK** (Sales Document Header): su \`MANDT, VBELN=VBELN\` (da KDST)
-  * **STKO** (BOM Header): su \`MANDT, STLNR, STLTY\` (da KDST)
+  * **STKO** (BOM Header): su \`STLNR, STLTY\`
 
 #### Production orders
 **AUFK (Production order headers)**
-* Chiavi Primarie: \`MANDT, AUFNR\`
+* Chiavi Primarie: \`AUFNR\`
 * Descrizione: Testata generale per tutti i tipi di ordini, inclusi quelli di produzione.
 * Possibili Join:
-  * **AFKO** (Order header data PP orders): su \`MANDT, AUFNR\`
-  * **AFIH** (Maintenance order header): su \`MANDT, AUFNR\`
-  * **JEST** (Object status): su \`MANDT, OBJNR=OBJNR\`
-  * **JSTO** (Status profile): su \`MANDT, STSMA=STSMA\` (STSMA da AUFK)
-  * **ACDOCA** (Universal Journal): su \`MANDT=RCLNT, AUFNR=AUFNR\`
+  * **AFKO** (Order header data PP orders): su \`AUFNR\`
+  * **AFIH** (Maintenance order header): su \`AUFNR\`
+  * **JEST** (Object status): su \`OBJNR\`
+  * **JSTO** (Status profile): su \`OBJNR\`
+  * **AUFM** (Goods movement for prod. order): su \`AUFNR\`
 
 **AFIH (Maintenance order header)**
-* Chiavi Primarie: \`MANDT, AUFNR\`
+* Chiavi Primarie: \`AUFNR\`
 * Descrizione: Testata specifica per ordini di manutenzione (rilevante in PP per ordini di ricondizionamento).
 * Possibili Join:
-  * **AUFK** (Order Master Data): su \`MANDT, AUFNR\`
-  * **ILOA** (PM Object Location): su \`MANDT, ILOAN\`
+  * **AUFK** (Order Master Data): su \`AUFNR\`
 
 **AUFM (Goods movement for prod. order)**
-* Chiavi Primarie: \`MANDT, MBLNR, MJAHR, ZEILE\`
+* Chiavi Primarie: \`MBLNR, MJAHR, ZEILE\`
 * Descrizione: Tabella indice per i movimenti merci relativi a un ordine (Nota: obsoleto in S/4HANA, usare MATDOC).
 * Possibili Join:
-  * **AUFK** (Order Header): su \`MANDT, AUFNR\`
-  * **MSEG** (Material Document Item): su \`MANDT, MBLNR, MJAHR, ZEILE\`
-  * **MATDOC** (Universal Journal for Material Docs): su \`MANDT, MBLNR, MJAHR, ZEILE\`
+  * **AUFK** (Order Header): su \`AUFNR\`
 
 **AFKO (Order header data PP orders)**
-* Chiavi Primarie: \`MANDT, AUFNR\`
+* Chiavi Primarie: \`AUFNR\`
 * Descrizione: Dati di testata specifici per l'ordine di produzione (quantità, date, DBM, ciclo).
 * Possibili Join:
-  * **AUFK** (Order Master Data): su \`MANDT, AUFNR\`
-  * **AFPO** (Order Item): su \`MANDT, AUFNR\`
-  * **AFVC** (Order Operations): su \`MANDT, AUFPL\`
+  * **AUFK** (Order Master Data): su \`AUFNR\`
+  * **AFPO** (Order Item): su \`AUFNR\`
+  * **AFVC** (Order Operations): su \`AUFPL\`
+  * **AFFL** (Work order sequence): su \`AUFPL\`
+  * **AFRU** (Order completion confirmations): su \`AUFNR\`
+  * **DRAD_PORDER** (Documents linked to prod. order): su \`AUFNR\`
 
 **AFPO (Order item)**
-* Chiavi Primarie: \`MANDT, AUFNR, POSNR\`
+* Chiavi Primarie: \`AUFNR, POSNR\`
 * Descrizione: Dati della posizione dell'ordine di produzione.
 * Possibili Join:
-  * **AFKO** (Order Header Data PP Orders): su \`MANDT, AUFNR\`
-  * **MARA** (Material Master): su \`MANDT, MATNR\`
-  * **RESB** (Order Components): su \`MANDT, AUFNR, POSNR=AUFPL_ORD\` (se la prenotazione è per posizione ordine)
-
-**RESB (Order components)**
-* Chiavi Primarie: \`MANDT, RSNUM, RSPOS\`
-* Descrizione: Componenti materiali richiesti (impegni) per un ordine.
-* Possibili Join:
-  * **AFKO** (Order Header Data PP Orders): su \`MANDT, AUFNR\`
-  * **MARA** (Material Master): su \`MANDT, MATNR\`
-  * **AFPO** (Order Item): su \`MANDT, AUFNR, AUFPL_ORD=POSNR\`
-
-**AFVC (Order operations)**
-* Chiavi Primarie: \`MANDT, AUFPL, APLZL\`
-* Descrizione: Operazioni dell'ordine di produzione, derivate dal ciclo di lavoro.
-* Possibili Join:
-  * **AFKO** (Order Header Data PP Orders): su \`MANDT, AUFPL\`
-  * **AFVV** (Quantities/dates/values in the operation): su \`MANDT, AUFPL, APLZL\`
-  * **AFRU** (Order Completion Confirmations): su \`MANDT, AUFPL, APLZL\`
-  * **CRHD** (Work Center Header): su \`MANDT, ARBID=OBJID\`
-
-**AFVV (Quantities/dates/values in the operation)**
-* Chiavi Primarie: \`MANDT, AUFPL, APLZL\`
-* Descrizione: Dettagli quantitativi, date e valori per un'operazione dell'ordine.
-* Possibili Join:
-  * **AFVC** (Order Operations): su \`MANDT, AUFPL, APLZL\`
-
-**AFVU (User fields of the operation)**
-* Chiavi Primarie: \`MANDT, AUFPL, APLZL\`
-* Descrizione: Campi utente personalizzati per le operazioni dell'ordine.
-* Possibili Join:
-  * **AFVC** (Order Operations): su \`MANDT, AUFPL, APLZL\`
-
-**AFFL (Work order sequence)**
-* Chiavi Primarie: \`MANDT, AUFPL, FOLGE\`
-* Descrizione: Sequenza delle operazioni all'interno dell'ordine.
-* Possibili Join:
-  * **AFVC** (Order Operations): su \`MANDT, AUFPL\`
-  * **AFKO** (Order Header Data PP Orders): su \`MANDT, AUFPL\`
-
-**AFFH (PRT assignment data for the work order)**
-* Chiavi Primarie: \`MANDT, AUFPL, APLZL, AFH_ID\`
-* Descrizione: Assegnazione dei Production Resources/Tools (PRT) alle operazioni dell'ordine.
-* Possibili Join:
-  * **AFVC** (Order Operations): su \`MANDT, AUFPL, APLZL\`
-
-**JSTO (Status profile)**
-* Chiavi Primarie: \`MANDT, STSMA\`
-* Descrizione: Definizione dei profili di stato.
-* Possibili Join:
-  * **AUFK** (Order Header): su \`MANDT, STSMA\`
-  * **JEST** (Object Status): su \`MANDT, STSMA=STSMA\` (tramite OBJNR)
-
-**JEST (Object status)**
-* Chiavi Primarie: \`MANDT, OBJNR, STAT, INACT\`
-* Descrizione: Tabella centrale che memorizza gli stati (di sistema e utente) attivi per qualsiasi oggetto SAP.
-* Possibili Join:
-  * **AUFK** (Order Header): su \`MANDT, OBJNR\`
-  * **PRPS** (WBS Element): su \`MANDT, OBJNR\`
-  * **EQUI** (Equipment): su \`MANDT, OBJNR\`
-  * **TJ02T** (System Status Texts): su \`MANDT, ISTAT=STAT, SPRAS\`
+  * **AFKO** (Order Header Data PP Orders): su \`AUFNR\`
+  * **RESB** (Order Components): su \`AUFNR\`
+  * **PRPS** (WBS Element): su \`PROJN = PSPNR\`
 
 **AFRU (Order completion confirmations)**
-* Chiavi Primarie: \`MANDT, RUECK, RMZHL\`
+* Chiavi Primarie: \`RUECK, RMZHL\`
 * Descrizione: Conferme di completamento (consuntivazioni) per le operazioni dell'ordine.
 * Possibili Join:
-  * **AFVC** (Order Operations): su \`MANDT, AUFPL, APLZL\`
-  * **AFKO** (Order Header Data PP Orders): su \`MANDT, AUFNR\`
+  * **AFKO** (Order Header Data PP Orders): su \`AUFNR\`
+  * **AFVC** (Order operations): su \`AUFPL, APLZL, VORNR\`
+
+**AFVC (Order operations)**
+* Chiavi Primarie: \`AUFPL, APLZL\`
+* Descrizione: Operazioni dell'ordine di produzione, derivate dal ciclo di lavoro.
+* Possibili Join:
+  * **AFKO** (Order Header Data PP Orders): su \`AUFPL\`
+  * **AFVV** (Quantities/dates/values in the operation): su \`AUFPL, APLZL\`
+  * **AFVU** (User fields of the operation): su \`AUFPL, APLZL\`
+  * **AFFH** (PRT assignment data for the work order): su \`AUFPL\`
+  * **AFRU** (Order completion confirmations): su \`AUFPL, APLZL,PLNFL, VORNR\`
+  * **RESB** (Order components): su \`AUFPL, APLZL, PLNFL, VORNR\`
+  * **CRHD** (Work Center Header): su \`ARBID = OBJID\`
+
+**AFVV (Quantities/dates/values in the operation)**
+* Chiavi Primarie: \`AUFPL, APLZL\`
+* Descrizione: Dettagli quantitativi, date e valori per un'operazione dell'ordine.
+* Possibili Join:
+  * **AFVC** (Order Operations): su \`AUFPL, APLZL\`
+
+**AFVU (User fields of the operation)**
+* Chiavi Primarie: \`AUFPL, APLZL\`
+* Descrizione: Campi utente personalizzati per le operazioni dell'ordine.
+* Possibili Join:
+  * **AFVC** (Order Operations): su \`AUFPL, APLZL\`
+
+**AFFL (Work order sequence)**
+* Chiavi Primarie: \`AUFPL, APLZL\`
+* Descrizione: Sequenza delle operazioni all'interno dell'ordine.
+* Possibili Join:
+  * **AFKO** (Order Header Data PP Orders): su \`AUFPL\`
+
+**AFFH (PRT assignment data for the work order)**
+* Chiavi Primarie: \`AUFPL, PZLFH\`
+* Descrizione: Assegnazione dei Production Resources/Tools (PRT) alle operazioni dell'ordine.
+* Possibili Join:
+  * **AFVC** (Order Operations): su \`AUFPL, APLZL\`
+  * **CRVD_B** (Document link to PRT): su \`OBJID\`
+
+**CRVD_B (Document link to PRT)**
+* Chiavi Primarie: \`OBJID\`
+* Descrizione: Collega un oggetto (come un PRT) a un documento.
+* Possibili Join:
+    * **AFFH** (PRT assignment): su \`OBJID\`
+    * **DRAW** (Document info record): su \`DOKAR, DOKNR, DOKVR, DOKTL\`
+
+**DRAD_PORDER (Documents linked to production order)**
+* Chiavi Primarie: \`DOCAR, DOCNR, DOCVR, DOCTL, AUFNR\`
+* Descrizione: Tabella di collegamento tra documenti DMS e ordini di produzione.
+* Possibili Join:
+    * **AFKO** (Order header data PP orders): su \`AUFNR\`
+    * **DRAW** (Document info record): su \`DOCAR, DOCNR, DOCVR, DOCTL\`
+
+**DRAW (Document info record)**
+* Chiavi Primarie: \`DOCAR, DOCNR, DOCVR, DOCTL\`
+* Descrizione: Anagrafica del documento nel sistema DMS.
+* Possibili Join:
+    * **DRAD_PORDER** (Documents linked to prod. order): su \`DOCAR, DOCNR, DOCVR, DOCTL\`
+    * **CRVD_B** (Document link to PRT): su \`DOKAR, DOKNR, DOKVR, DOKTL\`
+
+**JEST (Object status)**
+* Chiavi Primarie: \`OBJNR, STAT\`
+* Descrizione: Tabella centrale che memorizza gli stati attivi per qualsiasi oggetto SAP.
+* Possibili Join:
+  * **AUFK** (Order Header): su \`OBJNR\`
+  * **TJ30** (User status codes): su \`STAT = ESTAT\` (e JSTO.STSMA per il profilo corretto)
+
+**JSTO (Status profile)**
+* Chiavi Primarie: \`OBJNR\`
+* Descrizione: Informazioni sullo schema di stato per un oggetto.
+* Possibili Join:
+  * **AUFK** (Order Header): su \`OBJNR\`
+  * **TJ30** (User status codes): su \`STSMA\`
+
+**PROJ (Project definition)**
+* Chiavi Primarie: \`PSPNR\`
+* Descrizione: Dati anagrafici della definizione di progetto.
+* Possibili Join:
+    * **PRPS** (WBS Element): su \`PSPNR = PSPHI\`
+
+**PRPS (WBS Element)**
+* Chiavi Primarie: \`PSPNR\`
+* Descrizione: Dati anagrafici dell'elemento WBS (Work Breakdown Structure).
+* Possibili Join:
+    * **AFPO** (Order Item): su \`PSPNR = PS_PSP_PNR\`
+    * **PROJ** (Project definition): su \`PSPHI = PSPNR\`
+
+**RESB (Order components)**
+* Chiavi Primarie: \`RSNUM, RSPOS, RSART\`
+* Descrizione: Componenti materiali richiesti (impegni) per un ordine.
+* Possibili Join:
+  * **AFPO** (Order Item): su \`AUFNR\`
+  * **AFVC** (Order operations): su \`AUFPL, APLZL, VORNR\`
+
+**TJ30 (User status codes)**
+* Chiavi Primarie: \`STSMA, ESTAT\`
+* Descrizione: Testi e proprietà degli stati utente.
+* Possibili Join:
+    * **JEST** (Object status): tramite JSTO su \`STSMA\` e JEST.STAT = TJ30.ESTAT
+    * **TJ31** (process control user status): su \`STSMA\`
+
+**TJ31 (process control user status)**
+* Chiavi Primarie: \`STSMA\`
+* Descrizione: Processi di business controllati dallo stato utente.
+* Possibili Join:
+    * **TJ30** (User status codes): su \`STSMA\`
 `;

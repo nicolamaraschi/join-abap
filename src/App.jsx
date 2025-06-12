@@ -4,28 +4,21 @@ import Navbar from './components/Navbar.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import MainContent from './components/MainContent.jsx';
 
-import { coData } from './modules/CO.jsx';
-import { fiData } from './modules/FI.jsx';
-import { mmData } from './modules/MM.jsx';
-import { pmData } from './modules/PM.jsx';
-import { ppData } from './modules/PP.jsx';
-import { psData } from './modules/PS.jsx';
-import { qmData } from './modules/QM.jsx';
-import { sdData } from './modules/SD.jsx';
+import { tableDataRaw } from './modules/index.js';
+import { bapiData } from './modules/BapiData.jsx';
 
 import './App.css';
 
-const sapDataRaw = [fiData, coData, sdData, mmData, ppData, pmData, psData, qmData].join('\n');
-
-const parseSapData = (text) => {
-    const lines = text.split('\n'); let currentModule = null; let currentSubModule = null; let currentTable = null; const sapData = {}; const allTables = [];
-    const moduleRegex = /^###\s*Modulo\s*(.*?)\s*\((.*?)\)/; const subModuleRegex = /^####\s*(.*)/; const tableRegex = /^\*\*(.*?)\s*(\((.*?)\))?\*\*/;
+const parseTableData = (text) => {
+    // ... La logica di parsing per le tabelle rimane qui
+    const lines = text.split('\n'); let currentModule = null; let currentSubModule = null; let currentTable = null; const sapData = {}; const allTables = []; const moduleNames = {};
+    const moduleRegex = /^###\s*Modulo\s*(.*?)\s*\((.*?)\)/; const subModuleRegex = /^####\s*(.*)/; const tableRegex = /^\*\*(.*?)\s*(\(.*\))?\*\*/;
     const keysRegex = /^\*\s*Chiavi Primarie:\s*`(.*?)`/; const descRegex = /^\*\s*Descrizione:\s*(.*)/; const joinRegex = /^\s{2,}\*\s*\*\*(.*?)\*\*.*:\s*su\s*`(.*?)`/;
     for (const line of lines) {
         if (line.trim() === '') continue; let match;
-        match = line.match(moduleRegex); if (match) { currentModule = match[2].trim(); if (!sapData[currentModule]) sapData[currentModule] = {}; currentSubModule = "Generale"; currentTable = null; continue; }
+        match = line.match(moduleRegex); if (match) { const fullName = match[1].trim(); const abbreviation = match[2].trim(); currentModule = abbreviation; if (!sapData[currentModule]) { sapData[currentModule] = {}; moduleNames[abbreviation] = fullName; } currentSubModule = "Generale"; currentTable = null; continue; }
         match = line.match(subModuleRegex); if (match && currentModule) { currentSubModule = match[1].trim(); currentTable = null; continue; }
-        match = line.match(tableRegex); if (match && currentModule) { const tableName = match[1].trim(); const tableDesc = match[3] ? match[3].trim() : ''; currentTable = { name: tableName, description: tableDesc, module: currentModule, subModule: currentSubModule, primaryKeys: [], joins: [] }; sapData[currentModule][tableName] = currentTable; allTables.push(currentTable); continue; }
+        match = line.match(tableRegex); if (match && currentModule) { const tableName = match[1].trim(); const tableDesc = match[2] ? match[2].replace(/[()]/g, '').trim() : ''; currentTable = { name: tableName, description: tableDesc, module: currentModule, subModule: currentSubModule, primaryKeys: [], joins: [] }; sapData[currentModule][tableName] = currentTable; allTables.push(currentTable); continue; }
         if (currentTable) {
             match = line.match(descRegex); if (match) { currentTable.description = match[1].trim(); continue; }
             match = line.match(keysRegex); if (match) { currentTable.primaryKeys = match[1].split(',').map(k => k.trim().replace(/`/g, '')); continue; }
@@ -39,66 +32,112 @@ const parseSapData = (text) => {
                 table.joins.forEach(join => {
                     let target = null;
                     for (const moduleKey in sapData) { if (sapData[moduleKey] && sapData[moduleKey][join.table]) { target = sapData[moduleKey][join.table]; break; } }
-                    if (target) resolvedJoins.push({ table: target, on: join.on }); else resolvedJoins.push({ table: { name: join.table, description: "Non trovato/definito", module:"N/A", primaryKeys:[] }, on: join.on });
+                    if (target) resolvedJoins.push({ table: target, on: join.on });
                 });
                 table.joins = resolvedJoins;
             }
         });
     });
-    return { sapData, allTables };
+    return { sapData, allTables, moduleNames };
 };
 
 
 function App() {
-    const [selectedTableName, setSelectedTableName] = useState(null);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [viewMode, setViewMode] = useState('TABLES');
     const [currentModule, setCurrentModule] = useState('All');
+    const [selectedItemName, setSelectedItemName] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedSubgroup, setSelectedSubgroup] = useState('All');
 
-    const { allTables, modules, findTable } = useMemo(() => {
-        const parsed = parseSapData(sapDataRaw);
-        const findFunc = (tableName) => tableName ? parsed.allTables.find(t => t.name === tableName) || null : null;
-        const moduleList = ['All', ...Object.keys(parsed.sapData).sort()];
-        return { ...parsed, modules: moduleList, findTable: findFunc };
+    const { tableData, bapiDataPrepared } = useMemo(() => {
+        const tables = parseTableData(tableDataRaw);
+        const bapis = bapiData;
+        const tableModuleList = ['All', ...Object.keys(tables.sapData).sort()];
+        const tableDisplayNames = { 'All': 'Home', ...tables.moduleNames };
+        const bapiModuleList = ['All', ...Object.keys(bapis).sort()];
+        const bapiDisplayNames = { 'All': 'Tutti i Moduli', ...Object.fromEntries(Object.keys(bapis).map(abbr => [abbr, tables.moduleNames[abbr] || abbr])) };
+        const subgroupsMap = {};
+        Object.keys(tables.sapData).forEach(moduleKey => {
+            const subgroups = new Set();
+            tables.allTables.forEach(table => { if (table.module === moduleKey && table.subModule) subgroups.add(table.subModule); });
+            subgroupsMap[moduleKey] = Array.from(subgroups).sort();
+        });
+        const findTableFunc = (name) => name ? tables.allTables.find(t => t.name === name) : null;
+        const findBapiFunc = (name) => {
+            if (!name) return null;
+            for (const moduleKey in bapis) { const found = bapis[moduleKey].find(b => b.name === name); if (found) return found; } return null;
+        };
+        return {
+            tableData: { all: tables.allTables, modules: tableModuleList, names: tableDisplayNames, subgroups: subgroupsMap, find: findTableFunc },
+            bapiDataPrepared: { all: bapis, modules: bapiModuleList, names: bapiDisplayNames, find: findBapiFunc }
+        };
     }, []);
 
-    const filteredTables = useMemo(() => {
-        if (currentModule === 'All') {
-            return searchTerm ? allTables.filter(table => table.name.toLowerCase().includes(searchTerm.toLowerCase())) : [];
-        }
-        return allTables.filter(table => {
-            const matchesModule = table.module === currentModule;
-            const term = searchTerm.toLowerCase();
-            const matchesSearch = searchTerm === '' || table.name.toLowerCase().includes(term) || (table.description && table.description.toLowerCase().includes(term));
-            return matchesModule && matchesSearch;
-        });
-    }, [allTables, currentModule, searchTerm]);
-
+    const handleViewModeSelect = (mode) => {
+        setViewMode(mode);
+        const firstModule = mode === 'BAPIS' ? bapiDataPrepared.modules[1] || 'All' : 'All';
+        handleModuleSelect(firstModule);
+    };
+    
     const handleModuleSelect = (module) => {
         setCurrentModule(module);
-        setSelectedTableName(null);
+        setSelectedItemName(null);
         setSearchTerm('');
+        setSelectedSubgroup('All');
     };
-  
-    const selectedTable = useMemo(() => findTable(selectedTableName), [selectedTableName, findTable]);
+    
+    const filteredTables = useMemo(() => {
+        if (currentModule === 'All' || viewMode !== 'TABLES') return [];
+        return tableData.all.filter(table => {
+            const matchesModule = table.module === currentModule;
+            const matchesSubgroup = selectedSubgroup === 'All' || table.subModule === selectedSubgroup;
+            const term = searchTerm.toLowerCase();
+            const matchesSearch = searchTerm === '' || table.name.toLowerCase().includes(term) || (table.description && table.description.toLowerCase().includes(term));
+            return matchesModule && matchesSubgroup && matchesSearch;
+        });
+    }, [tableData.all, currentModule, searchTerm, selectedSubgroup, viewMode]);
+
+    const filteredBapis = useMemo(() => {
+        if (viewMode !== 'BAPIS') return [];
+        let bapisToFilter = currentModule === 'All'
+            ? Object.values(bapiDataPrepared.all).flat()
+            : (bapiDataPrepared.all[currentModule] || []);
+        if (!searchTerm) return bapisToFilter;
+        return bapisToFilter.filter(b => b.name.toLowerCase().includes(searchTerm.toLowerCase()) || (b.description && b.description.toLowerCase().includes(searchTerm.toLowerCase())));
+    }, [bapiDataPrepared.all, currentModule, searchTerm, viewMode]);
+
+    const selectedTable = viewMode === 'TABLES' ? tableData.find(selectedItemName) : null;
+    const selectedBapi = viewMode === 'BAPIS' ? bapiDataPrepared.find(selectedItemName) : null;
 
     return (
         <div className="app-layout">
             <Navbar
-                modules={modules}
+                viewMode={viewMode}
+                onViewModeSelect={handleViewModeSelect}
+                modules={viewMode === 'TABLES' ? tableData.modules : bapiDataPrepared.modules}
+                moduleNames={viewMode === 'TABLES' ? tableData.names : bapiDataPrepared.names}
                 currentModule={currentModule}
                 onModuleSelect={handleModuleSelect}
+                subgroups={viewMode === 'TABLES' ? tableData.subgroups[currentModule] : null}
+                selectedSubgroup={selectedSubgroup}
+                onSubgroupSelect={setSelectedSubgroup}
             />
             <div className="main-view">
                 <Sidebar
+                    viewMode={viewMode}
                     searchTerm={searchTerm}
                     onSearchChange={setSearchTerm}
                     tables={filteredTables}
-                    onSelectTable={setSelectedTableName}
+                    bapis={filteredBapis}
+                    onSelectTable={setSelectedItemName}
+                    onSelectBapi={setSelectedItemName}
                 />
                 <MainContent
+                    viewMode={viewMode}
                     selectedTable={selectedTable}
-                    allTables={allTables}
-                    onSelectTable={setSelectedTableName}
+                    selectedBapi={selectedBapi}
+                    allTables={tableData.all}
+                    onSelectTable={setSelectedItemName}
                 />
             </div>
         </div>

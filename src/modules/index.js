@@ -1,5 +1,4 @@
 import { coData } from './CO.jsx';
-import { commonData } from './Common.jsx';
 import { fiData } from './FI.jsx';
 import { mmData } from './MM.jsx';
 import { pmData } from './PM.jsx';
@@ -8,8 +7,8 @@ import { psData } from './PS.jsx';
 import { qmData } from './QM.jsx';
 import { sdData } from './SD.jsx';
 
-// Combiniamo tutte le stringhe dei dati in una sola
-export const sapDataRaw = [
+// Esportiamo la variabile con il nome corretto: tableDataRaw
+export const tableDataRaw = [
   fiData,
   coData,
   sdData,
@@ -18,5 +17,4 @@ export const sapDataRaw = [
   pmData,
   psData,
   qmData,
-  commonData
 ].join('\\n');
