@@ -2,14 +2,38 @@
 import React from 'react';
 import BapiList from './BapiList.jsx';
 import TableList from './TableList.jsx';
+import PresetList from './PresetList.jsx';
 
-const Sidebar = ({ viewMode, searchTerm, onSearchChange, tables, bapis, onSelectTable, onSelectBapi }) => {
+const Sidebar = ({ viewMode, searchTerm, onSearchChange, tables, bapis, presets, onSelectItem }) => {
+    
+    const getPlaceholder = () => {
+        switch(viewMode) {
+            case 'TABLES': return "Cerca tabella...";
+            case 'BAPIS': return "Cerca BAPI...";
+            case 'PRESETS': return "Cerca preset...";
+            default: return "Cerca...";
+        }
+    };
+
+    const renderList = () => {
+        switch (viewMode) {
+            case 'TABLES':
+                return <TableList tables={tables} onSelectTable={onSelectItem} />;
+            case 'BAPIS':
+                return <BapiList bapis={bapis} onSelectBapi={onSelectItem} />;
+            case 'PRESETS':
+                return <PresetList presets={presets} onSelectPreset={onSelectItem} />;
+            default:
+                return null;
+        }
+    };
+
     return (
         <aside className="sidebar">
             <div className="search-container">
                 <input 
                     type="text" 
-                    placeholder={viewMode === 'TABLES' ? "Cerca tabella..." : "Cerca BAPI..."} 
+                    placeholder={getPlaceholder()} 
                     className="search-input" 
                     value={searchTerm} 
                     onChange={(e) => onSearchChange(e.target.value)} 
@@ -19,10 +43,7 @@ const Sidebar = ({ viewMode, searchTerm, onSearchChange, tables, bapis, onSelect
                 </svg>
             </div>
             
-            {viewMode === 'TABLES' 
-                ? <TableList tables={tables} onSelectTable={onSelectTable} /> 
-                : <BapiList bapis={bapis} onSelectBapi={onSelectBapi} />
-            }
+            {renderList()}
         </aside>
     );
 };

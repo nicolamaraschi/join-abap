@@ -6,11 +6,11 @@ import MainContent from './components/MainContent.jsx';
 
 import { tableDataRaw } from './modules/index.js';
 import { bapiData } from './modules/BapiData.jsx';
+import { codePresets } from './modules/CodePresets.jsx';
 
 import './App.css';
 
 const parseTableData = (text) => {
-    // ... La logica di parsing per le tabelle rimane qui
     const lines = text.split('\n'); let currentModule = null; let currentSubModule = null; let currentTable = null; const sapData = {}; const allTables = []; const moduleNames = {};
     const moduleRegex = /^###\s*Modulo\s*(.*?)\s*\((.*?)\)/; const subModuleRegex = /^####\s*(.*)/; const tableRegex = /^\*\*(.*?)\s*(\(.*\))?\*\*/;
     const keysRegex = /^\*\s*Chiavi Primarie:\s*`(.*?)`/; const descRegex = /^\*\s*Descrizione:\s*(.*)/; const joinRegex = /^\s{2,}\*\s*\*\*(.*?)\*\*.*:\s*su\s*`(.*?)`/;
@@ -49,34 +49,53 @@ function App() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedSubgroup, setSelectedSubgroup] = useState('All');
 
-    const { tableData, bapiDataPrepared } = useMemo(() => {
+    const { tableData, bapiDataPrepared, presetData } = useMemo(() => {
         const tables = parseTableData(tableDataRaw);
         const bapis = bapiData;
+        
         const tableModuleList = ['All', ...Object.keys(tables.sapData).sort()];
         const tableDisplayNames = { 'All': 'Home', ...tables.moduleNames };
+        
         const bapiModuleList = ['All', ...Object.keys(bapis).sort()];
         const bapiDisplayNames = { 'All': 'Tutti i Moduli', ...Object.fromEntries(Object.keys(bapis).map(abbr => [abbr, tables.moduleNames[abbr] || abbr])) };
+        
         const subgroupsMap = {};
         Object.keys(tables.sapData).forEach(moduleKey => {
             const subgroups = new Set();
             tables.allTables.forEach(table => { if (table.module === moduleKey && table.subModule) subgroups.add(table.subModule); });
             subgroupsMap[moduleKey] = Array.from(subgroups).sort();
         });
+        
         const findTableFunc = (name) => name ? tables.allTables.find(t => t.name === name) : null;
+        
         const findBapiFunc = (name) => {
             if (!name) return null;
             for (const moduleKey in bapis) { const found = bapis[moduleKey].find(b => b.name === name); if (found) return found; } return null;
         };
+
+        const presets = {
+            all: codePresets,
+            find: (id) => id ? codePresets.find(p => p.id === id) : null
+        };
+        
         return {
             tableData: { all: tables.allTables, modules: tableModuleList, names: tableDisplayNames, subgroups: subgroupsMap, find: findTableFunc },
-            bapiDataPrepared: { all: bapis, modules: bapiModuleList, names: bapiDisplayNames, find: findBapiFunc }
+            bapiDataPrepared: { all: bapis, modules: bapiModuleList, names: bapiDisplayNames, find: findBapiFunc },
+            presetData: presets
         };
     }, []);
 
     const handleViewModeSelect = (mode) => {
         setViewMode(mode);
-        const firstModule = mode === 'BAPIS' ? bapiDataPrepared.modules[1] || 'All' : 'All';
-        handleModuleSelect(firstModule);
+        setSelectedItemName(null);
+        setSearchTerm('');
+        
+        if (mode === 'TABLES' || mode === 'BAPIS') {
+            const moduleToSelect = mode === 'BAPIS' ? bapiDataPrepared.modules[1] || 'All' : 'All';
+            handleModuleSelect(moduleToSelect);
+        } else {
+             setCurrentModule('All');
+        }
     };
     
     const handleModuleSelect = (module) => {
@@ -106,8 +125,15 @@ function App() {
         return bapisToFilter.filter(b => b.name.toLowerCase().includes(searchTerm.toLowerCase()) || (b.description && b.description.toLowerCase().includes(searchTerm.toLowerCase())));
     }, [bapiDataPrepared.all, currentModule, searchTerm, viewMode]);
 
+    const filteredPresets = useMemo(() => {
+        if (viewMode !== 'PRESETS') return [];
+        if (!searchTerm) return presetData.all;
+        return presetData.all.filter(p => p.title.toLowerCase().includes(searchTerm.toLowerCase()));
+    }, [presetData.all, searchTerm, viewMode]);
+
     const selectedTable = viewMode === 'TABLES' ? tableData.find(selectedItemName) : null;
     const selectedBapi = viewMode === 'BAPIS' ? bapiDataPrepared.find(selectedItemName) : null;
+    const selectedPreset = viewMode === 'PRESETS' ? presetData.find(selectedItemName) : null;
 
     return (
         <div className="app-layout">
@@ -129,13 +155,14 @@ function App() {
                     onSearchChange={setSearchTerm}
                     tables={filteredTables}
                     bapis={filteredBapis}
-                    onSelectTable={setSelectedItemName}
-                    onSelectBapi={setSelectedItemName}
+                    presets={filteredPresets}
+                    onSelectItem={setSelectedItemName}
                 />
                 <MainContent
                     viewMode={viewMode}
                     selectedTable={selectedTable}
                     selectedBapi={selectedBapi}
+                    selectedPreset={selectedPreset}
                     allTables={tableData.all}
                     onSelectTable={setSelectedItemName}
                 />

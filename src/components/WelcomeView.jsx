@@ -1,11 +1,9 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import { Chart, BarController, BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend } from 'chart.js';
 
-// REGISTRAZIONE DEI COMPONENTI NECESSARI PER CHART.JS
-// Questa riga risolve l'errore "linear is not a registered scale".
 Chart.register(BarController, BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
 
-const WelcomeView = ({ allTables, isBapiMode }) => {
+const WelcomeView = ({ allTables = [], isBapiMode, isPresetMode }) => {
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
     
@@ -23,7 +21,7 @@ const WelcomeView = ({ allTables, isBapiMode }) => {
     }, [allTables]);
 
     useEffect(() => {
-        if (!chartRef.current || !allTables) return;
+        if (!chartRef.current || !allTables || isBapiMode || isPresetMode) return;
         
         if (chartInstance.current) {
             chartInstance.current.destroy();
@@ -56,16 +54,22 @@ const WelcomeView = ({ allTables, isBapiMode }) => {
                 chartInstance.current.destroy();
             }
         };
-    }, [allTables, chartData]);
+    }, [allTables, chartData, isBapiMode, isPresetMode]);
+
+    const getWelcomeMessage = () => {
+        if (isPresetMode) return "Seleziona un preset di codice dalla lista per visualizzarlo e copiarlo.";
+        if (isBapiMode) return "Seleziona un modulo per visualizzare le BAPI disponibili.";
+        return "Seleziona un modulo e una sottocategoria per visualizzare le tabelle.";
+    };
 
     return (
         <div className="welcome-view">
-             <div style={{maxWidth: '56rem', width: '100%'}}>
+             <div style={{maxWidth: '56rem', margin: 'auto', width: '100%'}}>
                 <h2 style={{fontSize: '1.875rem', fontWeight: '700', marginBottom: '0.5rem'}}>Benvenuto nell'Explorer</h2>
                 <p style={{fontSize: '1.125rem', color: '#64748b', marginBottom: '1.5rem'}}>
-                    {isBapiMode ? "Seleziona un modulo per visualizzare le BAPI disponibili." : "Seleziona un modulo e una sottocategoria per visualizzare le tabelle."}
+                    {getWelcomeMessage()}
                 </p>
-                {!isBapiMode && allTables.length > 0 && (
+                {!isBapiMode && !isPresetMode && allTables.length > 0 && (
                     <div style={{backgroundColor: 'white', padding: '1.5rem', borderRadius: '0.5rem', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'}}>
                         <div className="chart-container"><canvas ref={chartRef}></canvas></div>
                         <p style={{fontSize: '0.875rem', color: '#64748b', marginTop: '1rem'}}>Tabelle per Modulo</p>

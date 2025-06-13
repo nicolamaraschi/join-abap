@@ -13,7 +13,7 @@ const Navbar = ({
 }) => {
     return (
         <header className="navbar-container">
-            {/* 1. BARRA PRINCIPALE: Switch tra Tabelle e BAPI */}
+            {/* 1. BARRA PRINCIPALE: Switch tra Tabelle, BAPI e Preset */}
             <nav className="navbar">
                 <div className="navbar-brand">
                     SAP Explorer
@@ -25,41 +25,49 @@ const Navbar = ({
                     <button onClick={() => onViewModeSelect('BAPIS')} className={viewMode === 'BAPIS' ? 'active' : 'inactive'}>
                         BAPI
                     </button>
+                    <button onClick={() => onViewModeSelect('PRESETS')} className={viewMode === 'PRESETS' ? 'active' : 'inactive'}>
+                        Preset Codice
+                    </button>
                 </div>
             </nav>
 
-            {/* 2. BARRA SECONDARIA: Selezione del Modulo (FI, SD, etc.) */}
-            <nav className="sub-navbar">
-                {(modules || []).map(moduleKey => (
-                    <button
-                        key={moduleKey}
-                        onClick={() => onModuleSelect(moduleKey)}
-                        className={currentModule === moduleKey ? 'active' : ''}
-                    >
-                        {moduleNames[moduleKey] || moduleKey}
-                    </button>
-                ))}
-            </nav>
-            
-            {/* 3. BARRA TERZIARIA: Selezione del Sottogruppo (solo per le tabelle) */}
-            {viewMode === 'TABLES' && subgroups && subgroups.length > 1 && (
-                <nav className="sub-navbar" style={{ backgroundColor: '#fff', borderTop: '1px solid #e2e8f0' }}>
-                    <button 
-                        onClick={() => onSubgroupSelect('All')}
-                        className={selectedSubgroup === 'All' ? 'active' : ''}
-                    >
-                        Tutti
-                    </button>
-                    {subgroups.map(subgroup => (
-                        <button
-                            key={subgroup}
-                            onClick={() => onSubgroupSelect(subgroup)}
-                            className={selectedSubgroup === subgroup ? 'active' : ''}
-                        >
-                            {subgroup}
-                        </button>
-                    ))}
-                </nav>
+            {/* Barre secondarie e terziarie (visibili solo per tabelle e bapi) */}
+            {viewMode !== 'PRESETS' && (
+                <>
+                    {/* 2. BARRA SECONDARIA: Selezione del Modulo (FI, SD, etc.) */}
+                    <nav className="sub-navbar">
+                        {(modules || []).map(moduleKey => (
+                            <button
+                                key={moduleKey}
+                                onClick={() => onMocleduleSelect(moduleKey)}
+                                className={currentModule === moduleKey ? 'active' : ''}
+                            >
+                                {moduleNames[moduleKey] || moduleKey}
+                            </button>
+                        ))}
+                    </nav>
+                    
+                    {/* 3. BARRA TERZIARIA: Selezione del Sottogruppo (solo per le tabelle) */}
+                    {viewMode === 'TABLES' && subgroups && subgroups.length > 1 && (
+                        <nav className="sub-navbar" style={{ backgroundColor: '#fff', borderTop: '1px solid #e2e8f0' }}>
+                            <button 
+                                onClick={() => onSubgroupSelect('All')}
+                                className={selectedSubgroup === 'All' ? 'active' : ''}
+                            >
+                                Tutti
+                            </button>
+                            {subgroups.map(subgroup => (
+                                <button
+                                    key={subgroup}
+                                    onClick={() => onSubgroupSelect(subgroup)}
+                                    className={selectedSubgroup === subgroup ? 'active' : ''}
+                                >
+                                    {subgroup}
+                                </button>
+                            ))}
+                        </nav>
+                    )}
+                </>
             )}
         </header>
     );
