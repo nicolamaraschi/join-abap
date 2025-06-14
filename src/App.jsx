@@ -106,13 +106,19 @@ function App() {
     };
     
     const filteredTables = useMemo(() => {
-        if (currentModule === 'All' || viewMode !== 'TABLES') return [];
-        return tableData.all.filter(table => {
-            const matchesModule = table.module === currentModule;
+        if (viewMode !== 'TABLES') return [];
+
+        // CORREZIONE: Se il modulo è 'All', usa tutte le tabelle, altrimenti filtra per il modulo corrente.
+        const tablesToFilter = currentModule === 'All'
+            ? tableData.all
+            : tableData.all.filter(table => table.module === currentModule);
+
+        // Applica i filtri successivi (sottogruppo e ricerca) al set di tabelle preselezionato.
+        return tablesToFilter.filter(table => {
             const matchesSubgroup = selectedSubgroup === 'All' || table.subModule === selectedSubgroup;
             const term = searchTerm.toLowerCase();
             const matchesSearch = searchTerm === '' || table.name.toLowerCase().includes(term) || (table.description && table.description.toLowerCase().includes(term));
-            return matchesModule && matchesSubgroup && matchesSearch;
+            return matchesSubgroup && matchesSearch;
         });
     }, [tableData.all, currentModule, searchTerm, selectedSubgroup, viewMode]);
 

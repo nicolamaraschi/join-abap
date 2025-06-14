@@ -203,3 +203,77 @@
 .copy-button:hover {
   background-color: #dbeafe; /* blue-100 */
 }
+
+/* ... stili esistenti ... */
+
+/* Stili per la Vista Report/Transazioni */
+.report-content {
+  max-width: 100%;
+}
+.report-introduction {
+  background-color: #eff6ff;
+  border: 1px solid #dbeafe;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  margin-bottom: 2rem;
+}
+.report-introduction h1 {
+  font-size: 2rem;
+  color: #1d4ed8;
+  margin-top: 0;
+}
+.module-section {
+  margin-bottom: 2.5rem;
+}
+.module-section > h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1e293b;
+  border-bottom: 2px solid #93c5fd;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+.module-context {
+  font-style: italic;
+  color: #475569;
+  background-color: #f8fafc;
+  border-left: 4px solid #d1d5db;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+.submodule-section > h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e3a8a;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+.table-container {
+  overflow-x: auto;
+  width: 100%;
+}
+.report-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 2rem;
+  font-size: 0.875rem;
+}
+.report-content th, .report-content td {
+  border: 1px solid #e2e8f0;
+  padding: 0.75rem;
+  text-align: left;
+  vertical-align: top;
+}
+.report-content th {
+  background-color: #f1f5f9;
+  font-weight: 600;
+}
+.report-content tr:nth-child(even) {
+  background-color: #f8fafc;
+}
+.report-content td:first-child {
+  min-width: 200px;
+}
+.report-content td:last-child {
+  min-width: 300px;
+}

@@ -1,36 +1,23 @@
-// FILE: src/components/PresetDetailsView.jsx
-import React, { useState } from 'react';
-import AbapCode from './AbapCode.jsx';
+// FILE: src/components/PresetList.jsx
+import React from 'react';
 
-const PresetDetailsView = ({ preset }) => {
-    const [copyButtonText, setCopyButtonText] = useState('Copia Codice');
-
-    if (!preset) return null;
-
-    const handleCopy = () => {
-        navigator.clipboard.writeText(preset.content).then(() => {
-            setCopyButtonText('Copiato!');
-            setTimeout(() => setCopyButtonText('Copia Codice'), 2000);
-        }, () => {
-            setCopyButtonText('Errore!');
-            setTimeout(() => setCopyButtonText('Copia Codice'), 2000);
-        });
-    };
+const PresetList = ({ presets, onSelectPreset }) => {
+    // Se non ci sono preset o la lista è vuota, mostra un messaggio.
+    if (!presets || presets.length === 0) {
+        return <div style={{textAlign: 'center', color: '#64748b', padding: '1rem'}}>Nessun preset trovato.</div>;
+    }
 
     return (
-        <div className="details-view">
-            <div className="details-header-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                <h2 style={{margin: 0}}>{preset.title}</h2>
-                <button onClick={handleCopy} className="copy-button">
-                    {copyButtonText}
-                </button>
-            </div>
-
-            <div className="preset-code-container">
-                <AbapCode code={preset.content} />
-            </div>
-        </div>
+        <ul className="table-list">
+            {presets.map(preset => (
+                <li key={preset.id} onClick={() => onSelectPreset(preset.id)} className="table-list-item">
+                    <div>
+                        <p className="table-name">{preset.title}</p>
+                    </div>
+                </li>
+            ))}
+        </ul>
     );
 };
 
-export default PresetDetailsView;
+export default PresetList;
