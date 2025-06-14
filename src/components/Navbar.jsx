@@ -39,7 +39,7 @@ const Navbar = ({
                         {(modules || []).map(moduleKey => (
                             <button
                                 key={moduleKey}
-                                onClick={() => onMocleduleSelect(moduleKey)}
+                                onClick={() => onModuleSelect(moduleKey)} // CORREZIONE: onMocleduleSelect -> onModuleSelect
                                 className={currentModule === moduleKey ? 'active' : ''}
                             >
                                 {moduleNames[moduleKey] || moduleKey}

@@ -1,5 +1,6 @@
 // FILE: src/components/PresetDetailsView.jsx
 import React, { useState } from 'react';
+import AbapCode from './AbapCode.jsx'; // Assicurati che l'import sia corretto
 
 const PresetDetailsView = ({ preset }) => {
     const [copyButtonText, setCopyButtonText] = useState('Copia Codice');
@@ -26,7 +27,8 @@ const PresetDetailsView = ({ preset }) => {
             </div>
 
             <div className="preset-code-container">
-                <pre><code>{preset.content}</code></pre>
+                {/* Utilizzo del componente per l'evidenziazione della sintassi */}
+                <AbapCode code={preset.content} />
             </div>
         </div>
     );
