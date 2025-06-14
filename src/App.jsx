@@ -7,6 +7,7 @@ import MainContent from './components/MainContent.jsx';
 import { tableDataRaw } from './modules/index.js';
 import { bapiData } from './modules/BapiData.jsx';
 import { codePresets } from './modules/CodePresets.jsx';
+import { transactionData } from './modules/TransactionData.jsx';
 
 import './App.css';
 
@@ -49,7 +50,7 @@ function App() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedSubgroup, setSelectedSubgroup] = useState('All');
 
-    const { tableData, bapiDataPrepared, presetData } = useMemo(() => {
+    const { tableData, bapiDataPrepared, presetData, staticTransactionData } = useMemo(() => {
         const tables = parseTableData(tableDataRaw);
         const bapis = bapiData;
         
@@ -78,10 +79,17 @@ function App() {
             find: (id) => id ? codePresets.find(p => p.id === id) : null
         };
         
+        // Aggiungi transactionModules per la navigazione
+        const transactionModules = transactionData.fiori.modules.map(m => ({
+            id: m.id,
+            name: m.name
+        }));
+
         return {
             tableData: { all: tables.allTables, modules: tableModuleList, names: tableDisplayNames, subgroups: subgroupsMap, find: findTableFunc },
             bapiDataPrepared: { all: bapis, modules: bapiModuleList, names: bapiDisplayNames, find: findBapiFunc },
-            presetData: presets
+            presetData: presets,
+            staticTransactionData: { ...transactionData, navModules: transactionModules }
         };
     }, []);
 
@@ -107,13 +115,10 @@ function App() {
     
     const filteredTables = useMemo(() => {
         if (viewMode !== 'TABLES') return [];
-
-        // CORREZIONE: Se il modulo è 'All', usa tutte le tabelle, altrimenti filtra per il modulo corrente.
         const tablesToFilter = currentModule === 'All'
             ? tableData.all
             : tableData.all.filter(table => table.module === currentModule);
 
-        // Applica i filtri successivi (sottogruppo e ricerca) al set di tabelle preselezionato.
         return tablesToFilter.filter(table => {
             const matchesSubgroup = selectedSubgroup === 'All' || table.subModule === selectedSubgroup;
             const term = searchTerm.toLowerCase();
@@ -162,6 +167,7 @@ function App() {
                     tables={filteredTables}
                     bapis={filteredBapis}
                     presets={filteredPresets}
+                    transactionModules={staticTransactionData.navModules}
                     onSelectItem={setSelectedItemName}
                 />
                 <MainContent
@@ -169,6 +175,7 @@ function App() {
                     selectedTable={selectedTable}
                     selectedBapi={selectedBapi}
                     selectedPreset={selectedPreset}
+                    transactionData={staticTransactionData}
                     allTables={tableData.all}
                     onSelectTable={setSelectedItemName}
                 />

@@ -1,20 +1,46 @@
-// FILE: src/components/PresetDetailsView.jsx
 import React, { useState } from 'react';
-import AbapCode from './AbapCode.jsx'; // Assicurati che l'import sia corretto
+import AbapCode from './AbapCode.jsx';
 
 const PresetDetailsView = ({ preset }) => {
     const [copyButtonText, setCopyButtonText] = useState('Copia Codice');
 
     if (!preset) return null;
 
+    // Funzione di copia aggiornata e più robusta
     const handleCopy = () => {
-        navigator.clipboard.writeText(preset.content).then(() => {
+        // Crea un textarea temporaneo
+        const textArea = document.createElement('textarea');
+        textArea.value = preset.content;
+
+        // Rendi il textarea invisibile
+        textArea.style.position = 'fixed';
+        textArea.style.top = 0;
+        textArea.style.left = 0;
+        textArea.style.width = '2em';
+        textArea.style.height = '2em';
+        textArea.style.padding = 0;
+        textArea.style.border = 'none';
+        textArea.style.outline = 'none';
+        textArea.style.boxShadow = 'none';
+        textArea.style.background = 'transparent';
+
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            document.execCommand('copy');
             setCopyButtonText('Copiato!');
-            setTimeout(() => setCopyButtonText('Copia Codice'), 2000);
-        }, () => {
+        } catch (err) {
             setCopyButtonText('Errore!');
-            setTimeout(() => setCopyButtonText('Copia Codice'), 2000);
-        });
+            console.error('Errore durante la copia del codice', err);
+        }
+
+        // Rimuovi il textarea temporaneo
+        document.body.removeChild(textArea);
+
+        // Resetta il testo del pulsante dopo 2 secondi
+        setTimeout(() => setCopyButtonText('Copia Codice'), 2000);
     };
 
     return (
@@ -27,7 +53,6 @@ const PresetDetailsView = ({ preset }) => {
             </div>
 
             <div className="preset-code-container">
-                {/* Utilizzo del componente per l'evidenziazione della sintassi */}
                 <AbapCode code={preset.content} />
             </div>
         </div>

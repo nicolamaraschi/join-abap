@@ -1,11 +1,11 @@
-// FILE: src/components/MainContent.jsx
 import React from 'react';
 import WelcomeView from './WelcomeView.jsx';
 import TableDetailsView from './TableDetailsView.jsx';
 import BapiDetailsView from './BapiDetailsView.jsx';
 import PresetDetailsView from './PresetDetailsView.jsx';
+import ReportView from './ReportView.jsx'; // Import ReportView
 
-const MainContent = ({ viewMode, selectedTable, selectedBapi, selectedPreset, allTables, onSelectTable }) => {
+const MainContent = ({ viewMode, selectedTable, selectedBapi, selectedPreset, transactionData, allTables, onSelectTable }) => {
     const renderContent = () => {
         switch(viewMode) {
             case 'TABLES':
@@ -20,6 +20,8 @@ const MainContent = ({ viewMode, selectedTable, selectedBapi, selectedPreset, al
                 return selectedPreset
                     ? <PresetDetailsView preset={selectedPreset} />
                     : <WelcomeView isPresetMode={true} />;
+            case 'TRANSACTIONS':
+                return <ReportView data={transactionData} />;
             default:
                 return <WelcomeView allTables={allTables} />;
         }
