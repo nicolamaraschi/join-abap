@@ -112,6 +112,7 @@
   padding: 1rem;
   flex-shrink: 0;
   overflow-y: auto;
+  
 }
 
 .search-container { position: relative; margin-bottom: 1rem; }
@@ -276,4 +277,495 @@
 }
 .report-content td:last-child {
   min-width: 300px;
+}
+
+
+
+/* ==========================================================================
+   NUOVO: Stili per Filtri "Aurora" con Floating Label
+   ========================================================================== */
+
+/* ====== ADVANCED NAVBAR CSS - ULTRA MODERN DESIGN ====== */
+
+/* Compensazione per navbar fixed - IMPORTANTE! */
+body {
+  padding-top: 220px; /* Altezza stimata della navbar completa */
+  transition: var(--transition-smooth);
+}
+
+/* Classe helper per quando la filter-bar non è visibile */
+body.navbar-simple {
+  padding-top: 80px; /* Solo navbar principale */
+}
+
+/* Reset e variabili CSS personalizzate */
+:root {
+  /* Palette colori premium */
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --aurora-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --dark-gradient: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 100%);
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  
+  /* Colori semantici */
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.8);
+  --text-muted: rgba(255, 255, 255, 0.6);
+  --accent-color: #00d4aa;
+  --danger-color: #ff6b6b;
+  --warning-color: #ffd93d;
+  
+  /* Effetti e ombre */
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 8px 32px rgba(0, 0, 0, 0.2);
+  --shadow-hard: 0 12px 48px rgba(0, 0, 0, 0.3);
+  --shadow-glow: 0 0 20px rgba(103, 126, 234, 0.4);
+  
+  /* Transizioni fluide */
+  --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Spacing system */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+}
+
+/* Container principale della navbar */
+.navbar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: var(--dark-gradient);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-medium);
+  animation: slideDown 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Navbar principale */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-xl);
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Brand/Logo con effetto holografico */
+.navbar-brand {
+  font-size: 1.75rem;
+  font-weight: 800;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  text-shadow: 0 0 30px rgba(103, 126, 234, 0.5);
+  letter-spacing: -0.02em;
+}
+
+.navbar-brand::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--aurora-gradient);
+  opacity: 0;
+  transition: var(--transition-smooth);
+  filter: blur(10px);
+  z-index: -1;
+}
+
+.navbar-brand:hover::before {
+  opacity: 0.3;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Contenitore dei filtri principali */
+.main-nav-filters {
+  display: flex;
+  gap: var(--space-xs);
+  background: var(--glass-bg);
+  padding: var(--space-xs);
+  border-radius: 50px;
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-soft);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Indicatore animato per i bottoni attivi */
+.main-nav-filters::before {
+  content: '';
+  position: absolute;
+  top: var(--space-xs);
+  bottom: var(--space-xs);
+  left: var(--space-xs);
+  width: calc(25% - var(--space-xs));
+  background: var(--primary-gradient);
+  border-radius: 40px;
+  transition: var(--transition-smooth);
+  z-index: 0;
+  box-shadow: var(--shadow-glow);
+}
+
+/* Bottoni di navigazione principale */
+.main-nav-filters button {
+  position: relative;
+  z-index: 1;
+  padding: var(--space-sm) var(--space-lg);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 40px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.main-nav-filters button:hover {
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.main-nav-filters button.active {
+  color: var(--text-primary);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.main-nav-filters button.inactive {
+  color: var(--text-muted);
+}
+
+/* Animazione dinamica dell'indicatore */
+.main-nav-filters button:nth-child(1).active ~ ::before,
+.main-nav-filters button:nth-child(1).active + * + * + ::before {
+  transform: translateX(0);
+}
+
+.main-nav-filters button:nth-child(2).active ~ ::before {
+  transform: translateX(calc(100% + var(--space-xs)));
+}
+
+.main-nav-filters button:nth-child(3).active ~ ::before {
+  transform: translateX(calc(200% + var(--space-sm)));
+}
+
+.main-nav-filters button:nth-child(4).active ~ ::before {
+  transform: translateX(calc(300% + var(--space-md)));
+}
+
+/* Barra dei filtri secondari */
+.filter-bar {
+  background: rgba(0, 0, 0, 0.3);
+  border-top: 1px solid var(--glass-border);
+  padding: var(--space-lg) var(--space-xl);
+  display: flex;
+  gap: var(--space-xl);
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.filter-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 1px;
+  background: var(--aurora-gradient);
+  animation: scanline 3s linear infinite;
+}
+
+@keyframes scanline {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Gruppi di filtri con effetto Aurora */
+.filter-group-aurora {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+/* Select con design futuristico */
+.filter-select-aurora {
+  width: 100%;
+  padding: var(--space-md) var(--space-lg);
+  padding-top: var(--space-xl);
+  background: var(--glass-bg);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 500;
+  outline: none;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: var(--transition-smooth);
+  cursor: pointer;
+  position: relative;
+  appearance: none;
+  background-image: 
+    linear-gradient(45deg, transparent 50%, var(--text-secondary) 50%),
+    linear-gradient(135deg, var(--text-secondary) 50%, transparent 50%);
+  background-position: 
+    calc(100% - 20px) calc(1em + 2px),
+    calc(100% - 15px) calc(1em + 2px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.filter-select-aurora:hover {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 20px rgba(0, 212, 170, 0.3);
+  transform: translateY(-2px);
+}
+
+.filter-select-aurora:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 30px rgba(0, 212, 170, 0.5);
+  transform: translateY(-2px);
+}
+
+.filter-select-aurora:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.filter-select-aurora:disabled:hover {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* Labels flottanti */
+.filter-group-aurora label {
+  position: absolute;
+  top: var(--space-sm);
+  left: var(--space-lg);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: var(--transition-fast);
+  pointer-events: none;
+  background: var(--aurora-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.filter-select-aurora:focus + label,
+.filter-select-aurora:not([value=""]) + label {
+  color: var(--accent-color);
+  transform: translateY(-2px);
+}
+
+/* Opzioni del select */
+.filter-select-aurora option {
+  background: #1a1a2e;
+  color: var(--text-primary);
+  padding: var(--space-sm);
+  border: none;
+}
+
+.filter-select-aurora option:hover,
+.filter-select-aurora option:checked {
+  background: var(--primary-gradient);
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  body {
+    padding-top: 130px;
+  }
+  
+  body.navbar-simple {
+    padding-top: 75px;
+  }
+  
+  .navbar {
+    padding: var(--space-md) var(--space-lg);
+  }
+  
+  .filter-bar {
+    padding: var(--space-lg);
+    gap: var(--space-lg);
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    padding-top: 160px; /* Navbar diventa più alta su mobile */
+  }
+  
+  body.navbar-simple {
+    padding-top: 120px;
+  }
+  
+  .navbar {
+    padding: var(--space-sm) var(--space-md);
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+  
+  .navbar-brand {
+    font-size: 1.5rem;
+  }
+  
+  .main-nav-filters {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .main-nav-filters button {
+    padding: var(--space-sm) var(--space-md);
+    font-size: 0.8rem;
+  }
+  
+  .filter-bar {
+    flex-direction: column;
+    gap: var(--space-lg);
+    padding: var(--space-md);
+  }
+  
+  .filter-group-aurora {
+    max-width: none;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding-top: 180px; /* Ancora più spazio su schermi molto piccoli */
+  }
+  
+  body.navbar-simple {
+    padding-top: 140px;
+  }
+  
+  .main-nav-filters {
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+  
+  .main-nav-filters button {
+    flex: 1;
+    min-width: calc(50% - var(--space-xs));
+  }
+  
+  .navbar-brand {
+    font-size: 1.25rem;
+  }
+}
+
+/* Effetti di caricamento e micro-interazioni */
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+.filter-select-aurora::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: var(--transition-slow);
+}
+
+.filter-select-aurora:hover::before {
+  animation: shimmer 1.5s ease-in-out;
+}
+
+/* Indicatori di stato avanzati */
+.filter-group-aurora::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--accent-color);
+  transition: var(--transition-smooth);
+}
+
+.filter-select-aurora:focus ~ ::after {
+  width: 100%;
+}
+
+/* Accessibilità migliorata */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus visibile per navigazione da tastiera */
+.main-nav-filters button:focus-visible,
+.filter-select-aurora:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+/* Stato di caricamento */
+.navbar-container.loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.navbar-container.loading .filter-select-aurora {
+  pointer-events: none;
+  opacity: 0.7;
 }
