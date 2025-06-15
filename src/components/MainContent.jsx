@@ -3,30 +3,30 @@ import WelcomeView from './WelcomeView.jsx';
 import TableDetailsView from './TableDetailsView.jsx';
 import BapiDetailsView from './BapiDetailsView.jsx';
 import PresetDetailsView from './PresetDetailsView.jsx';
-import ReportView from './ReportView.jsx'; // Import ReportView
-import AbapDocViewer from './AbapDocViewer.jsx'; // Import the new ABAP documentation viewer
+import ReportView from './ReportView.jsx';
+import AbapDocDetailsView from './AbapDocDetailsView.jsx';
 
-const MainContent = ({ viewMode, selectedTable, selectedBapi, selectedPreset, transactionData, allTables, onSelectTable }) => {
+const MainContent = ({ viewMode, selectedTable, selectedBapi, selectedPreset, selectedAbapDoc, transactionData, allTables, onSelectTable }) => {
     const renderContent = () => {
         switch(viewMode) {
             case 'TABLES':
-                return selectedTable
-                    ? <TableDetailsView table={selectedTable} onSelectTable={onSelectTable} />
+                return selectedTable 
+                    ? <TableDetailsView table={selectedTable} onSelectTable={onSelectTable} /> 
                     : <WelcomeView allTables={allTables} />;
             case 'BAPIS':
-                return selectedBapi
-                    ? <BapiDetailsView bapi={selectedBapi} />
+                return selectedBapi 
+                    ? <BapiDetailsView bapi={selectedBapi} /> 
                     : <WelcomeView isBapiMode={true} allTables={allTables} />;
             case 'PRESETS':
                 return selectedPreset
                     ? <PresetDetailsView preset={selectedPreset} />
                     : <WelcomeView isPresetMode={true} />;
+            case 'ABAP_DOC':
+                return selectedAbapDoc
+                    ? <AbapDocDetailsView doc={selectedAbapDoc} />
+                    : <WelcomeView isAbapDocMode={true} />;
             case 'TRANSACTIONS':
                 return <ReportView data={transactionData} />;
-            case 'ABAP_DOCS': // Nuovo caso per la documentazione ABAP
-                // Assumiamo che per ora ci sia solo la guida CL_SALV_TABLE.
-                // In futuro, si potrebbe passare un prop o usare un altro meccanismo per selezionare documenti specifici.
-                return <AbapDocViewer docId="cl_salv_table_guide" />;
             default:
                 return <WelcomeView allTables={allTables} />;
         }

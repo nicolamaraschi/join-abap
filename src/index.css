@@ -23,3 +23,41 @@ body {
 #root {
     height: 100%;
 }
+
+/* Stili per le tabelle renderizzate dal Markdown */
+.markdown-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid #e2e8f0; /* slate-200 */
+}
+
+.markdown-table th,
+.markdown-table td {
+  border: 1px solid #e2e8f0; /* slate-200 */
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+
+.markdown-table th {
+  background-color: #f8fafc; /* slate-50 */
+  font-weight: 600;
+}
+
+.markdown-table tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+.markdown-table tbody tr:nth-child(even) {
+  background-color: #f8fafc; /* slate-50 */
+}
+
+.markdown-table code {
+    background-color: #e2e8f0;
+    padding: 2px 5px;
+    border-radius: 4px;
+}

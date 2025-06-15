@@ -1,5 +1,5 @@
 import React from 'react';
-import ClSalvTableDoc from '../modules/abap_doc/ClSalvTableDoc';
+import ClSalvTableDoc from '../modules/doc_abap/ClSalvTableDoc';
 
 const AbapDocViewer = ({ docId }) => {
     switch (docId) {
