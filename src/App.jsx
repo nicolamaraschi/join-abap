@@ -7,9 +7,12 @@ import MainContent from './components/MainContent.jsx';
 import { tableDataRaw } from './modules/index.js';
 import { bapiData } from './modules/BapiData.jsx';
 import { codePresets } from './modules/CodePresets.jsx';
+import { transactionData } from './modules/TransactionData.jsx';
+// L'import di AbapDocumentationData.jsx è stato rimosso
 
 import './App.css';
 
+// La funzione parseTableData rimane invariata...
 const parseTableData = (text) => {
     const lines = text.split('\n'); let currentModule = null; let currentSubModule = null; let currentTable = null; const sapData = {}; const allTables = []; const moduleNames = {};
     const moduleRegex = /^###\s*Modulo\s*(.*?)\s*\((.*?)\)/; const subModuleRegex = /^####\s*(.*)/; const tableRegex = /^\*\*(.*?)\s*(\(.*\))?\*\*/;
@@ -41,7 +44,6 @@ const parseTableData = (text) => {
     return { sapData, allTables, moduleNames };
 };
 
-
 function App() {
     const [viewMode, setViewMode] = useState('TABLES');
     const [currentModule, setCurrentModule] = useState('All');
@@ -49,47 +51,54 @@ function App() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedSubgroup, setSelectedSubgroup] = useState('All');
 
-    const { tableData, bapiDataPrepared, presetData } = useMemo(() => {
+    const { tableData, bapiDataPrepared, presetData, staticTransactionData, abapDocSections } = useMemo(() => {
         const tables = parseTableData(tableDataRaw);
         const bapis = bapiData;
         
+        // Logica esistente per tabelle, bapi, etc. ...
         const tableModuleList = ['All', ...Object.keys(tables.sapData).sort()];
         const tableDisplayNames = { 'All': 'Home', ...tables.moduleNames };
-        
         const bapiModuleList = ['All', ...Object.keys(bapis).sort()];
         const bapiDisplayNames = { 'All': 'Tutti i Moduli', ...Object.fromEntries(Object.keys(bapis).map(abbr => [abbr, tables.moduleNames[abbr] || abbr])) };
-        
         const subgroupsMap = {};
         Object.keys(tables.sapData).forEach(moduleKey => {
             const subgroups = new Set();
             tables.allTables.forEach(table => { if (table.module === moduleKey && table.subModule) subgroups.add(table.subModule); });
             subgroupsMap[moduleKey] = Array.from(subgroups).sort();
         });
-        
         const findTableFunc = (name) => name ? tables.allTables.find(t => t.name === name) : null;
-        
         const findBapiFunc = (name) => {
             if (!name) return null;
             for (const moduleKey in bapis) { const found = bapis[moduleKey].find(b => b.name === name); if (found) return found; } return null;
         };
-
         const presets = {
             all: codePresets,
             find: (id) => id ? codePresets.find(p => p.id === id) : null
         };
+        const transactionModules = transactionData.fiori.modules.map(m => ({ id: m.id, name: m.name }));
         
+        // Logica semplificata per la navigazione della documentazione
+        const abapDocNavData = [
+            { id: "knowledge-base", title: "Sezione 1: Knowledge Base" },
+            { id: "architecture", title: "Sezione 2: Architettura ABAP" },
+            { id: "alv-masterclass", title: "Sezione 3: ALV Masterclass" },
+            { id: "essential-fm", title: "Sezione 4: Toolkit Essenziale" },
+        ];
+
         return {
             tableData: { all: tables.allTables, modules: tableModuleList, names: tableDisplayNames, subgroups: subgroupsMap, find: findTableFunc },
             bapiDataPrepared: { all: bapis, modules: bapiModuleList, names: bapiDisplayNames, find: findBapiFunc },
-            presetData: presets
+            presetData: presets,
+            staticTransactionData: { ...transactionData, navModules: transactionModules },
+            abapDocSections: abapDocNavData
         };
     }, []);
 
+    // Il resto della logica del componente App rimane invariato
     const handleViewModeSelect = (mode) => {
         setViewMode(mode);
         setSelectedItemName(null);
         setSearchTerm('');
-        
         if (mode === 'TABLES' || mode === 'BAPIS') {
             const moduleToSelect = mode === 'BAPIS' ? bapiDataPrepared.modules[1] || 'All' : 'All';
             handleModuleSelect(moduleToSelect);
@@ -97,23 +106,15 @@ function App() {
              setCurrentModule('All');
         }
     };
-    
     const handleModuleSelect = (module) => {
         setCurrentModule(module);
         setSelectedItemName(null);
         setSearchTerm('');
         setSelectedSubgroup('All');
     };
-    
     const filteredTables = useMemo(() => {
         if (viewMode !== 'TABLES') return [];
-
-        // CORREZIONE: Se il modulo è 'All', usa tutte le tabelle, altrimenti filtra per il modulo corrente.
-        const tablesToFilter = currentModule === 'All'
-            ? tableData.all
-            : tableData.all.filter(table => table.module === currentModule);
-
-        // Applica i filtri successivi (sottogruppo e ricerca) al set di tabelle preselezionato.
+        const tablesToFilter = currentModule === 'All' ? tableData.all : tableData.all.filter(table => table.module === currentModule);
         return tablesToFilter.filter(table => {
             const matchesSubgroup = selectedSubgroup === 'All' || table.subModule === selectedSubgroup;
             const term = searchTerm.toLowerCase();
@@ -121,16 +122,12 @@ function App() {
             return matchesSubgroup && matchesSearch;
         });
     }, [tableData.all, currentModule, searchTerm, selectedSubgroup, viewMode]);
-
     const filteredBapis = useMemo(() => {
         if (viewMode !== 'BAPIS') return [];
-        let bapisToFilter = currentModule === 'All'
-            ? Object.values(bapiDataPrepared.all).flat()
-            : (bapiDataPrepared.all[currentModule] || []);
+        let bapisToFilter = currentModule === 'All' ? Object.values(bapiDataPrepared.all).flat() : (bapiDataPrepared.all[currentModule] || []);
         if (!searchTerm) return bapisToFilter;
         return bapisToFilter.filter(b => b.name.toLowerCase().includes(searchTerm.toLowerCase()) || (b.description && b.description.toLowerCase().includes(searchTerm.toLowerCase())));
     }, [bapiDataPrepared.all, currentModule, searchTerm, viewMode]);
-
     const filteredPresets = useMemo(() => {
         if (viewMode !== 'PRESETS') return [];
         if (!searchTerm) return presetData.all;
@@ -162,6 +159,8 @@ function App() {
                     tables={filteredTables}
                     bapis={filteredBapis}
                     presets={filteredPresets}
+                    transactionModules={staticTransactionData.navModules}
+                    abapDocSections={abapDocSections}
                     onSelectItem={setSelectedItemName}
                 />
                 <MainContent
@@ -169,6 +168,7 @@ function App() {
                     selectedTable={selectedTable}
                     selectedBapi={selectedBapi}
                     selectedPreset={selectedPreset}
+                    transactionData={staticTransactionData}
                     allTables={tableData.all}
                     onSelectTable={setSelectedItemName}
                 />

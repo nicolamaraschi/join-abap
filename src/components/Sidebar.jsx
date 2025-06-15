@@ -3,6 +3,8 @@ import React from 'react';
 import BapiList from './BapiList.jsx';
 import TableList from './TableList.jsx';
 import PresetList from './PresetList.jsx';
+// 1. Aggiungi l'importazione per il nuovo componente di navigazione
+import AbapDocNavList from './AbapDocNavList.jsx';
 
 const Sidebar = ({ viewMode, searchTerm, onSearchChange, tables, bapis, presets, onSelectItem }) => {
     
