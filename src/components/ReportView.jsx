@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './ReportView.css';
 
 const ReportView = ({ data }) => {
     const [view, setView] = useState('fiori'); // 'fiori' o 'gui'

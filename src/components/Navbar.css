@@ -1,0 +1,60 @@
+/* Contenitore barra filtri */
+.filter-bar {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+    flex-wrap: wrap;
+  }
+  
+  /* Gruppo singolo (select + label) */
+  .filter-group-aurora {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    min-width: 160px;
+    flex: 1;
+  }
+  
+  /* Dropdown */
+  .filter-select-aurora {
+    padding: 8px 12px;
+    font-size: 0.95rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background-color: white;
+    color: #111827;
+    appearance: none;
+    transition: border 0.2s, box-shadow 0.2s;
+  }
+  
+  .filter-select-aurora:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  }
+  
+  /* Label sopra la select */
+  .filter-group-aurora label {
+    margin-bottom: 0.25rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #374151;
+  }
+  
+  /* Disabilitato */
+  .filter-select-aurora:disabled {
+    background-color: #f3f4f6;
+    color: #9ca3af;
+    cursor: not-allowed;
+  }
+  
+  /* Responsive */
+  @media (max-width: 600px) {
+    .filter-bar {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+  }
+  
