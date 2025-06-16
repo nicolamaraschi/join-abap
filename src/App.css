@@ -289,7 +289,7 @@
 
 /* Compensazione per navbar fixed - IMPORTANTE! */
 body {
-  padding-top: 220px; /* Altezza stimata della navbar completa */
+  padding-top: 230px; /* Altezza stimata della navbar completa */
   transition: var(--transition-smooth);
 }
 

@@ -47,6 +47,9 @@ const Navbar = ({
                     <button onClick={() => onViewModeSelect('TABLES')} className={viewMode === 'TABLES' ? 'active' : 'inactive'}>
                         Tabelle
                     </button>
+                    <button onClick={() => onViewModeSelect('ABAP_DOC')} className={viewMode === 'ABAP_DOC' ? 'active' : 'inactive'}>
+                        Doc ABAP
+                    </button>
                     <button onClick={() => onViewModeSelect('BAPIS')} className={viewMode === 'BAPIS' ? 'active' : 'inactive'}>
                         BAPI
                     </button>
