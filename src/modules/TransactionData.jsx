@@ -141,94 +141,534 @@ export const transactionData = {
     ],
   },
  // Nuovi dati per le transazioni SAP GUI
- gui: {
-  introduction: {
-    title: "Guida alle Transazioni SAP GUI in S/4HANA",
-    content: "Questa sezione analizza le transazioni classiche della SAP GUI, evidenziando il loro stato (valido, obsoleto), il loro successore strategico e l'impatto dei cambiamenti architetturali di S/4HANA come il Giornale Unico e il Business Partner. La comprensione di questi pilastri è il prerequisito per un utilizzo efficace del sistema."
-  },
-  architecturalChanges: {
-      title: "Cambiamenti Architettonici Fondamentali",
-      points: [
-          { title: "Il Giornale Unico (Universal Journal - Tabella ACDOCA)", content: "È la nuova, unica fonte di verità per tutte le registrazioni contabili. Unifica i dati di FI, CO, FI-AA e ML, eliminando la necessità di riconciliazioni periodiche e garantendo una coerenza dei dati by design." },
-          { title: "Il Modello Business Partner (BP)", content: "Sostituisce obbligatoriamente i modelli di dati anagrafici separati per clienti e fornitori. Tutte le informazioni sono centralizzate in un unico oggetto anagrafico gestito tramite la transazione BP." },
-          { title: "Il Material Ledger (ML)", content: "Non più opzionale, il Material Ledger è la soluzione obbligatoria per la valorizzazione dell'inventario in S/4HANA, fornendo nativamente funzionalità multi-valuta e multi-principio contabile." }
-      ]
-  },
-  modules: [
-    {
-      id: "FI",
-      name: "Financial Accounting (FI)",
-      introduction: "Il modulo di Financial Accounting (FI) in S/4HANA ha subito una delle trasformazioni più profonde. Sebbene molte transazioni mantengano un nome familiare, il loro funzionamento interno e le loro dipendenze sono radicalmente cambiati, soprattutto a causa dell'unificazione di conti Co.Ge. ed elementi di costo in FS00 e l'obbligatorietà del Business Partner (BP) per la gestione di clienti e fornitori.",
-      transactions: [
-        { tCode: "FK01 / XD01", description: "Creare Fornitore / Cliente (Contabilità/Vendite)", status: "Obsoleto", notes: "BP" },
-        { tCode: "FS00", description: "Gestione Anagrafica Conti Co.Ge.", status: "Valido (Potenziato)", notes: "Unico punto di accesso per conti Co.Ge. ed elementi di costo." },
-        { tCode: "FBL1N / FBL5N", description: "Visualizzazione Partite Individuali Fornitori / Clienti", status: "Valido", notes: "Lettura diretta da ACDOCA per performance e coerenza in tempo reale." },
-        { tCode: "F-02 / FB50", description: "Registrazione Documento Co.Ge.", status: "Valido", notes: "Transazioni standard per registrazioni manuali nel General Ledger." },
-        { tCode: "F110", description: "Programma di Pagamento Automatico", status: "Valido", notes: "Rimane il pilastro per l'elaborazione automatizzata dei pagamenti e incassi." },
-        { tCode: "ASKB", description: "Registrare Valori APC Periodicamente", status: "Obsoleto", notes: "La registrazione dei valori cespiti in Co.Ge. avviene in tempo reale." },
-        { tCode: "AFAB", description: "Esecuzione Ammortamenti", status: "Valido", notes: "Ora calcola e registra direttamente i documenti di ammortamento in ACDOCA." },
-        { tCode: "FS10N", description: "Visualizzazione Saldi Conti Co.Ge.", status: "Obsoleto (Tecnicamente disponibile)", notes: "Sostituito da FAGLB03 o analisi tramite FBL3N." },
+  "gui": {
+    "introduction": {
+      "title": "Guida alle Transazioni SAP GUI in S/4HANA",
+      "content": "Questa sezione analizza le transazioni classiche della SAP GUI, evidenziando il loro stato (valido, obsoleto), il loro successore strategico e l'impatto dei cambiamenti architetturali di S/4HANA come il Giornale Unico e il Business Partner. La comprensione di questi pilastri è il prerequisito per un utilizzo efficace del sistema."
+    },
+    "architecturalChanges": {
+      "title": "Cambiamenti Architettonici Fondamentali",
+      "points": [
+        {
+          "title": "Il Giornale Unico (Universal Journal - Tabella ACDOCA)",
+          "content": "È la nuova, unica fonte di verità per tutte le registrazioni contabili. Unifica i dati di FI, CO, FI-AA e ML, eliminando la necessità di riconciliazioni periodiche e garantendo una coerenza dei dati by design."
+        },
+        {
+          "title": "Il Modello Business Partner (BP)",
+          "content": "Sostituisce obbligatoriamente i modelli di dati anagrafici separati per clienti e fornitori. Tutte le informazioni sono centralizzate in un unico oggetto anagrafico gestito tramite la transazione BP."
+        },
+        {
+          "title": "Il Material Ledger (ML)",
+          "content": "Non più opzionale, il Material Ledger è la soluzione obbligatoria per la valorizzazione dell'inventario in S/4HANA, fornendo nativamente funzionalità multi-valuta e multi-principio contabile."
+        }
       ]
     },
-    {
-        id: "CO",
-        name: "Controlling (CO)",
-        introduction: "La fusione con FI nel Giornale Unico ha eliminato le riconciliazioni. Ogni transazione CO ora genera una scrittura contabile in tempo reale in ACDOCA, rendendo obsoleto il Reconciliation Ledger (KALC).",
-        transactions: [
-            { tCode: "KA01 / KA06", description: "Creare Elemento di Costo Primario / Secondario", status: "Obsoleto", notes: "Funzionalità confluita in FS00 tramite il campo 'Tipo elemento di costo'." },
-            { tCode: "KS01 / KO01", description: "Creare Centro di Costo / Ordine Interno", status: "Valido", notes: "Rimangono le transazioni centrali per la gestione dei rispettivi oggetti." },
-            { tCode: "KSB1 / KOB1", description: "Centri di Costo / Ordini: Partite Individuali Attuali", status: "Valido", notes: "Reportistica operativa fondamentale, ora basata su ACDOCA." },
-            { tCode: "KALC", description: "Eseguire Riconciliazione FI-CO", status: "Obsoleto", notes: "La riconciliazione non è più necessaria grazie all'architettura del Giornale Unico." },
-            { tCode: "KSU5 / KSV5", description: "Eseguire Ribaltamento / Distribuzione", status: "Valido", notes: "Transazioni standard per le allocazioni periodiche dei costi." },
-            { tCode: "CK11N / CK40N", description: "Creare Calcolo Costi Materiale / Ciclo di Calcolo Costi", status: "Valido", notes: "Strumenti primari per la pianificazione dei costi di prodotto (costo standard)." },
-            { tCode: "CKMLCP", description: "Cockpit di Chiusura del Material Ledger", status: "Valido (Obbligatorio)", notes: "Transazione mensile cruciale per il calcolo del costo effettivo." },
-            { tCode: "KE21N", description: "Creare Partita Individuale CO-PA", status: "Valido (Legacy)", notes: "Rilevante solo per Costing-Based CO-PA; la soluzione strategica è Margin Analysis." },
+    "modules": [
+      {
+        "id": "FI",
+        "name": "Financial Accounting (FI)",
+        "introduction": "Il modulo di Financial Accounting (FI) in S/4HANA ha subito una delle trasformazioni più profonde. Sebbene molte transazioni mantengano un nome familiare, il loro funzionamento interno e le loro dipendenze sono radicalmente cambiati, soprattutto a causa dell'unificazione di conti Co.Ge. ed elementi di costo in FS00 e l'obbligatorietà del Business Partner (BP) per la gestione di clienti e fornitori.",
+        "transactions": [
+          {
+            "tCode": "FS00",
+            "description": "Gestione Anagrafica Conti Co.Ge.",
+            "status": "Valido (Potenziato)",
+            "notes": "Unico punto di accesso per conti Co.Ge. ed elementi di costo."
+          },
+          {
+            "tCode": "FBL1N",
+            "description": "Visualizzazione Partite Individuali Fornitori",
+            "status": "Valido",
+            "notes": "Lettura diretta da ACDOCA per performance e coerenza in tempo reale."
+          },
+          {
+            "tCode": "FBL3N",
+            "description": "Elenco partite conti generali",
+            "status": "Valido",
+            "notes": "Transazione standard per la consultazione partite Co.Ge."
+          },
+          {
+            "tCode": "FBL5N",
+            "description": "Visualizzazione Partite Individuali Clienti",
+            "status": "Valido",
+            "notes": "Lettura diretta da ACDOCA per performance e coerenza in tempo reale."
+          },
+          {
+            "tCode": "F-02",
+            "description": "Registrazione Documento Co.Ge.",
+            "status": "Valido",
+            "notes": "Transazioni standard per registrazioni manuali nel General Ledger."
+          },
+          {
+            "tCode": "FB01",
+            "description": "Registrazione documento contabile manuale",
+            "status": "Valido",
+            "notes": "Transazione principale per registrazioni manuali."
+          },
+          {
+            "tCode": "FB02",
+            "description": "Modifica documento contabile",
+            "status": "Valido",
+            "notes": "Modifica documenti contabili esistenti."
+          },
+          {
+            "tCode": "FB03",
+            "description": "Visualizzazione documento contabile",
+            "status": "Valido",
+            "notes": "Consultazione documenti contabili."
+          },
+          {
+            "tCode": "FB50",
+            "description": "Registrazione Documento Co.Ge.",
+            "status": "Valido",
+            "notes": "Transazioni standard per registrazioni manuali nel General Ledger."
+          },
+          {
+            "tCode": "F110",
+            "description": "Programma di Pagamento Automatico",
+            "status": "Valido",
+            "notes": "Rimane il pilastro per l'elaborazione automatizzata dei pagamenti e incassi."
+          },
+          {
+            "tCode": "AFAB",
+            "description": "Esecuzione Ammortamenti",
+            "status": "Valido",
+            "notes": "Ora calcola e registra direttamente i documenti di ammortamento in ACDOCA."
+          },
+          {
+            "tCode": "FIBF",
+            "description": "Gestione user-exit per FI",
+            "status": "Valido",
+            "notes": "Gestione personalizzazioni e user-exit per modulo FI."
+          },
+          {
+            "tCode": "GGB1",
+            "description": "Definizione regole di validazione/sostituzione",
+            "status": "Valido",
+            "notes": "Configurazione regole di business per validazioni."
+          },
+          {
+            "tCode": "OB28",
+            "description": "Attivazione validazioni/sostituzioni FI",
+            "status": "Valido",
+            "notes": "Attivazione delle regole di validazione e sostituzione."
+          }
         ]
-    },
-    {
-        id: "MM",
-        name: "Materials Management (MM)",
-        introduction: "La semplificazione più drastica è nella gestione delle scorte, con la transazione MIGO che diventa l'unico punto di accesso per quasi tutti i movimenti e la tabella MATDOC come unica fonte di verità, eliminando le tabelle di aggregazione e garantendo la coerenza con FI.",
-        transactions: [
-            { tCode: "ME21N", description: "Creare Ordine d'Acquisto", status: "Valido", notes: "Transazione centrale e invariata per la creazione di OdA." },
-            { tCode: "MM01", description: "Creare Materiale", status: "Valido", notes: "Standard indiscusso per la gestione dell'anagrafica materiali." },
-            { tCode: "MB1A / MB1B / MB1C", description: "Uscita Merci / Trasferimento / Altra Entrata Merci", status: "Obsoleto", notes: "Tutte le funzionalità sono state consolidate nella transazione MIGO." },
-            { tCode: "MIRO", description: "Registrare Fattura in Entrata", status: "Valido", notes: "Rimane la transazione chiave per il controllo fatture logistico." },
-            { tCode: "MMBE", description: "Sintesi Stock", status: "Valido", notes: "Ancora utilizzata per una rapida panoramica dello stock." },
-            { tCode: "ME51N", description: "Creare Richiesta d'Acquisto", status: "Valido", notes: "Transazione standard per la creazione di RdA." },
-            { tCode: "MI01 / MI04 / MI07", description: "Creare Doc. Inventario / Registrare Conta / Registrare Differenze", status: "Valido", notes: "Il processo di inventario fisico rimane transazionalmente stabile." },
-            { tCode: "MK01", description: "Creare Fornitore (Acquisti)", status: "Obsoleto", notes: "Sostituito obbligatoriamente dalla transazione BP." },
+      },
+      {
+        "id": "CO",
+        "name": "Controlling (CO)",
+        "introduction": "La fusione con FI nel Giornale Unico ha eliminato le riconciliazioni. Ogni transazione CO ora genera una scrittura contabile in tempo reale in ACDOCA, rendendo obsoleto il Reconciliation Ledger (KALC).",
+        "transactions": [
+          {
+            "tCode": "KS01",
+            "description": "Creare Centro di Costo",
+            "status": "Valido",
+            "notes": "Rimangono le transazioni centrali per la gestione dei rispettivi oggetti."
+          },
+          {
+            "tCode": "KO01",
+            "description": "Creare Ordine Interno",
+            "status": "Valido",
+            "notes": "Rimangono le transazioni centrali per la gestione dei rispettivi oggetti."
+          },
+          {
+            "tCode": "KSB1",
+            "description": "Centri di Costo: Partite Individuali Attuali",
+            "status": "Valido",
+            "notes": "Reportistica operativa fondamentale, ora basata su ACDOCA."
+          },
+          {
+            "tCode": "KOB1",
+            "description": "Ordini: Partite Individuali Attuali",
+            "status": "Valido",
+            "notes": "Reportistica operativa fondamentale, ora basata su ACDOCA."
+          },
+          {
+            "tCode": "KSU5",
+            "description": "Eseguire Ribaltamento",
+            "status": "Valido",
+            "notes": "Transazioni standard per le allocazioni periodiche dei costi."
+          },
+          {
+            "tCode": "KSV5",
+            "description": "Eseguire Distribuzione",
+            "status": "Valido",
+            "notes": "Transazioni standard per le allocazioni periodiche dei costi."
+          },
+          {
+            "tCode": "CK11N",
+            "description": "Creare Calcolo Costi Materiale",
+            "status": "Valido",
+            "notes": "Strumenti primari per la pianificazione dei costi di prodotto (costo standard)."
+          },
+          {
+            "tCode": "CK40N",
+            "description": "Ciclo di Calcolo Costi",
+            "status": "Valido",
+            "notes": "Strumenti primari per la pianificazione dei costi di prodotto (costo standard)."
+          },
+          {
+            "tCode": "CKMLCP",
+            "description": "Cockpit di Chiusura del Material Ledger",
+            "status": "Valido (Obbligatorio)",
+            "notes": "Transazione mensile cruciale per il calcolo del costo effettivo."
+          },
+          {
+            "tCode": "KE21N",
+            "description": "Creare Partita Individuale CO-PA",
+            "status": "Valido (Legacy)",
+            "notes": "Rilevante solo per Costing-Based CO-PA; la soluzione strategica è Margin Analysis."
+          }
         ]
-    },
-    {
-        id: "SD",
-        name: "Sales and Distribution (SD)",
-        introduction: "Il flusso Order-to-Cash (VA01, VL01N, VF01) rimane stabile, ma cambiamenti importanti riguardano i dati anagrafici (BP), la gestione del credito (FIN-FSCM) e i ristorni, completamente sostituiti dalla Gestione Contratti Condizione (WCOCO).",
-        transactions: [
-            { tCode: "VA01", description: "Creare Ordine di Vendita", status: "Valido", notes: "La transazione principale per la creazione di ordini cliente rimane invariata." },
-            { tCode: "VD01 / XD01", description: "Creare Cliente (Vendite / Centrale)", status: "Obsoleto", notes: "Sostituito obbligatoriamente dalla transazione BP." },
-            { tCode: "VL01N", description: "Creare Consegna in Uscita", status: "Valido", notes: "Transazione primaria per avviare il processo di spedizione." },
-            { tCode: "VF01", description: "Creare Documento di Fatturazione", status: "Valido", notes: "Strumento standard per la creazione delle fatture clienti." },
-            { tCode: "VBO1", description: "Creare Accordo di Ristorno", status: "Obsoleto", notes: "Sostituito dalla Gestione Contratti Condizione (es. WCOCO)." },
-            { tCode: "VK11", description: "Creare Record di Condizione", status: "Valido", notes: "Ancora centrale per la manutenzione dei prezzi (ma scrive su PRCD_ELEMENTS)." },
-            { tCode: "VA05", description: "Lista Ordini di Vendita", status: "Valido", notes: "Report operativo standard per la visualizzazione degli ordini." },
-            { tCode: "NACE", description: "Determinazione Output", status: "Valido (Legacy)", notes: "La soluzione strategica è il nuovo Output Management basato su BRF+." },
+      },
+      {
+        "id": "MM",
+        "name": "Materials Management (MM)",
+        "introduction": "La semplificazione più drastica è nella gestione delle scorte, con la transazione MIGO che diventa l'unico punto di accesso per quasi tutti i movimenti e la tabella MATDOC come unica fonte di verità, eliminando le tabelle di aggregazione e garantendo la coerenza con FI.",
+        "transactions": [
+          {
+            "tCode": "ME21N",
+            "description": "Creare Ordine d'Acquisto",
+            "status": "Valido",
+            "notes": "Transazione centrale e invariata per la creazione di OdA."
+          },
+          {
+            "tCode": "MM01",
+            "description": "Creare Materiale",
+            "status": "Valido",
+            "notes": "Standard indiscusso per la gestione dell'anagrafica materiali."
+          },
+          {
+            "tCode": "MM03",
+            "description": "Visualizzazione anagrafica materiale",
+            "status": "Valido",
+            "notes": "Consultazione dati anagrafici materiali."
+          },
+          {
+            "tCode": "MIGO",
+            "description": "Entrata merci / Movimenti magazzino",
+            "status": "Valido",
+            "notes": "Tutte le funzionalità di movimentazione sono state consolidate in questa transazione."
+          },
+          {
+            "tCode": "MIRO",
+            "description": "Registrare Fattura in Entrata",
+            "status": "Valido",
+            "notes": "Rimane la transazione chiave per il controllo fatture logistico."
+          },
+          {
+            "tCode": "MMBE",
+            "description": "Sintesi Stock",
+            "status": "Valido",
+            "notes": "Ancora utilizzata per una rapida panoramica dello stock."
+          },
+          {
+            "tCode": "ME51N",
+            "description": "Creare Richiesta d'Acquisto",
+            "status": "Valido",
+            "notes": "Transazione standard per la creazione di RdA."
+          },
+          {
+            "tCode": "MI01",
+            "description": "Creare Doc. Inventario",
+            "status": "Valido",
+            "notes": "Il processo di inventario fisico rimane transazionalmente stabile."
+          },
+          {
+            "tCode": "MI04",
+            "description": "Registrare Conta",
+            "status": "Valido",
+            "notes": "Il processo di inventario fisico rimane transazionalmente stabile."
+          },
+          {
+            "tCode": "MI07",
+            "description": "Registrare Differenze",
+            "status": "Valido",
+            "notes": "Il processo di inventario fisico rimane transazionalmente stabile."
+          },
+          {
+            "tCode": "MR8M",
+            "description": "Storno documento di fattura (annullamento MIRO)",
+            "status": "Valido",
+            "notes": "Storno documenti di fattura acquisti."
+          },
+          {
+            "tCode": "MIR4",
+            "description": "Visualizzazione documento di fattura (MIRO)",
+            "status": "Valido",
+            "notes": "Consultazione documenti di fattura acquisti."
+          },
+          {
+            "tCode": "MIR8",
+            "description": "Modifica documento di fattura (MIRO)",
+            "status": "Valido",
+            "notes": "Modifica documenti di fattura acquisti."
+          },
+          {
+            "tCode": "CS11",
+            "description": "Visualizzazione distinta base livello singolo",
+            "status": "Valido",
+            "notes": "Consultazione distinte base."
+          },
+          {
+            "tCode": "CS12",
+            "description": "Visualizzazione distinta base livello multiplo",
+            "status": "Valido",
+            "notes": "Consultazione distinte base multi-livello."
+          },
+          {
+            "tCode": "CS13",
+            "description": "Visualizzazione distinta base con struttura applicazione",
+            "status": "Valido",
+            "notes": "Consultazione avanzata distinte base."
+          },
+          {
+            "tCode": "MSC1N",
+            "description": "Creazione dati serial number",
+            "status": "Valido",
+            "notes": "Gestione numeri seriali."
+          },
+          {
+            "tCode": "MSC2N",
+            "description": "Modifica dati serial number",
+            "status": "Valido",
+            "notes": "Modifica numeri seriali."
+          },
+          {
+            "tCode": "MSC3N",
+            "description": "Visualizzazione dati serial number",
+            "status": "Valido",
+            "notes": "Consultazione numeri seriali."
+          }
         ]
-    },
-    {
-        id: "PP",
-        name: "Production Planning (PP)",
-        introduction: "Il cambiamento principale è l'introduzione di MRP Live (MD01N) come strumento strategico per la pianificazione, molto più performante dell'MRP classico. Le transazioni operative (CS01, CR01, CO01) rimangono stabili.",
-        transactions: [
-            { tCode: "CS01", description: "Creare Distinta Base (BOM)", status: "Valido", notes: "Fondamentale e invariato per definire la struttura del prodotto." },
-            { tCode: "CR01", description: "Creare Centro di Lavoro", status: "Valido", notes: "Transazione standard per definire le risorse produttive." },
-            { tCode: "CA01", description: "Creare Ciclo di Lavoro Standard", status: "Valido", notes: "Utilizzata per definire la sequenza delle operazioni di produzione." },
-            { tCode: "MD01N", description: "MRP Live", status: "Valido (Strategico)", notes: "Successore ottimizzato per HANA delle transazioni MRP classiche (MD01/MD02)." },
-            { tCode: "MD04", description: "Lista Stock/Fabbisogni", status: "Valido", notes: "Lo strumento di lavoro più importante per i pianificatori per analizzare i risultati." },
-            { tCode: "CO01", description: "Creare Ordine di Produzione", status: "Valido", notes: "Le transazioni per la gestione degli ordini di produzione rimangono invariate." },
-            { tCode: "CO11N / CO15", description: "Conferma Ordine Produzione (Operazione/Testata)", status: "Valido", notes: "Transazioni standard per la registrazione dell'avanzamento produttivo." },
+      },
+      {
+        "id": "SD",
+        "name": "Sales and Distribution (SD)",
+        "introduction": "Il flusso Order-to-Cash (VA01, VL01N, VF01) rimane stabile, ma cambiamenti importanti riguardano i dati anagrafici (BP), la gestione del credito (FIN-FSCM) e i ristorni, completamente sostituiti dalla Gestione Contratti Condizione (WCOCO).",
+        "transactions": [
+          {
+            "tCode": "VA01",
+            "description": "Creare Ordine di Vendita",
+            "status": "Valido",
+            "notes": "La transazione principale per la creazione di ordini cliente rimane invariata."
+          },
+          {
+            "tCode": "VA02",
+            "description": "Modifica ordine di vendita",
+            "status": "Valido",
+            "notes": "Modifica ordini cliente esistenti."
+          },
+          {
+            "tCode": "VA03",
+            "description": "Visualizzazione ordine di vendita",
+            "status": "Valido",
+            "notes": "Consultazione ordini cliente."
+          },
+          {
+            "tCode": "VL01N",
+            "description": "Creare Consegna in Uscita",
+            "status": "Valido",
+            "notes": "Transazione primaria per avviare il processo di spedizione."
+          },
+          {
+            "tCode": "VL02N",
+            "description": "Modifica consegna ordine cliente",
+            "status": "Valido",
+            "notes": "Modifica documenti di consegna."
+          },
+          {
+            "tCode": "VF01",
+            "description": "Creare Documento di Fatturazione",
+            "status": "Valido",
+            "notes": "Strumento standard per la creazione delle fatture clienti."
+          },
+          {
+            "tCode": "VF03",
+            "description": "Visualizzazione fattura",
+            "status": "Valido",
+            "notes": "Consultazione fatture clienti."
+          },
+          {
+            "tCode": "VF11",
+            "description": "Storno fattura",
+            "status": "Valido",
+            "notes": "Storno documenti di fattura clienti."
+          },
+          {
+            "tCode": "VK11",
+            "description": "Creare Record di Condizione",
+            "status": "Valido",
+            "notes": "Ancora centrale per la manutenzione dei prezzi (ma scrive su PRCD_ELEMENTS)."
+          },
+          {
+            "tCode": "VA05",
+            "description": "Lista Ordini di Vendita",
+            "status": "Valido",
+            "notes": "Report operativo standard per la visualizzazione degli ordini."
+          },
+          {
+            "tCode": "VOFM",
+            "description": "Gestione routine di determinazione (prezzi, output, ecc.)",
+            "status": "Valido",
+            "notes": "Configurazione routine di determinazione."
+          },
+          {
+            "tCode": "NACE",
+            "description": "Determinazione Output",
+            "status": "Valido (Legacy)",
+            "notes": "La soluzione strategica è il nuovo Output Management basato su BRF+."
+          }
         ]
-    }
-  ]
-}
+      },
+      {
+        "id": "PP",
+        "name": "Production Planning (PP)",
+        "introduction": "Il cambiamento principale è l'introduzione di MRP Live (MD01N) come strumento strategico per la pianificazione, molto più performante dell'MRP classico. Le transazioni operative (CS01, CR01, CO01) rimangono stabili.",
+        "transactions": [
+          {
+            "tCode": "CS01",
+            "description": "Creare Distinta Base (BOM)",
+            "status": "Valido",
+            "notes": "Fondamentale e invariato per definire la struttura del prodotto."
+          },
+          {
+            "tCode": "CR01",
+            "description": "Creare Centro di Lavoro",
+            "status": "Valido",
+            "notes": "Transazione standard per definire le risorse produttive."
+          },
+          {
+            "tCode": "CA01",
+            "description": "Creare Ciclo di Lavoro Standard",
+            "status": "Valido",
+            "notes": "Utilizzata per definire la sequenza delle operazioni di produzione."
+          },
+          {
+            "tCode": "MD01N",
+            "description": "MRP Live",
+            "status": "Valido (Strategico)",
+            "notes": "Successore ottimizzato per HANA delle transazioni MRP classiche (MD01/MD02)."
+          },
+          {
+            "tCode": "MD04",
+            "description": "Lista Stock/Fabbisogni",
+            "status": "Valido",
+            "notes": "Lo strumento di lavoro più importante per i pianificatori per analizzare i risultati."
+          },
+          {
+            "tCode": "CO01",
+            "description": "Creare Ordine di Produzione",
+            "status": "Valido",
+            "notes": "Le transazioni per la gestione degli ordini di produzione rimangono invariate."
+          },
+          {
+            "tCode": "CO02",
+            "description": "Modifica ordine produzione",
+            "status": "Valido",
+            "notes": "Modifica ordini di produzione esistenti."
+          },
+          {
+            "tCode": "CO03",
+            "description": "Visualizzazione ordine produzione",
+            "status": "Valido",
+            "notes": "Consultazione ordini di produzione."
+          },
+          {
+            "tCode": "CO11N",
+            "description": "Conferma Ordine Produzione (Operazione)",
+            "status": "Valido",
+            "notes": "Transazioni standard per la registrazione dell'avanzamento produttivo."
+          },
+          {
+            "tCode": "CO15",
+            "description": "Conferma Ordine Produzione (Testata)",
+            "status": "Valido",
+            "notes": "Transazioni standard per la registrazione dell'avanzamento produttivo."
+          }
+        ]
+      },
+      {
+        "id": "QM",
+        "name": "Quality Management (QM)",
+        "introduction": "Il modulo Quality Management mantiene la sua struttura transazionale classica, con focus sui lotti di ispezione e le notifiche qualità.",
+        "transactions": [
+          {
+            "tCode": "QA01",
+            "description": "Creazione lotto di ispezione manuale",
+            "status": "Valido",
+            "notes": "Creazione manuale lotti di ispezione."
+          },
+          {
+            "tCode": "QA02",
+            "description": "Modifica lotto di ispezione",
+            "status": "Valido",
+            "notes": "Modifica lotti di ispezione esistenti."
+          },
+          {
+            "tCode": "QA03",
+            "description": "Visualizzazione lotto di ispezione",
+            "status": "Valido",
+            "notes": "Consultazione lotti di ispezione."
+          },
+          {
+            "tCode": "QA31",
+            "description": "Registrazione risultati ispezione",
+            "status": "Valido",
+            "notes": "Inserimento risultati delle ispezioni."
+          },
+          {
+            "tCode": "QA32",
+            "description": "Modifica risultati ispezione",
+            "status": "Valido",
+            "notes": "Modifica risultati ispezioni esistenti."
+          },
+          {
+            "tCode": "QA33",
+            "description": "Visualizzazione risultati ispezione",
+            "status": "Valido",
+            "notes": "Consultazione risultati ispezioni."
+          },
+          {
+            "tCode": "QM01",
+            "description": "Creazione notifica qualità",
+            "status": "Valido",
+            "notes": "Creazione notifiche per problemi qualità."
+          },
+          {
+            "tCode": "QM02",
+            "description": "Modifica notifica qualità",
+            "status": "Valido",
+            "notes": "Modifica notifiche qualità esistenti."
+          },
+          {
+            "tCode": "QM03",
+            "description": "Visualizzazione notifica qualità",
+            "status": "Valido",
+            "notes": "Consultazione notifiche qualità."
+          }
+        ]
+      },
+      {
+        "id": "FE",
+        "name": "Fatturazione Elettronica (FE)",
+        "introduction": "Modulo dedicato alla gestione dei documenti elettronici e alla conformità normativa per la fatturazione elettronica.",
+        "transactions": [
+          {
+            "tCode": "EDOC_COCKPIT",
+            "description": "Monitoraggio e gestione centralizzata dei documenti elettronici",
+            "status": "Valido",
+            "notes": "Cockpit principale per la gestione della fatturazione elettronica."
+          },
+          {
+            "tCode": "EDOC_RESUBMIT",
+            "description": "Ritrasmissione documenti elettronici con errori",
+            "status": "Valido",
+            "notes": "Reinvio documenti elettronici in errore."
+          }
+        ]
+      }
+    ]
+  }
 };
