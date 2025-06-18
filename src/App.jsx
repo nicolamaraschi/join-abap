@@ -8,7 +8,7 @@ import { tableDataRaw } from './modules/index.js';
 import { bapiData } from './modules/BapiData.jsx';
 import { codePresets } from './modules/CodePresets.jsx';
 import { transactionData } from './modules/TransactionData.jsx';
-import { abapDocData } from './modules/doc_abap/AbapDocData.jsx'; // Import corretto
+import { cdsData } from './modules/CdsData.jsx'; // Assumendo che questo file esista
 
 import './App.css';
 
@@ -51,38 +51,52 @@ function App() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedSubgroup, setSelectedSubgroup] = useState('All');
 
-    const { tableData, bapiDataPrepared, presetData, staticTransactionData, abapDocPrepared } = useMemo(() => {
+    const { tableData, bapiDataPrepared, cdsDataPrepared, presetData, staticTransactionData } = useMemo(() => {
         const tables = parseTableData(tableDataRaw);
         const bapis = bapiData;
+        const cds = cdsData;
+        
         const tableModuleList = ['All', ...Object.keys(tables.sapData).sort()];
         const tableDisplayNames = { 'All': 'Home', ...tables.moduleNames };
+        
         const bapiModuleList = ['All', ...Object.keys(bapis).sort()];
         const bapiDisplayNames = { 'All': 'Tutti i Moduli', ...Object.fromEntries(Object.keys(bapis).map(abbr => [abbr, tables.moduleNames[abbr] || abbr])) };
+
+        const cdsModuleList = ['All', ...Object.keys(cds).sort()];
+        const cdsDisplayNames = { 'All': 'Tutti i Moduli', ...Object.fromEntries(Object.keys(cds).map(abbr => [abbr, tables.moduleNames[abbr] || abbr])) };
+        
         const subgroupsMap = {};
         Object.keys(tables.sapData).forEach(moduleKey => {
             const subgroups = new Set();
             tables.allTables.forEach(table => { if (table.module === moduleKey && table.subModule) subgroups.add(table.subModule); });
             subgroupsMap[moduleKey] = Array.from(subgroups).sort();
         });
+        
         const findTableFunc = (name) => name ? tables.allTables.find(t => t.name === name) : null;
+        
         const findBapiFunc = (name) => {
             if (!name) return null;
             for (const moduleKey in bapis) { const found = bapis[moduleKey].find(b => b.name === name); if (found) return found; } return null;
         };
+
+        const findCdsFunc = (name) => {
+            if (!name) return null;
+            for (const moduleKey in cds) { const found = cds[moduleKey].find(c => c.name === name); if (found) return found; } return null;
+        };
+
         const presets = {
             all: codePresets,
             find: (id) => id ? codePresets.find(p => p.id === id) : null
         };
+        
         const transactionModules = transactionData.fiori.modules.map(m => ({ id: m.id, name: m.name }));
-        const findAbapDocFunc = (id) => id ? abapDocData.find(d => d.id === id) : null;
-        const docs = { all: abapDocData, find: findAbapDocFunc };
 
         return {
             tableData: { all: tables.allTables, modules: tableModuleList, names: tableDisplayNames, subgroups: subgroupsMap, find: findTableFunc },
             bapiDataPrepared: { all: bapis, modules: bapiModuleList, names: bapiDisplayNames, find: findBapiFunc },
+            cdsDataPrepared: { all: cds, modules: cdsModuleList, names: cdsDisplayNames, find: findCdsFunc },
             presetData: presets,
-            staticTransactionData: { ...transactionData, navModules: transactionModules },
-            abapDocPrepared: docs
+            staticTransactionData: { ...transactionData, navModules: transactionModules }
         };
     }, []);
 
@@ -90,8 +104,11 @@ function App() {
         setViewMode(mode);
         setSelectedItemName(null);
         setSearchTerm('');
-        if (mode === 'TABLES' || mode === 'BAPIS') {
-            const moduleToSelect = mode === 'BAPIS' ? bapiDataPrepared.modules[1] || 'All' : 'All';
+        
+        if (mode === 'TABLES' || mode === 'BAPIS' || mode === 'CDS') {
+            let moduleToSelect = 'All';
+            if (mode === 'BAPIS') moduleToSelect = bapiDataPrepared.modules[1] || 'All';
+            if (mode === 'CDS') moduleToSelect = cdsDataPrepared.modules[1] || 'All';
             handleModuleSelect(moduleToSelect);
         } else {
              setCurrentModule('All');
@@ -123,30 +140,43 @@ function App() {
         return bapisToFilter.filter(b => b.name.toLowerCase().includes(searchTerm.toLowerCase()) || (b.description && b.description.toLowerCase().includes(searchTerm.toLowerCase())));
     }, [bapiDataPrepared.all, currentModule, searchTerm, viewMode]);
 
+    const filteredCds = useMemo(() => {
+        if (viewMode !== 'CDS') return [];
+        let cdsToFilter = currentModule === 'All' ? Object.values(cdsDataPrepared.all).flat() : (cdsDataPrepared.all[currentModule] || []);
+        if (!searchTerm) return cdsToFilter;
+        return cdsToFilter.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()) || (c.description && c.description.toLowerCase().includes(searchTerm.toLowerCase())));
+    }, [cdsDataPrepared.all, currentModule, searchTerm, viewMode]);
+
     const filteredPresets = useMemo(() => {
         if (viewMode !== 'PRESETS') return [];
         if (!searchTerm) return presetData.all;
         return presetData.all.filter(p => p.title.toLowerCase().includes(searchTerm.toLowerCase()));
     }, [presetData.all, searchTerm, viewMode]);
-    
-    const filteredAbapDocs = useMemo(() => {
-        if (viewMode !== 'ABAP_DOC') return [];
-        if (!searchTerm) return abapDocPrepared.all;
-        return abapDocPrepared.all.filter(d => d.title.toLowerCase().includes(searchTerm.toLowerCase()));
-    }, [abapDocPrepared.all, searchTerm, viewMode]);
 
     const selectedTable = viewMode === 'TABLES' ? tableData.find(selectedItemName) : null;
     const selectedBapi = viewMode === 'BAPIS' ? bapiDataPrepared.find(selectedItemName) : null;
+    const selectedCds = viewMode === 'CDS' ? cdsDataPrepared.find(selectedItemName) : null;
     const selectedPreset = viewMode === 'PRESETS' ? presetData.find(selectedItemName) : null;
-    const selectedAbapDoc = viewMode === 'ABAP_DOC' ? abapDocPrepared.find(selectedItemName) : null;
+
+    const currentModules = {
+        'TABLES': tableData.modules,
+        'BAPIS': bapiDataPrepared.modules,
+        'CDS': cdsDataPrepared.modules
+    }[viewMode] || [];
+
+    const currentModuleNames = {
+        'TABLES': tableData.names,
+        'BAPIS': bapiDataPrepared.names,
+        'CDS': cdsDataPrepared.names
+    }[viewMode] || {};
 
     return (
         <div className="app-layout">
             <Navbar
                 viewMode={viewMode}
                 onViewModeSelect={handleViewModeSelect}
-                modules={viewMode === 'TABLES' ? tableData.modules : bapiDataPrepared.modules}
-                moduleNames={viewMode === 'TABLES' ? tableData.names : bapiDataPrepared.names}
+                modules={currentModules}
+                moduleNames={currentModuleNames}
                 currentModule={currentModule}
                 onModuleSelect={handleModuleSelect}
                 subgroups={viewMode === 'TABLES' ? tableData.subgroups[currentModule] : null}
@@ -160,8 +190,8 @@ function App() {
                     onSearchChange={setSearchTerm}
                     tables={filteredTables}
                     bapis={filteredBapis}
+                    cdsViews={filteredCds}
                     presets={filteredPresets}
-                    abapDocs={filteredAbapDocs}
                     transactionModules={staticTransactionData.navModules}
                     onSelectItem={setSelectedItemName}
                 />
@@ -169,8 +199,8 @@ function App() {
                     viewMode={viewMode}
                     selectedTable={selectedTable}
                     selectedBapi={selectedBapi}
+                    selectedCds={selectedCds}
                     selectedPreset={selectedPreset}
-                    selectedAbapDoc={selectedAbapDoc}
                     transactionData={staticTransactionData}
                     allTables={tableData.all}
                     onSelectTable={setSelectedItemName}

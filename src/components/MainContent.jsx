@@ -21,6 +21,8 @@ const MainContent = ({ viewMode, selectedTable, selectedBapi, selectedPreset, se
                 return selectedPreset
                     ? <PresetDetailsView preset={selectedPreset} />
                     : <WelcomeView isPresetMode={true} />;
+            case 'CDS':
+                return <WelcomeView isCdsMode={true} />;
             case 'ABAP_DOC':
                 return selectedAbapDoc
                     ? <AbapDocDetailsView doc={selectedAbapDoc} />

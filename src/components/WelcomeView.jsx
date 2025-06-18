@@ -3,7 +3,7 @@ import { Chart, BarController, BarElement, CategoryScale, LinearScale, Title, To
 
 Chart.register(BarController, BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
 
-const WelcomeView = ({ allTables = [], isBapiMode, isPresetMode }) => {
+const WelcomeView = ({ allTables = [], isBapiMode, isPresetMode, isCdsMode }) => {
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
     
@@ -21,7 +21,7 @@ const WelcomeView = ({ allTables = [], isBapiMode, isPresetMode }) => {
     }, [allTables]);
 
     useEffect(() => {
-        if (!chartRef.current || !allTables || isBapiMode || isPresetMode) return;
+        if (!chartRef.current || !allTables || isBapiMode || isPresetMode || isCdsMode) return;
         
         if (chartInstance.current) {
             chartInstance.current.destroy();
@@ -54,10 +54,11 @@ const WelcomeView = ({ allTables = [], isBapiMode, isPresetMode }) => {
                 chartInstance.current.destroy();
             }
         };
-    }, [allTables, chartData, isBapiMode, isPresetMode]);
+    }, [allTables, chartData, isBapiMode, isPresetMode, isCdsMode]);
 
     const getWelcomeMessage = () => {
         if (isPresetMode) return "Seleziona un preset di codice dalla lista per visualizzarlo e copiarlo.";
+        if (isCdsMode) return "Sezione in costruzione. Seleziona un'altra vista.";
         if (isBapiMode) return "Seleziona un modulo per visualizzare le BAPI disponibili.";
         return "Seleziona un modulo e una sottocategoria per visualizzare le tabelle.";
     };
@@ -69,7 +70,7 @@ const WelcomeView = ({ allTables = [], isBapiMode, isPresetMode }) => {
                 <p style={{fontSize: '1.125rem', color: '#64748b', marginBottom: '1.5rem'}}>
                     {getWelcomeMessage()}
                 </p>
-                {!isBapiMode && !isPresetMode && allTables.length > 0 && (
+                {!isBapiMode && !isPresetMode && !isCdsMode && allTables.length > 0 && (
                     <div style={{backgroundColor: 'white', padding: '1.5rem', borderRadius: '0.5rem', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'}}>
                         <div className="chart-container"><canvas ref={chartRef}></canvas></div>
                         <p style={{fontSize: '0.875rem', color: '#64748b', marginTop: '1rem'}}>Tabelle per Modulo</p>
