@@ -5,7 +5,8 @@ import { content as smartformCallContent } from './presets/SmartformCall.jsx';
 import { content as emailBcsContent } from './presets/EmailBcs.jsx';
 import { content as alvSalvTableContent } from './presets/AlvSalvTable.jsx';
 import { content as hierarchicalAlvContent } from './presets/HierarchicalAlv.jsx';
-import { content as reuseAlvLegacyContent } from './presets/ReuseAlvLegacy.jsx'; // 1. Aggiungi questa riga
+import { content as reuseAlvLegacyContent } from './presets/ReuseAlvLegacy.jsx';
+import { content as gui_download } from './presets/Gui_download.jsx';  // 1. Aggiungi questa riga
 
 export const codePresets = [
   {
@@ -48,5 +49,10 @@ export const codePresets = [
     id: 'REUSE_ALV_LEGACY',
     title: 'reuse alv merge filedcatalog merge e reuse alv gris display',
     content: reuseAlvLegacyContent
+  },
+  {
+    id: 'Gui_download',
+    title: 'uso della funzione Gui_download per mettere dati sul excel',
+    content: gui_download
   }
 ];

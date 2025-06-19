@@ -1,3 +1,4 @@
+// src/App.jsx
 import React, { useState, useMemo } from 'react';
 
 import Navbar from './components/Navbar.jsx';
@@ -8,14 +9,17 @@ import { tableDataRaw } from './modules/index.js';
 import { bapiData } from './modules/BapiData.jsx';
 import { codePresets } from './modules/CodePresets.jsx';
 import { transactionData } from './modules/TransactionData.jsx';
-import { cdsData } from './modules/CdsData.jsx'; // Assumendo che questo file esista
+// Assumendo che questo file esista e sia strutturato come BapiData.jsx (oggetto con moduli)
+import { cdsData } from './modules/CdsData.jsx'; 
+// Assumendo che questo file esista e sia un array di oggetti { id, title, content }
+import { abapDocData } from './modules/doc_abap/AbapDocData.jsx'; 
 
 import './App.css';
 
 const parseTableData = (text) => {
     const lines = text.split('\n'); let currentModule = null; let currentSubModule = null; let currentTable = null; const sapData = {}; const allTables = []; const moduleNames = {};
     const moduleRegex = /^###\s*Modulo\s*(.*?)\s*\((.*?)\)/; const subModuleRegex = /^####\s*(.*)/; const tableRegex = /^\*\*(.*?)\s*(\(.*\))?\*\*/;
-    const keysRegex = /^\*\s*Chiavi Primarie:\s*`(.*?)`/; const descRegex = /^\*\s*Descrizione:\s*(.*)/; const joinRegex = /^\s{2,}\*\s*\*\*(.*?)\*\*.*:\s*su\s*`(.*?)`/;
+    const keysRegex = /^\*\s*Chiavi Primarie:\s*`(.*?)`/; const descRegex = /^\*\s*Descrizione:\s*(.*)/; const joinRegex = /^\s{2,}\*\s*\*(.*?)\*\*.*:\s*su\s*`(.*?)`/;
     for (const line of lines) {
         if (line.trim() === '') continue; let match;
         match = line.match(moduleRegex); if (match) { const fullName = match[1].trim(); const abbreviation = match[2].trim(); currentModule = abbreviation; if (!sapData[currentModule]) { sapData[currentModule] = {}; moduleNames[abbreviation] = fullName; } currentSubModule = "Generale"; currentTable = null; continue; }
@@ -51,10 +55,12 @@ function App() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedSubgroup, setSelectedSubgroup] = useState('All');
 
-    const { tableData, bapiDataPrepared, cdsDataPrepared, presetData, staticTransactionData } = useMemo(() => {
+
+    const { tableData, bapiDataPrepared, cdsDataPrepared, presetData, staticTransactionData, abapDocPrepared } = useMemo(() => {
         const tables = parseTableData(tableDataRaw);
         const bapis = bapiData;
-        const cds = cdsData;
+        const cds = cdsData; // cdsData is expected to be an object with modules, similar to bapiData
+        const abapDocs = abapDocData; // abapDocData is expected to be an array of objects, similar to codePresets
         
         const tableModuleList = ['All', ...Object.keys(tables.sapData).sort()];
         const tableDisplayNames = { 'All': 'Home', ...tables.moduleNames };
@@ -62,7 +68,7 @@ function App() {
         const bapiModuleList = ['All', ...Object.keys(bapis).sort()];
         const bapiDisplayNames = { 'All': 'Tutti i Moduli', ...Object.fromEntries(Object.keys(bapis).map(abbr => [abbr, tables.moduleNames[abbr] || abbr])) };
 
-        const cdsModuleList = ['All', ...Object.keys(cds).sort()];
+        const cdsModuleList = ['All', ...Object.keys(cds).sort()]; // Assuming cdsData is structured like bapiData
         const cdsDisplayNames = { 'All': 'Tutti i Moduli', ...Object.fromEntries(Object.keys(cds).map(abbr => [abbr, tables.moduleNames[abbr] || abbr])) };
         
         const subgroupsMap = {};
@@ -81,6 +87,7 @@ function App() {
 
         const findCdsFunc = (name) => {
             if (!name) return null;
+            // Assuming cdsData is structured like bapiData: { 'Module': [ {name: 'CDS1'}, {name: 'CDS2'} ] }
             for (const moduleKey in cds) { const found = cds[moduleKey].find(c => c.name === name); if (found) return found; } return null;
         };
 
@@ -90,13 +97,17 @@ function App() {
         };
         
         const transactionModules = transactionData.fiori.modules.map(m => ({ id: m.id, name: m.name }));
+        const findAbapDocFunc = (id) => id ? abapDocs.find(d => d.id === id) : null;
+        const docs = { all: abapDocs, find: findAbapDocFunc };
 
         return {
             tableData: { all: tables.allTables, modules: tableModuleList, names: tableDisplayNames, subgroups: subgroupsMap, find: findTableFunc },
             bapiDataPrepared: { all: bapis, modules: bapiModuleList, names: bapiDisplayNames, find: findBapiFunc },
             cdsDataPrepared: { all: cds, modules: cdsModuleList, names: cdsDisplayNames, find: findCdsFunc },
             presetData: presets,
-            staticTransactionData: { ...transactionData, navModules: transactionModules }
+            staticTransactionData: { ...transactionData, navModules: transactionModules },
+            abapDocPrepared: docs
+
         };
     }, []);
 
@@ -105,10 +116,13 @@ function App() {
         setSelectedItemName(null);
         setSearchTerm('');
         
-        if (mode === 'TABLES' || mode === 'BAPIS' || mode === 'CDS') {
+        // Logic for module selection based on view mode
+        if (mode === 'TABLES' || mode === 'BAPIS' || mode === 'CDS' || mode === 'ABAP_DOC') { // Added ABAP_DOC
             let moduleToSelect = 'All';
             if (mode === 'BAPIS') moduleToSelect = bapiDataPrepared.modules[1] || 'All';
-            if (mode === 'CDS') moduleToSelect = cdsDataPrepared.modules[1] || 'All';
+            else if (mode === 'CDS') moduleToSelect = cdsDataPrepared.modules[1] || 'All';
+            // ABAP_DOC does not have modules, so keep it 'All' or empty if you want a blank state
+            else if (mode === 'ABAP_DOC') moduleToSelect = 'All'; // Or an empty string if you want no module selected initially
             handleModuleSelect(moduleToSelect);
         } else {
              setCurrentModule('All');
@@ -142,6 +156,7 @@ function App() {
 
     const filteredCds = useMemo(() => {
         if (viewMode !== 'CDS') return [];
+        // Assuming cdsDataPrepared.all is an object like { 'Module1': [cds1, cds2], 'Module2': [cds3] }
         let cdsToFilter = currentModule === 'All' ? Object.values(cdsDataPrepared.all).flat() : (cdsDataPrepared.all[currentModule] || []);
         if (!searchTerm) return cdsToFilter;
         return cdsToFilter.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()) || (c.description && c.description.toLowerCase().includes(searchTerm.toLowerCase())));
@@ -153,21 +168,35 @@ function App() {
         return presetData.all.filter(p => p.title.toLowerCase().includes(searchTerm.toLowerCase()));
     }, [presetData.all, searchTerm, viewMode]);
 
+    const filteredAbapDocs = useMemo(() => {
+        if (viewMode !== 'ABAP_DOC') return [];
+        if (!searchTerm) return abapDocPrepared.all;
+        return abapDocPrepared.all.filter(d => d.title.toLowerCase().includes(searchTerm.toLowerCase()));
+    }, [abapDocPrepared.all, searchTerm, viewMode]);
+
+
     const selectedTable = viewMode === 'TABLES' ? tableData.find(selectedItemName) : null;
     const selectedBapi = viewMode === 'BAPIS' ? bapiDataPrepared.find(selectedItemName) : null;
     const selectedCds = viewMode === 'CDS' ? cdsDataPrepared.find(selectedItemName) : null;
     const selectedPreset = viewMode === 'PRESETS' ? presetData.find(selectedItemName) : null;
+    const selectedAbapDoc = viewMode === 'ABAP_DOC' ? abapDocPrepared.find(selectedItemName) : null;
 
+
+    // Dynamically set currentModules and currentModuleNames based on viewMode
+    // Note: For ABAP_DOC, if it doesn't have modules, this will correctly return an empty array
+    // or you can explicitly define it as ['All']
     const currentModules = {
         'TABLES': tableData.modules,
         'BAPIS': bapiDataPrepared.modules,
-        'CDS': cdsDataPrepared.modules
+        'CDS': cdsDataPrepared.modules,
+        'ABAP_DOC': ['All'] // Assuming ABAP_DOC does not have sub-modules in the dropdown
     }[viewMode] || [];
 
     const currentModuleNames = {
         'TABLES': tableData.names,
         'BAPIS': bapiDataPrepared.names,
-        'CDS': cdsDataPrepared.names
+        'CDS': cdsDataPrepared.names,
+        'ABAP_DOC': { 'All': 'Tutte le Docs' } // Custom display name for ABAP Doc
     }[viewMode] || {};
 
     return (
@@ -179,7 +208,12 @@ function App() {
                 moduleNames={currentModuleNames}
                 currentModule={currentModule}
                 onModuleSelect={handleModuleSelect}
-                subgroups={viewMode === 'TABLES' ? tableData.subgroups[currentModule] : null}
+                // Subgroups are typically for TABLES and potentially CDS if they have sub-groupings
+                subgroups={
+                    (viewMode === 'TABLES' || viewMode === 'CDS')
+                        ? tableData.subgroups[currentModule] // Re-using tableData.subgroups, ensure CDS also uses this structure
+                        : null
+                }
                 selectedSubgroup={selectedSubgroup}
                 onSubgroupSelect={setSelectedSubgroup}
             />
@@ -192,6 +226,7 @@ function App() {
                     bapis={filteredBapis}
                     cdsViews={filteredCds}
                     presets={filteredPresets}
+                    abapDocs={filteredAbapDocs} // Pass filteredAbapDocs
                     transactionModules={staticTransactionData.navModules}
                     onSelectItem={setSelectedItemName}
                 />
@@ -201,6 +236,7 @@ function App() {
                     selectedBapi={selectedBapi}
                     selectedCds={selectedCds}
                     selectedPreset={selectedPreset}
+                    selectedAbapDoc={selectedAbapDoc} // Pass selectedAbapDoc
                     transactionData={staticTransactionData}
                     allTables={tableData.all}
                     onSelectTable={setSelectedItemName}

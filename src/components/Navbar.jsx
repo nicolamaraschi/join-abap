@@ -1,5 +1,5 @@
 import React from 'react';
-import './Navbar.css';
+// import './Navbar.css'; // Se hai un file CSS specifico per Navbar, mantienilo
 
 const Navbar = ({
     viewMode,
@@ -36,8 +36,9 @@ const Navbar = ({
                     <button onClick={() => onViewModeSelect('BAPIS')} className={viewMode === 'BAPIS' ? 'active' : 'inactive'}>
                         BAPI
                     </button>
-                    <button onClick={() => onViewModeSelect('CDS_DOCS')} className={viewMode === 'CDS_DOCS' ? 'active' : 'inactive'}>
-                        Doc. CDS
+                    {/* Pulsante per CDS Views - usa 'CDS' come viewMode per coerenza con le modifiche App.jsx */}
+                    <button onClick={() => onViewModeSelect('CDS')} className={viewMode === 'CDS' ? 'active' : 'inactive'}>
+                        CDS Views
                     </button>
                     <button onClick={() => onViewModeSelect('TRANSACTIONS')} className={viewMode === 'TRANSACTIONS' ? 'active' : 'inactive'}>
                         Transazioni
@@ -45,16 +46,28 @@ const Navbar = ({
                     <button onClick={() => onViewModeSelect('PRESETS')} className={viewMode === 'PRESETS' ? 'active' : 'inactive'}>
                         Preset Codice
                     </button>
+                    {/* Nuovo pulsante per ABAP Doc */}
+                    <button onClick={() => onViewModeSelect('ABAP_DOC')} className={viewMode === 'ABAP_DOC' ? 'active' : 'inactive'}>
+                        ABAP Doc
+                    </button>
                 </div>
             </nav>
 
             {/* 2. BARRA DEI FILTRI: APPARE CONTESTUALMENTE */}
-            {(viewMode === 'TABLES' || viewMode === 'BAPIS') && (
+            {/* I filtri appaiono per TABLES, BAPIS, CDS e ABAP_DOC */}
+            {(viewMode === 'TABLES' || viewMode === 'BAPIS' || viewMode === 'CDS' || viewMode === 'ABAP_DOC') && (
                 <div className="filter-bar">
                     {/* Filtro per Modulo */}
                     <div className="filter-group">
                         <label htmlFor="module-select">Modulo</label>
-                        <select id="module-select" value={currentModule} onChange={handleModuleChange} className="filter-select">
+                        <select
+                            id="module-select"
+                            value={currentModule}
+                            onChange={handleModuleChange}
+                            className="filter-select"
+                            // Disabilita il filtro modulo se la modalità non lo richiede (es. ABAP_DOC se non ha moduli)
+                            disabled={viewMode === 'ABAP_DOC'}
+                        >
                             {(modules || []).map(moduleKey => (
                                 <option key={moduleKey} value={moduleKey}>
                                     {moduleNames[moduleKey] || moduleKey}
@@ -63,8 +76,9 @@ const Navbar = ({
                         </select>
                     </div>
 
-                    {/* Filtro per Sottogruppo (solo per le Tabelle) */}
-                    {viewMode === 'TABLES' && subgroups && subgroups.length > 0 && (
+                    {/* Filtro per Sottogruppo (solo per le Tabelle e CDS Views) */}
+                    {/* Presumiamo che solo TABLES e CDS abbiano sottogruppi */}
+                    {(viewMode === 'TABLES' || viewMode === 'CDS') && subgroups && subgroups.length > 0 && (
                         <div className="filter-group">
                             <label htmlFor="subgroup-select">Sottogruppo</label>
                             <select id="subgroup-select" value={selectedSubgroup} onChange={handleSubgroupChange} className="filter-select" disabled={currentModule === 'All'}>
