@@ -5,7 +5,7 @@ import BapiDetailsView from './BapiDetailsView.jsx';
 import PresetDetailsView from './PresetDetailsView.jsx';
 import ReportView from './ReportView.jsx';
 import AbapDocDetailsView from './AbapDocDetailsView.jsx';
-
+import CdsDocumentationView from './CdsDocumentationView.jsx'; // Assicurati che il percorso sia corretto
 const MainContent = ({ viewMode, selectedTable, selectedBapi, selectedPreset, selectedAbapDoc, transactionData, allTables, onSelectTable }) => {
     const renderContent = () => {
         switch(viewMode) {
@@ -21,8 +21,8 @@ const MainContent = ({ viewMode, selectedTable, selectedBapi, selectedPreset, se
                 return selectedPreset
                     ? <PresetDetailsView preset={selectedPreset} />
                     : <WelcomeView isPresetMode={true} />;
-            case 'CDS':
-                return <WelcomeView isCdsMode={true} />;
+            case 'CDS_DOCS':
+                        return <CdsDocumentationView />;
             case 'ABAP_DOC':
                 return selectedAbapDoc
                     ? <AbapDocDetailsView doc={selectedAbapDoc} />

@@ -36,8 +36,8 @@ const Navbar = ({
                     <button onClick={() => onViewModeSelect('BAPIS')} className={viewMode === 'BAPIS' ? 'active' : 'inactive'}>
                         BAPI
                     </button>
-                    <button onClick={() => onViewModeSelect('CDS')} className={viewMode === 'CDS' ? 'active' : 'inactive'}>
-                        CDS
+                    <button onClick={() => onViewModeSelect('CDS_DOCS')} className={viewMode === 'CDS_DOCS' ? 'active' : 'inactive'}>
+                        Doc. CDS
                     </button>
                     <button onClick={() => onViewModeSelect('TRANSACTIONS')} className={viewMode === 'TRANSACTIONS' ? 'active' : 'inactive'}>
                         Transazioni

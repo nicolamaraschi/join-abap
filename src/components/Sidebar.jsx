@@ -22,10 +22,10 @@ const Sidebar = ({ viewMode, searchTerm, onSearchChange, tables, bapis, presets,
     switch(viewMode) {
       case 'TABLES': return "Cerca tabella...";
       case 'BAPIS': return "Cerca BAPI...";
-       case 'CDS': return "Ricerca CDS non disponibile";
       case 'PRESETS': return "Cerca preset...";
       case 'ABAP_DOC': return "Cerca documentazione...";
       case 'TRANSACTIONS': return "Navigazione Report Transazioni";
+      case 'CDS_DOCS': return "Documentazione CDS"; // AGGIUNGI QUESTO
       default: return "Cerca...";
     }
   };
@@ -36,8 +36,8 @@ const Sidebar = ({ viewMode, searchTerm, onSearchChange, tables, bapis, presets,
         return <TableList tables={tables} onSelectTable={onSelectItem} />;
       case 'BAPIS':
         return <BapiList bapis={bapis} onSelectBapi={onSelectItem} />;
-    case 'CDS':
-        return <div style={{textAlign: 'center', color: '#64748b', padding: '1rem'}}>Nessun elemento trovato.</div>;
+        case 'CDS_DOCS': // AGGIUNGI QUESTO
+        return <div style={{textAlign: 'center', color: '#64748b', padding: '1rem'}}>Naviga la documentazione a destra.</div>;
       case 'PRESETS':
         return <PresetList presets={presets} onSelectPreset={onSelectItem} />;
       case 'ABAP_DOC':
