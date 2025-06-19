@@ -10,7 +10,7 @@ import { content as reuseAlvLegacyContent } from './presets/ReuseAlvLegacy.jsx';
 export const codePresets = [
   {
     id: 'EXCEL_TO_ABAP',
-    title: 'Lettura File Excel e Mappatura in Tabella ABAP',
+    title: 'Lettura File Excel e Mappatura in Tabella ABAP usando function ASML_EXCEL_TO_INTERNAL_TABLE',
     content: excelToAbapContent
   },
   {
