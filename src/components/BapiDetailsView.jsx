@@ -1,11 +1,15 @@
 // FILE: src/components/BapiDetailsView.jsx
 import React from 'react';
+import AbapCode from './AbapCode.jsx'; // Importa il componente per il codice
 
 const BapiDetailsView = ({ bapi }) => {
     if (!bapi) return null;
     return (
         <div className="details-view">
+            {/* Sezione Intestazione (invariata) */}
             <div className="details-header-card"><h2>{bapi.name}</h2><p>{bapi.description}</p></div>
+            
+            {/* Sezione Dettagli Parametri (invariata) */}
             <div>{bapi.details.map((detail, index) => (
                 <div key={index} className="mb-6">
                     <h3 className="text-xl font-semibold mb-2 text-slate-700">{detail.title}</h3>
@@ -28,6 +32,16 @@ const BapiDetailsView = ({ bapi }) => {
                     </div>
                 </div>
             ))}</div>
+
+            {/* NUOVA SEZIONE: Visualizzazione Codice ABAP */}
+            {bapi.content && bapi.content.trim() !== '' && (
+                 <div className="mt-6">
+                    <h3 className="text-xl font-semibold mb-2 text-slate-700">Esempio di Utilizzo</h3>
+                    <div className="preset-code-container">
+                        <AbapCode code={bapi.content} />
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
