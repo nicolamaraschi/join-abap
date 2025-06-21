@@ -26,7 +26,8 @@ export const bapi = {
     },
     { "title": "Note", "content": "Richiede l'assegnazione ad almeno una società. Richiede BAPI_TRANSACTION_COMMIT." }
   ],
-  "content": `"&---------------------------------------------------------------------*
+  "content": `
+  "&---------------------------------------------------------------------*
 "&      Form  f_testa_profitcenter_create
 "&---------------------------------------------------------------------*
 " Testa la BAPI BAPI_PROFITCENTER_CREATE - Creazione Centro di Profitto
@@ -120,5 +121,6 @@ FORM f_testa_profitcenter_create.
   ELSE.
     MESSAGE 'BAPI_PROFITCENTER_CREATE eseguita in modalità testrun.' TYPE 'I'.
   ENDIF.
-ENDFORM.`
+ENDFORM.
+`
 };
