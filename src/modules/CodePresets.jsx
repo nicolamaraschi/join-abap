@@ -7,7 +7,7 @@ import { content as alvSalvTableContent } from './presets/AlvSalvTable.jsx';
 import { content as hierarchicalAlvContent } from './presets/HierarchicalAlv.jsx';
 import { content as reuseAlvLegacyContent } from './presets/ReuseAlvLegacy.jsx';
 import { content as gui_download } from './presets/Gui_download.jsx';  // 1. Aggiungi questa riga
-
+import { content as cl_gui_alv_grid } from './presets/cl_gui_alv_grid.jsx';
 export const codePresets = [
   {
     id: 'EXCEL_TO_ABAP',
@@ -54,5 +54,10 @@ export const codePresets = [
     id: 'Gui_download',
     title: 'uso della funzione Gui_download per mettere dati sul excel',
     content: gui_download
+  },
+  {
+    id: 'Cl_gui_alv_grid',
+    title: 'classe per alv',
+    content: cl_gui_alv_grid
   }
 ];
