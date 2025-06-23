@@ -34,10 +34,10 @@ export const cdsData = {
         ]
       }
     ],
-    "CUSTOM": [ // Una categoria per le CDS custom
+    "Documentazione": [ // Una categoria per le CDS custom
        {
-        "name": "ZCUSTOM_CDS_VIEW",
-        "description": "Esempio di una vista CDS personalizzata.",
+        "name": "conoscenza cds",
+        "description": "Documentazione cds",
         "details": []
       }
     ]

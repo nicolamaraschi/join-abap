@@ -8,6 +8,8 @@ import { content as hierarchicalAlvContent } from './presets/HierarchicalAlv.jsx
 import { content as reuseAlvLegacyContent } from './presets/ReuseAlvLegacy.jsx';
 import { content as gui_download } from './presets/Gui_download.jsx';  // 1. Aggiungi questa riga
 import { content as cl_gui_alv_grid } from './presets/cl_gui_alv_grid.jsx';
+import { content as cl_gui_alv_tree } from './presets/cl_gui_alv_tree.jsx';
+
 export const codePresets = [
   {
     id: 'EXCEL_TO_ABAP',
@@ -59,5 +61,10 @@ export const codePresets = [
     id: 'Cl_gui_alv_grid',
     title: 'classe per alv Cl_gui_alv_grid',
     content: cl_gui_alv_grid
+  },
+  {
+    id: 'cl_gui_alv_tree',
+    title: 'classe per alv cl_gui_alv_tree',
+    content: cl_gui_alv_tree
   }
 ];
