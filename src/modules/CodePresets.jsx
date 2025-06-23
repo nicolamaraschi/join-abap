@@ -57,7 +57,7 @@ export const codePresets = [
   },
   {
     id: 'Cl_gui_alv_grid',
-    title: 'classe per alv',
+    title: 'classe per alv Cl_gui_alv_grid',
     content: cl_gui_alv_grid
   }
 ];
