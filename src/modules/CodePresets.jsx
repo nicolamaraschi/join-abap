@@ -9,6 +9,10 @@ import { content as reuseAlvLegacyContent } from './presets/ReuseAlvLegacy.jsx';
 import { content as gui_download } from './presets/Gui_download.jsx';  // 1. Aggiungi questa riga
 import { content as cl_gui_alv_grid } from './presets/cl_gui_alv_grid.jsx';
 import { content as cl_gui_alv_tree } from './presets/cl_gui_alv_tree.jsx';
+import { content as cl_salv_gui_table_ida } from './presets/cl_salv_gui_table_ida.jsx';
+import { content as cl_abap_format } from './presets/cl_abap_format.jsx';
+import { content as popup_get_value } from './presets/popup_get_value.jsx';
+import { content as popup_with_table_display } from './presets/popup_with_table_display.jsx';
 
 export const codePresets = [
   {
@@ -46,7 +50,6 @@ export const codePresets = [
     title: 'cl_salv_hierseq_table',
     content: hierarchicalAlvContent
   },
-  // 2. Aggiungi questo nuovo blocco alla fine dell'array
   {
     id: 'REUSE_ALV_LEGACY',
     title: 'reuse alv merge filedcatalog merge e reuse alv gris display',
@@ -66,5 +69,27 @@ export const codePresets = [
     id: 'cl_gui_alv_tree',
     title: 'classe per alv cl_gui_alv_tree',
     content: cl_gui_alv_tree
+  },
+  {
+    id: 'cl_salv_gui_table_ida',
+    title: 'classe per alv cl_salv_gui_table_ida',
+    content: cl_salv_gui_table_ida
+  },
+  {
+    id: 'cl_abap_format',
+    title: 'classe per alv cl_abap_format',
+    content: cl_abap_format
+  },
+  {
+    id: 'popup_get_value',
+    title: 'motodo per popup_get_value',
+    content: popup_get_value
+  },
+  {
+    id: 'popup_with_table_display',
+    title: 'metodo popup_with_table_display',
+    content: popup_with_table_display
   }
 ];
+
+

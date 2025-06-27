@@ -1,12 +1,32 @@
+// src/components/Sidebar.jsx
 import React, { useState, useEffect } from 'react';
 import BapiList from './BapiList.jsx';
 import TableList from './TableList.jsx';
 import PresetList from './PresetList.jsx';
 import TransactionNavList from './TransactionNavList.jsx';
 import AbapDocList from './AbapDocList.jsx';
+import BadiList from './BadiList.jsx';
+// Importa i nuovi componenti lista per Smartforms e Adobe Forms
+import SmartformList from './SmartformList.jsx';
+import AdobeformList from './AdobeformList.jsx';
+import CdsList from './CdsList.jsx'; // <--- Importa CdsList
 import './Sidebar.css'; // se usi file CSS separato
 
-const Sidebar = ({ viewMode, searchTerm, onSearchChange, tables, bapis, presets, abapDocs, transactionModules, onSelectItem }) => {
+const Sidebar = ({
+  viewMode,
+  searchTerm,
+  onSearchChange,
+  tables,
+  bapis,
+  cdsViews, // Assicurati che questa prop sia ricevuta (conterrà il documento overview da App.jsx)
+  presets,
+  abapDocs,
+  badis,
+  smartforms,
+  adobeforms,
+  transactionModules,
+  onSelectItem
+}) => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -25,7 +45,10 @@ const Sidebar = ({ viewMode, searchTerm, onSearchChange, tables, bapis, presets,
       case 'PRESETS': return "Cerca preset...";
       case 'ABAP_DOC': return "Cerca documentazione...";
       case 'TRANSACTIONS': return "Navigazione Report Transazioni";
-      case 'CDS_DOCS': return "Documentazione CDS"; // AGGIUNGI QUESTO
+      case 'CDS': return "Cerca CDS..."; // <--- Modificato da 'CDS_DOCS' a 'CDS' e aggiornato placeholder
+      case 'BADIS': return "Cerca BADI...";
+      case 'SMARTFORMS': return "Cerca Smartform...";
+      case 'ADOBEFORMS': return "Cerca Adobe Form...";
       default: return "Cerca...";
     }
   };
@@ -36,12 +59,19 @@ const Sidebar = ({ viewMode, searchTerm, onSearchChange, tables, bapis, presets,
         return <TableList tables={tables} onSelectTable={onSelectItem} />;
       case 'BAPIS':
         return <BapiList bapis={bapis} onSelectBapi={onSelectItem} />;
-        case 'CDS_DOCS': // AGGIUNGI QUESTO
-        return <div style={{textAlign: 'center', color: '#64748b', padding: '1rem'}}>Naviga la documentazione a destra.</div>;
+      case 'CDS': // <--- Modificato da 'CDS_DOCS' a 'CDS'
+        // Ora renderizza CdsList e gli passa i cdsViews (il documento overview) e onSelectItem
+        return <CdsList cdsDocs={cdsViews} onSelectCdsDoc={onSelectItem} />;
       case 'PRESETS':
         return <PresetList presets={presets} onSelectPreset={onSelectItem} />;
       case 'ABAP_DOC':
         return <AbapDocList docs={abapDocs} onSelectDoc={onSelectItem} />;
+      case 'BADIS':
+        return <BadiList badis={badis} onSelectBadi={onSelectItem} />;
+      case 'SMARTFORMS':
+        return <SmartformList smartforms={smartforms} onSelectSmartform={onSelectItem} />;
+      case 'ADOBEFORMS':
+        return <AdobeformList adobeforms={adobeforms} onSelectAdobeform={onSelectItem} />;
       case 'TRANSACTIONS':
         return <TransactionNavList modules={transactionModules} />;
       default:
@@ -67,11 +97,11 @@ const Sidebar = ({ viewMode, searchTerm, onSearchChange, tables, bapis, presets,
 
         <div className="sidebar-content">
           <div className="search-container">
-            <input 
-              type="text" 
-              placeholder={getPlaceholder()} 
-              className="search-input" 
-              value={searchTerm} 
+            <input
+              type="text"
+              placeholder={getPlaceholder()}
+              className="search-input"
+              value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
               disabled={viewMode === 'TRANSACTIONS'}
             />

@@ -1,0 +1,91 @@
+/* src/components/DetailsView.css */
+
+.details-view-container {
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    height: 100%;
+}
+
+.details-view-title {
+    font-size: 2rem;
+    color: #1a202c;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+}
+
+.details-view-description {
+    font-size: 1rem;
+    color: #4a5568;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.details-view-section {
+    margin-bottom: 1.5rem;
+}
+
+.details-view-section h2 {
+    font-size: 1.3rem;
+    color: #2d3748;
+    margin-bottom: 0.8rem;
+    border-left: 4px solid #4299e1;
+    padding-left: 0.5rem;
+}
+
+.method-details {
+    background-color: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.method-details h3 {
+    font-size: 1.1rem;
+    color: #3182ce;
+    margin-bottom: 0.5rem;
+}
+
+.method-details p {
+    font-size: 0.95rem;
+    color: #4a5568;
+    margin-bottom: 0.5rem;
+}
+
+.code-example {
+    margin-top: 1rem;
+    background-color: #2d3748; /* Colore scuro per il blocco codice */
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.code-example h4 {
+    font-size: 0.9rem;
+    color: #cbd5e0;
+    padding: 0.5rem 1rem;
+    background-color: #4a5568;
+    margin-bottom: 0;
+}
+
+/* Assicurati che il tuo componente AbapCode gestisca lo stile interno,
+   o aggiungi qui stili per pre/code se non lo fa */
+.code-example pre {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
+    color: #f7fafc;
+    font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+    font-size: 0.85rem;
+}
+
+.details-view-placeholder {
+    text-align: center;
+    padding: 3rem;
+    color: #64748b;
+    font-size: 1.1rem;
+    font-style: italic;
+}

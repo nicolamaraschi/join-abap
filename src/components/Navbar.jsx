@@ -1,5 +1,5 @@
 import React from 'react';
-// import './Navbar.css'; // Se hai un file CSS specifico per Navbar, mantienilo
+import './Navbar.css'; // Se hai un file CSS specifico per Navbar, mantienilo
 
 const Navbar = ({
     viewMode,
@@ -12,6 +12,7 @@ const Navbar = ({
     selectedSubgroup,
     onSubgroupSelect
 }) => {
+
     // Gestisce il cambio del modulo dal menu a tendina
     const handleModuleChange = (e) => {
         onModuleSelect(e.target.value);
@@ -36,7 +37,6 @@ const Navbar = ({
                     <button onClick={() => onViewModeSelect('BAPIS')} className={viewMode === 'BAPIS' ? 'active' : 'inactive'}>
                         BAPI
                     </button>
-                    {/* Pulsante per CDS Views - usa 'CDS' come viewMode per coerenza con le modifiche App.jsx */}
                     <button onClick={() => onViewModeSelect('CDS')} className={viewMode === 'CDS' ? 'active' : 'inactive'}>
                         CDS Views
                     </button>
@@ -46,16 +46,28 @@ const Navbar = ({
                     <button onClick={() => onViewModeSelect('PRESETS')} className={viewMode === 'PRESETS' ? 'active' : 'inactive'}>
                         Preset Codice
                     </button>
-                    {/* Nuovo pulsante per ABAP Doc */}
                     <button onClick={() => onViewModeSelect('ABAP_DOC')} className={viewMode === 'ABAP_DOC' ? 'active' : 'inactive'}>
                         ABAP Doc
+                    </button>
+                    <button
+                        className={`nav-button ${viewMode === 'BADIS' ? 'active' : ''}`}
+                        onClick={() => onViewModeSelect('BADIS')}
+                    >
+                        BADI
+                    </button>
+                    {/* NUOVI PULSANTI PER SMARTFORMS E ADOBE FORMS */}
+                    <button onClick={() => onViewModeSelect('SMARTFORMS')} className={viewMode === 'SMARTFORMS' ? 'active' : 'inactive'}>
+                        Smartforms
+                    </button>
+                    <button onClick={() => onViewModeSelect('ADOBEFORMS')} className={viewMode === 'ADOBEFORMS' ? 'active' : 'inactive'}>
+                        Adobe Forms
                     </button>
                 </div>
             </nav>
 
             {/* 2. BARRA DEI FILTRI: APPARE CONTESTUALMENTE */}
-            {/* I filtri appaiono per TABLES, BAPIS, CDS e ABAP_DOC */}
-            {(viewMode === 'TABLES' || viewMode === 'BAPIS' || viewMode === 'CDS' || viewMode === 'ABAP_DOC') && (
+            {/* AGGIORNA LA CONDIZIONE PER INCLUDERE SMARTFORMS E ADOBE FORMS */}
+            {(viewMode === 'TABLES' || viewMode === 'BAPIS' || viewMode === 'CDS' || viewMode === 'ABAP_DOC' || viewMode === 'BADIS' || viewMode === 'SMARTFORMS' || viewMode === 'ADOBEFORMS') && (
                 <div className="filter-bar">
                     {/* Filtro per Modulo */}
                     <div className="filter-group">
@@ -65,8 +77,7 @@ const Navbar = ({
                             value={currentModule}
                             onChange={handleModuleChange}
                             className="filter-select"
-                            // Disabilita il filtro modulo se la modalità non lo richiede (es. ABAP_DOC se non ha moduli)
-                            disabled={viewMode === 'ABAP_DOC'}
+                            disabled={viewMode === 'ABAP_DOC'} // ABAP_DOC è l'unico che non ha moduli nel dropdown
                         >
                             {(modules || []).map(moduleKey => (
                                 <option key={moduleKey} value={moduleKey}>
@@ -77,7 +88,6 @@ const Navbar = ({
                     </div>
 
                     {/* Filtro per Sottogruppo (solo per le Tabelle e CDS Views) */}
-                    {/* Presumiamo che solo TABLES e CDS abbiano sottogruppi */}
                     {(viewMode === 'TABLES' || viewMode === 'CDS') && subgroups && subgroups.length > 0 && (
                         <div className="filter-group">
                             <label htmlFor="subgroup-select">Sottogruppo</label>
