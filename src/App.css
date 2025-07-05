@@ -1,4 +1,4 @@
-/* Layout Principale */
+/* Layout Principale - FIX per sidebar */
 .app-layout {
   display: flex;
   flex-direction: column;
@@ -7,10 +7,12 @@
   background-color: #f1f5f9; /* slate-100 */
 }
 
+/* FIX PRINCIPALE: Main view senza overflow hidden */
 .main-view {
   display: flex;
   flex: 1;
-  overflow: hidden; /* Evita doppio scrollbar */
+  /* RIMUOVERE: overflow: hidden; che taglia la sidebar */
+  min-height: 0; /* Permette il flex corretto */
 }
 
 /* Navbar & Sub-Navbar Container */
@@ -104,34 +106,126 @@
   font-weight: 600;
 }
 
-/* Main Content Area */
+/* FIX: Main Content Area - overflow solo quando necessario */
 .main-content {
   flex-grow: 1;
   padding: 1rem;
   overflow-y: auto;
+  /* FIX: Assicura che non interferisca con la sidebar */
+  position: relative;
+  height: 100%;
+  box-sizing: border-box;
 }
-.details-view, .welcome-view { animation: fadeIn 0.4s ease-out; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* FIX: Container per evitare conflitti layout */
+.main-content-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.details-view, .welcome-view { 
+  animation: fadeIn 0.4s ease-out; 
+  flex: 1;
+  min-height: 0;
+}
+
+@keyframes fadeIn { 
+  from { opacity: 0; transform: translateY(10px); } 
+  to { opacity: 1; transform: translateY(0); } 
+}
 
 /* Dettagli Tabella e BAPI */
-.details-header-card { background-color: white; padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); margin-bottom: 2rem; }
-.details-header-card h2 { font-size: 1.875rem; font-weight: 700; color: #2563eb; margin: 0; }
-.details-header-card p { font-size: 1rem; color: #475569; margin-top: 0.25rem; }
-.details-header-card h3 { font-size: 0.875rem; font-weight: 600; color: #334155; margin: 0; }
-.details-header-card .keys { font-size: 0.875rem; font-family: monospace; color: #64748b; margin-top: 0.25rem; }
+.details-header-card { 
+  background-color: white; 
+  padding: 1.5rem; 
+  border-radius: 0.75rem; 
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); 
+  margin-bottom: 2rem; 
+}
 
-.related-tables-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
-.related-card { background-color: white; padding: 1rem; border-radius: 0.5rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); transition: all 0.2s ease-in-out; }
-.related-card.selectable:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); cursor: pointer; }
+.details-header-card h2 { 
+  font-size: 1.875rem; 
+  font-weight: 700; 
+  color: #2563eb; 
+  margin: 0; 
+}
+
+.details-header-card p { 
+  font-size: 1rem; 
+  color: #475569; 
+  margin-top: 0.25rem; 
+}
+
+.details-header-card h3 { 
+  font-size: 0.875rem; 
+  font-weight: 600; 
+  color: #334155; 
+  margin: 0; 
+}
+
+.details-header-card .keys { 
+  font-size: 0.875rem; 
+  font-family: monospace; 
+  color: #64748b; 
+  margin-top: 0.25rem; 
+}
+
+.related-tables-grid { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); 
+  gap: 1rem; 
+}
+
+.related-card { 
+  background-color: white; 
+  padding: 1rem; 
+  border-radius: 0.5rem; 
+  border: 1px solid #e2e8f0; 
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); 
+  transition: all 0.2s ease-in-out; 
+}
+
+.related-card.selectable:hover { 
+  transform: translateY(-4px); 
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); 
+  cursor: pointer; 
+}
 
 /* Welcome View */
-.welcome-view { display: flex; justify-content: center; align-items: flex-start; text-align: center; padding-top: 2rem; }
-.chart-container { position: relative; height: 24rem; width: 100%; max-width: 56rem; margin: auto; }
+.welcome-view { 
+  display: flex; 
+  justify-content: center; 
+  align-items: flex-start; 
+  text-align: center; 
+  padding-top: 2rem; 
+}
+
+.chart-container { 
+  position: relative; 
+  height: 24rem; 
+  width: 100%; 
+  max-width: 56rem; 
+  margin: auto; 
+}
 
 /* BAPI Details */
-.prose { line-height: 1.6; }
-.prose ul { list-style: disc; padding-left: 1.5rem; }
-.prose code { background-color: #f1f5f9; padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-size: 0.875rem; }
+.prose { 
+  line-height: 1.6; 
+}
+
+.prose ul { 
+  list-style: disc; 
+  padding-left: 1.5rem; 
+}
+
+.prose code { 
+  background-color: #f1f5f9; 
+  padding: 0.2rem 0.4rem; 
+  border-radius: 0.25rem; 
+  font-size: 0.875rem; 
+}
 
 /* Preset Code View */
 .preset-code-container {
@@ -275,10 +369,10 @@
   }
 }
 
+/* FIX MOBILE: Layout corretto per mobile */
 @media (max-width: 768px) {
-  .main-view {
-    flex-direction: column;
-  }
+  /* NON forzare flex-direction column per main-view */
+  /* Lasciare che la sidebar gestisca il suo stato mobile */
   
   .main-nav-filters {
     flex-wrap: wrap;
@@ -325,6 +419,16 @@
   .report-content th, .report-content td {
     padding: 0.5rem;
   }
+  
+  /* FIX: Main content con margine per sidebar mobile */
+  .main-content {
+    padding: 1rem;
+    /* Su mobile, quando sidebar è aperta, aggiunge margine */
+  }
+  
+  .main-content.sidebar-open {
+    margin-left: 0; /* La sidebar è overlay, non sposta il contenuto */
+  }
 }
 
 @media (max-width: 480px) {
@@ -363,5 +467,32 @@
   
   .module-context {
     padding: 0.75rem;
+  }
+}
+
+/* FIX EXTRA: Assicura che la sidebar non sia compressa */
+.sidebar {
+  flex-shrink: 0 !important; /* Impedisce la compressione */
+}
+
+/* FIX: Overlay per mobile quando sidebar è aperta */
+.mobile-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: none;
+}
+
+.mobile-overlay.active {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .mobile-overlay.active {
+    display: block;
   }
 }

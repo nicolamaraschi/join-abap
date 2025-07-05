@@ -13,7 +13,8 @@ import { content as cl_salv_gui_table_ida } from './presets/cl_salv_gui_table_id
 import { content as cl_abap_format } from './presets/cl_abap_format.jsx';
 import { content as popup_get_value } from './presets/popup_get_value.jsx';
 import { content as popup_with_table_display } from './presets/popup_with_table_display.jsx';
-
+import { content as cl_gui_alv_grid2 } from './presets/cl_gui_alv_grid2.jsx';
+import { content as reuse_alv_popup_to_select } from './presets/reuse_alv_popup_to_select.jsx';
 export const codePresets = [
   {
     id: 'EXCEL_TO_ABAP',
@@ -89,7 +90,19 @@ export const codePresets = [
     id: 'popup_with_table_display',
     title: 'metodo popup_with_table_display',
     content: popup_with_table_display
+  },
+  {
+    id: 'cl_gui_alv_grid2',
+    title: 'cl_gui_alv_grid ma in una dympro',
+    content: cl_gui_alv_grid2
+  },
+  {
+    id: 'reuse_alv_popup_to_select',
+    title: 'reuse_alv_popup_to_select ossia alv dentro pop up senza dympro',
+    content: reuse_alv_popup_to_select
   }
 ];
+
+
 
 

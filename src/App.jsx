@@ -17,34 +17,102 @@ import { adobeformData } from './modules/AdobeformData.jsx';
 
 import './App.css';
 
+// Inserisci questo codice in src/App.jsx, sostituendo la vecchia funzione parseTableData
+
+// Inserisci questo codice in src/App.jsx, sostituendo la vecchia funzione parseTableData
+
+// Inserisci questo codice in src/App.jsx, sostituendo la funzione parseTableData esistente
+
 const parseTableData = (text) => {
-    const lines = text.split('\n'); let currentModule = null; let currentSubModule = null; let currentTable = null; const sapData = {}; const allTables = []; const moduleNames = {};
-    const moduleRegex = /^###\s*Modulo\s*(.*?)\s*\((.*?)\)/; const subModuleRegex = /^####\s*(.*)/; const tableRegex = /^\*\*(.*?)\s*(\(.*\))?\*\*/;
-    const keysRegex = /^\*\s*Chiavi Primarie:\s*`(.*?)`/; const descRegex = /^\*\s*Descrizione:\s*(.*)/; const joinRegex = /^\s{2,}\*\s*\*(.*?)\*\*.*:\s*su\s*`(.*?)`/;
+    const lines = text.split('\n');
+    let currentModule = null;
+    let currentSubModule = null;
+    let currentTable = null;
+    const sapData = {};
+    const allTables = [];
+    const moduleNames = {};
+
+    const moduleRegex = /^###\s*Modulo\s*(.*?)\s*\((.*?)\)/;
+    const subModuleRegex = /^####\s*(.*)/;
+    const tableRegex = /^\*\*(.*?)\s*(\(.*\))?\*\*/;
+    const keysRegex = /^\*\s*Chiavi Primarie:\s*`(.*?)`/;
+    const descRegex = /^\*\s*Descrizione:\s*(.*)/;
+    const joinRegex = /^\s{2,}\*\s*(Possibili Join:|)\s*\*\*(.*?)\*\*\s*.*:\s*su\s*`(.*?)`/;
+
+    // FASE 1: Lettura e creazione degli oggetti tabella base
     for (const line of lines) {
-        if (line.trim() === '') continue; let match;
-        match = line.match(moduleRegex); if (match) { const fullName = match[1].trim(); const abbreviation = match[2].trim(); currentModule = abbreviation; if (!sapData[currentModule]) { sapData[currentModule] = {}; moduleNames[abbreviation] = fullName; } currentSubModule = "Generale"; currentTable = null; continue; }
-        match = line.match(subModuleRegex); if (match && currentModule) { currentSubModule = match[1].trim(); currentTable = null; continue; }
-        match = line.match(tableRegex); if (match && currentModule) { const tableName = match[1].trim(); const tableDesc = match[2] ? match[2].replace(/[()]/g, '').trim() : ''; currentTable = { name: tableName, description: tableDesc, module: currentModule, subModule: currentSubModule, primaryKeys: [], joins: [] }; sapData[currentModule][tableName] = currentTable; allTables.push(currentTable); continue; }
+        if (line.trim() === '') continue;
+        let match;
+
+        if ((match = line.match(moduleRegex))) {
+            const [, fullName, abbreviation] = match;
+            currentModule = abbreviation.trim();
+            if (!sapData[currentModule]) {
+                sapData[currentModule] = {};
+                moduleNames[currentModule] = fullName.trim();
+            }
+            currentSubModule = "Generale";
+            currentTable = null;
+            continue;
+        }
+
+        if ((match = line.match(subModuleRegex))) {
+            currentSubModule = match[1].trim();
+            currentTable = null;
+            continue;
+        }
+
+        if ((match = line.match(tableRegex))) {
+            const tableName = match[1].trim();
+            const tableDesc = match[2] ? match[2].replace(/[()]/g, '').trim() : '';
+            currentTable = { name: tableName, description: tableDesc, module: currentModule, subModule: currentSubModule, primaryKeys: [], joins: [] };
+            sapData[currentModule][tableName] = currentTable;
+            allTables.push(currentTable);
+            continue;
+        }
+
         if (currentTable) {
-            match = line.match(descRegex); if (match) { currentTable.description = match[1].trim(); continue; }
-            match = line.match(keysRegex); if (match) { currentTable.primaryKeys = match[1].split(',').map(k => k.trim().replace(/`/g, '')); continue; }
-            match = line.match(joinRegex); if (match) { const targetTable = match[1].trim(); const joinKeys = match[2].split(',').map(k => k.trim().replace(/`/g, '')); currentTable.joins.push({ table: targetTable, on: joinKeys }); }
+            if ((match = line.match(descRegex))) {
+                currentTable.description = match[1].trim();
+                continue;
+            }
+            if ((match = line.match(keysRegex))) {
+                currentTable.primaryKeys = match[1].split(',').map(k => k.trim().replace(/`/g, ''));
+                continue;
+            }
+            if ((match = line.match(joinRegex))) {
+                const targetTable = match[2].trim();
+                const joinKeys = match[3].split(',').map(k => k.trim().replace(/`/g, ''));
+                currentTable.joins.push({ table: targetTable, on: joinKeys });
+            }
         }
     }
-    Object.values(sapData).forEach(moduleContent => {
-        Object.values(moduleContent).forEach(table => {
-            if (table.joins) {
-                const resolvedJoins = [];
-                table.joins.forEach(join => {
-                    let target = null;
-                    for (const moduleKey in sapData) { if (sapData[moduleKey] && sapData[moduleKey][join.table]) { target = sapData[moduleKey][join.table]; break; } }
-                    if (target) resolvedJoins.push({ table: target, on: join.on });
-                });
-                table.joins = resolvedJoins;
-            }
-        });
+
+    // FASE 2: Risoluzione dei join con creazione di segnaposto
+    allTables.forEach(table => {
+        if (table.joins && table.joins.length > 0) {
+            const resolvedJoins = [];
+            table.joins.forEach(join => {
+                const target = allTables.find(t => t.name === join.table);
+                if (target) {
+                    // Se la tabella di destinazione esiste, crea il link normale
+                    resolvedJoins.push({ table: target, on: join.on });
+                } else {
+                    // --- NUOVA LOGICA ---
+                    // Se la tabella di destinazione NON esiste, crea un oggetto segnaposto
+                    const dummyTarget = {
+                        name: join.table,
+                        description: 'Definizione non trovata.',
+                        primaryKeys: [],
+                        joins: []
+                    };
+                    resolvedJoins.push({ table: dummyTarget, on: join.on });
+                }
+            });
+            table.joins = resolvedJoins;
+        }
     });
+
     return { sapData, allTables, moduleNames };
 };
 

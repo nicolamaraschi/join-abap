@@ -28,7 +28,7 @@ Il metodo FACTORY permette di specificare dove e come l'ALV verrà visualizzato,
 * **Visualizzazione basata su Container:** Per integrare uno o più ALV all'interno di una singola schermata (dynpro), è necessario passare un riferimento a un oggetto container (ad esempio, un'istanza di CL_GUI_CUSTOM_CONTAINER o CL_GUI_SPLITTER_CONTAINER) al parametro r_container del metodo FACTORY.
 * **Visualizzazione come Lista Classica:** Impostando il parametro list_display a if_salv_c_bool_sap=>true, l'output assume l'aspetto di un report ABAP classico basato su istruzioni WRITE.
 
----
+
 
 Sezione 2: Padroneggiare la Configurazione delle Colonne con CL_SALV_COLUMNS_TABLE
 ------------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ La manipolazione delle colonne segue un processo a due passaggi:
 | set_cell_type       | CL_SALV_COLUMN_TABLE     | Cambia la visualizzazione della cella in un hotspot, pulsante o checkbox.             |
 | set_ddic_reference  | CL_SALV_COLUMN           | Collega la colonna a un campo del DDIC per ereditarne le proprietà (es. aiuto F4).      |
 
----
+
 
 Sezione 3: Implementazione delle Operazioni Standard sui Dati ALV
 --------------------------------------------------------------------
