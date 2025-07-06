@@ -798,39 +798,132 @@ export const transactionData = {
           }
         ]
       },
-  abap: {
-    introduction: {
-      title: "Guida alle Transazioni ABAP",
-      content: "Questa sezione elenca le transazioni ABAP più comuni e utili per lo sviluppo e la manutenzione nel sistema SAP."
-    },
-    modules: [
-      {
-        id: "DEV",
-        name: "Sviluppo ABAP",
-        introduction: "Transazioni essenziali per gli sviluppatori ABAP.",
-        transactions: [
-          { tCode: "SE38", description: "Editor ABAP", status: "Valido", notes: "Per la scrittura e l'esecuzione di programmi ABAP." },
-          { tCode: "SE80", description: "Object Navigator", status: "Valido", notes: "Ambiente di sviluppo integrato per oggetti ABAP." },
-          { tCode: "SE24", description: "Class Builder", status: "Valido", notes: "Per la creazione e gestione di classi e interfacce ABAP." },
-          { tCode: "SE37", description: "Function Builder", status: "Valido", notes: "Per la creazione e gestione di moduli funzione." },
-          { tCode: "SE11", description: "ABAP Dictionary", status: "Valido", notes: "Per la gestione di tabelle, viste, tipi di dati." },
-          { tCode: "SE09", description: "Transport Organizer", status: "Valido", notes: "Per la gestione delle richieste di trasporto." },
-          { tCode: "SE16N", description: "Data Browser", status: "Valido", notes: "Per la visualizzazione del contenuto delle tabelle." },
-          { tCode: "SM30", description: "Manutenzione Viste", status: "Valido", notes: "Per la manutenzione dei dati di customizing." },
-          { tCode: "ST22", description: "ABAP Dump Analysis", status: "Valido", notes: "Per l'analisi degli errori di runtime ABAP." },
-          { tCode: "SM13", description: "Update Records", status: "Valido", notes: "Per il monitoraggio dei processi di aggiornamento." },
-          { tCode: "SPRO", description: "Customizing (IMG)", status: "Valido", notes: "Punto di accesso per la configurazione del sistema." },
-          { tCode: "SMARTFORMS", description: "Smart Forms Builder", status: "Valido", notes: "Per la creazione e gestione di Smart Forms." },
-          { tCode: "SFP", description: "Adobe Forms Workbench", status: "Valido", notes: "Per la creazione e gestione di Adobe Forms." },
-          { tCode: "SWO1", description: "Business Object Builder", status: "Valido", notes: "Per la gestione dei Business Object (Workflow)." },
-          { tCode: "SWDD", description: "Workflow Builder", status: "Valido", notes: "Per la creazione e gestione dei workflow SAP." },
-          { tCode: "SICF", description: "Maintain Services (HTTP/HTTPS)", status: "Valido", notes: "Per attivare e configurare i servizi web in SAP." },
-          { tCode: "SRAL", description: "Service Registry", status: "Valido", notes: "Per registrare e gestire i servizi OData." },
-          { tCode: "LSMW", description: "Legacy System Migration Workbench", status: "Valido", notes: "Strumento per la migrazione dati da sistemi legacy." },
-          { tCode: "SQVI", description: "QuickViewer", status: "Valido", notes: "Per creare query rapide su tabelle e viste." },
-          { tCode: "ABAPHELP", description: "ABAP Keyword Documentation", status: "Valido", notes: "Documentazione della sintassi ABAP." }
-        ]
+      "abap": {
+        "introduction": {
+          "title": "Guida di Riferimento alle Transazioni SAP per il Programmatore ABAP",
+          "content": "Questa guida fornisce un riferimento completo sulle transazioni SAP (T-code) e gli strumenti moderni (ADT) per il programmatore ABAP, basata su un'analisi dettagliata che confronta l'approccio classico con quello moderno."
+        },
+        "modules": [
+          {
+            "id": "DEV_WORKBENCH",
+            "name": "Il Cuore dell'ABAP Workbench",
+            "introduction": "Il punto di accesso centrale e gli editor fondamentali per la programmazione ABAP in ambiente SAP GUI.",
+            "transactions": [
+              { "tCode": "SE80", "description": "Object Navigator", "notes": "Punto di accesso centrale e integrato all'ABAP Workbench. Offre una vista gerarchica di tutti gli oggetti di sviluppo correlati (programmi, classi, etc.)." },
+              { "tCode": "SE38", "description": "ABAP Editor", "notes": "Creazione e manutenzione di programmi ABAP, inclusi report eseguibili, module pool e include. Gestisce codice sorgente, varianti e text element." },
+              { "tCode": "SE24", "description": "Class Builder", "notes": "Fulcro dello sviluppo Object-Oriented. Permette di creare, modificare, documentare e testare classi e interfacce globali." },
+              { "tCode": "SE37", "description": "Function Builder", "notes": "Ambiente per la gestione di moduli funzione e gruppi di funzioni, definendo l'interfaccia e la logica riutilizzabile." }
+            ]
+          },
+          {
+            "id": "DATA_DICTIONARY",
+            "name": "ABAP Dictionary (DDIC)",
+            "introduction": "Transazioni per la definizione, l'ispezione e la manutenzione delle strutture dati e dei metadati.",
+            "transactions": [
+              { "tCode": "SE11", "description": "ABAP Dictionary", "notes": "Punto di accesso centrale per creare e manutenere tutti gli oggetti del dizionario dati: tabelle, viste, domini, data element, search help, lock object." },
+              { "tCode": "SE16 / SE16N", "description": "Data Browser", "notes": "Strumento di ispezione e debugging indispensabile per visualizzare rapidamente il contenuto di qualsiasi tabella trasparente." },
+              { "tCode": "SM30", "description": "Table Maintenance Generator", "notes": "Utilizzata per accedere ed eseguire i dialoghi di manutenzione generati per le tabelle custom, permettendo di inserire, modificare e cancellare record." },
+              { "tCode": "SQVI", "description": "QuickViewer", "notes": "Permette di creare rapidamente query semplici su tabelle e viste senza la necessità di scrivere un programma completo." }
+            ]
+          },
+          {
+            "id": "ENHANCEMENTS",
+            "name": "Framework di Enhancement",
+            "introduction": "Strumenti per estendere le funzionalità standard di SAP in modo strutturato e controllato.",
+            "transactions": [
+              { "tCode": "SMOD", "description": "SAP Enhancement Management", "notes": "Libreria per visualizzare le definizioni dei Customer Exits (function, screen, menu exits) messi a disposizione da SAP." },
+              { "tCode": "CMOD", "description": "Project Management of SAP Enhancements", "notes": "Utilizzata per implementare i Customer Exits trovati in SMOD, raggruppandoli in progetti di enhancement." },
+              { "tCode": "SE18", "description": "BAdI Builder - Definizioni", "notes": "Utilizzata per visualizzare le definizioni dei Business Add-Ins (BAdI), che sono interfacce ABAP per l'estensione object-oriented." },
+              { "tCode": "SE19", "description": "BAdI Builder - Implementazioni", "notes": "Utilizzata per creare e gestire le implementazioni dei BAdI, scrivendo la logica custom in classi che implementano l'interfaccia del BAdI." },
+              { "tCode": "SE84", "description": "Repository Information System", "notes": "Potente strumento di ricerca per navigare nel repository, indispensabile per trovare punti di estensione come BAdI e Customer Exits." }
+            ]
+          },
+          {
+            "id": "ANALYSIS_DEBUG",
+            "name": "Analisi, Debugging e Ottimizzazione",
+            "introduction": "Suite di strumenti diagnostici per garantire la qualità, stabilità ed efficienza del codice.",
+            "transactions": [
+              { "tCode": "ST22", "description": "ABAP Dump Analysis", "notes": "Strumento fondamentale per l'analisi post-mortem degli errori di runtime (short dump), fornendo dettagli su punto del codice, call stack e variabili." },
+              { "tCode": "SLG1", "description": "Application Log: Display Logs", "notes": "Visualizza i log applicativi scritti intenzionalmente dagli sviluppatori, cruciale per il monitoraggio di processi in background." },
+              { "tCode": "SAT", "description": "ABAP Runtime Analysis", "notes": "Strumento principale per l'analisi delle performance del codice ABAP, misurando i tempi di esecuzione per identificare gli 'hotspot'." },
+              { "tCode": "ST05", "description": "Performance Trace", "notes": "Si focalizza sull'interazione con il database (SQL Trace) per ottimizzare le query, verificare l'uso degli indici e ridurre il carico sul DB." },
+              { "tCode": "SCI", "description": "Code Inspector", "notes": "Strumento di analisi statica del codice per verificare la conformità a best practice di performance, sicurezza e sintassi prima del rilascio." },
+              { "tCode": "SLIN", "description": "Extended Program Check", "notes": "Fornisce un controllo sintattico più approfondito rispetto all'editor standard; molte sue funzionalità sono ora nel Code Inspector." },
+              { "tCode": "SM13", "description": "Update Records", "notes": "Permette di visualizzare e gestire i record di aggiornamento (update records), utile per diagnosticare problemi nei processi di salvataggio." }
+            ]
+          },
+          {
+            "id": "UI_SERVICES",
+            "name": "Interfacce Utente e Servizi",
+            "introduction": "Strumenti per la creazione di UI classiche (Dynpro, Forms) e l'esposizione di servizi moderni (OData).",
+            "transactions": [
+              { "tCode": "SE51", "description": "Screen Painter", "notes": "Editor visuale per la progettazione del layout delle schermate Dynpro e della relativa logica di flusso (flow logic)." },
+              { "tCode": "SE41", "description": "Menu Painter", "notes": "Utilizzato per creare gli status GUI: barre dei menu, barre degli strumenti e assegnazioni dei tasti funzione." },
+              { "tCode": "SE71", "description": "SAPscript Form Painter", "notes": "Editor per SAPscript, la tecnologia più datata per la creazione di modulistica stampata." },
+              { "tCode": "SMARTFORMS", "description": "Smart Forms Builder", "notes": "Successore di SAPscript, offre un editor più grafico e una migliore separazione tra logica e layout per la modulistica." },
+              { "tCode": "SFP", "description": "Adobe Forms Workbench", "notes": "Strumento per la creazione e la gestione di moduli interattivi e stampabili basati sulla tecnologia Adobe Document Services (ADS)." },
+              { "tCode": "SEGW", "description": "SAP Gateway Service Builder", "notes": "Strumento di modellazione per creare e manutenere servizi OData, generando le classi MPC/DPC per l'implementazione." },
+              { "tCode": "SICF", "description": "Maintain Services (HTTP/HTTPS)", "notes": "Attiva e configura i servizi web nel framework ICF, necessario per eseguire applicazioni Web Dynpro, BSP e servizi OData." }
+            ]
+          },
+          {
+            "id": "TRANSPORT",
+            "name": "Gestione e Distribuzione Sviluppi",
+            "introduction": "Transazioni per governare il ciclo di vita del software attraverso il Change and Transport System (CTS).",
+            "transactions": [
+              { "tCode": "SE09 / SE10", "description": "Transport Organizer", "notes": "Punto di accesso al CTS per creare, gestire, documentare e rilasciare ordini di trasporto (Workbench e Customizing)." },
+              { "tCode": "SE93", "description": "Transaction Maintenance", "notes": "Utilizzata per creare e manutenere i codici di transazione (T-code) che fungono da punto di accesso per programmi e applicazioni." }
+            ]
+          },
+          {
+            "id": "UTILITIES",
+            "name": "Transazioni di Utilità e Interfacce",
+            "introduction": "Strumenti per compiti specifici come la gestione di intervalli numerici, IDoc, workflow e migrazione dati.",
+            "transactions": [
+              { "tCode": "SNRO", "description": "Number Range Object Maintenance", "notes": "Transazione di sviluppo per definire oggetti di intervallo numerico e le loro proprietà (lunghezza, buffering)." },
+              { "tCode": "WE19", "description": "IDoc Test Tool", "notes": "Strumento indispensabile per testare l'elaborazione di IDoc, permettendo di creare e inviare IDoc al sistema." },
+              { "tCode": "WE02 / WE05", "description": "IDoc List", "notes": "Visualizzatori di log per cercare e analizzare gli IDoc processati, controllarne lo stato e i dati." },
+              { "tCode": "LSMW", "description": "Legacy System Migration Workbench", "notes": "Potente strumento per la migrazione di dati da sistemi legacy a SAP, supportando vari metodi di caricamento e logiche di conversione custom." },
+              { "tCode": "SWO1", "description": "Business Object Builder", "notes": "Utilizzata per creare e gestire i Tipi di Oggetto di Business (Business Object Types), elementi centrali del SAP Workflow." },
+              { "tCode": "SWDD", "description": "Workflow Builder", "notes": "Ambiente di sviluppo grafico per la creazione, modifica e test dei modelli di workflow." },
+              { "tCode": "ABAPHELP", "description": "ABAP Keyword Documentation", "notes": "Fornisce accesso diretto alla documentazione ufficiale della sintassi e dei comandi del linguaggio ABAP." }
+            ]
+          }
+        ],
+        "classicVsModern": {
+          "introduction": "Confronto tra gli strumenti di sviluppo classici (T-code) e l'approccio moderno basato su ABAP Development Tools (ADT) in Eclipse, necessario per sfruttare le capacità di SAP HANA e del cloud.",
+          "comparison": [
+            {
+              "task": "Definizione Vista Dati",
+              "classicTool": "SE11 (Database/Projection View)",
+              "modernTool": "ADT (DDL Source Editor)",
+              "modernArtifact": "Core Data Services (CDS) View"
+            },
+            {
+              "task": "Logica di Accesso al DB",
+              "classicTool": "SE38 (Open SQL)",
+              "modernTool": "ADT (AMDP Method in Class Editor)",
+              "modernArtifact": "ABAP Managed Database Procedure (AMDP)"
+            },
+            {
+              "task": "Esposizione Servizio API",
+              "classicTool": "SEGW (Gateway Service Builder)",
+              "modernTool": "ADT (Service Definition/Binding)",
+              "modernArtifact": "OData Service (ABAP RESTful Model)"
+            },
+            {
+              "task": "Creazione Programma",
+              "classicTool": "SE38 (ABAP Editor in GUI)",
+              "modernTool": "ADT (ABAP Source Code Editor)",
+              "modernArtifact": "Programma ABAP"
+            },
+            {
+              "task": "Creazione Classe",
+              "classicTool": "SE24 (Class Builder in GUI)",
+              "modernTool": "ADT (ABAP Class Editor)",
+              "modernArtifact": "Classe ABAP"
+            }
+          ]
+        }
       }
-    ]
-  }
 };
