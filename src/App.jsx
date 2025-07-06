@@ -14,6 +14,7 @@ import { abapDocData } from './modules/doc_abap/AbapDocData.jsx';
 import { badiData } from './modules/BadiData.jsx';
 import { smartformData } from './modules/SmartformData.jsx';
 import { adobeformData } from './modules/AdobeformData.jsx';
+import { fioriPresetsData } from './modules/FioriPresetsData.jsx';
 
 import './App.css';
 
@@ -142,7 +143,8 @@ function App() {
         findSmartformFunc,
         findAdobeformFunc,
         findBadiFunc,
-        findAbapDocFunc
+        findAbapDocFunc,
+        fioriPresetData, // Aggiunto
     } = useMemo(() => {
         const tables = parseTableData(tableDataRaw);
         const bapis = bapiData;
@@ -221,6 +223,11 @@ function App() {
         const findAbapDocFunc = (id) => id ? abapDocs.find(d => d.id === id) : null;
         const docs = { all: abapDocs, find: findAbapDocFunc };
 
+        const fioriPresets = {
+            all: fioriPresetsData,
+            find: (id) => id ? fioriPresetsData.find(p => p.id === id) : null
+        };
+
         return {
             tableData: { all: tables.allTables, modules: tableModuleList, names: tableDisplayNames, subgroups: subgroupsMap, find: findTableFunc },
             bapiDataPrepared: { all: bapis, modules: bapiModuleList, names: bapiDisplayNames, find: findBapiFunc },
@@ -246,7 +253,8 @@ function App() {
             findSmartformFunc,
             findAdobeformFunc,
             findBadiFunc,
-            findAbapDocFunc
+            findAbapDocFunc,
+            fioriPresetData: fioriPresets, // Aggiunto
         };
     }, []);
 
@@ -255,7 +263,7 @@ function App() {
         setSelectedItemName(null);
         setSearchTerm('');
 
-        if (mode === 'TABLES' || mode === 'BAPIS' || mode === 'CDS' || mode === 'ABAP_DOC' || mode === 'BADIS' || mode === 'SMARTFORMS' || mode === 'ADOBEFORMS') {
+        if (mode === 'TABLES' || mode === 'BAPIS' || mode === 'CDS' || mode === 'ABAP_DOC' || mode === 'BADIS' || mode === 'SMARTFORMS' || mode === 'ADOBEFORMS' || mode === 'FIORI_PRESETS') {
             let moduleToSelect = 'All';
             if (mode === 'BAPIS') moduleToSelect = 'All'; 
             else if (mode === 'ABAP_DOC') moduleToSelect = 'All';
@@ -338,6 +346,12 @@ function App() {
         return presetData.all.filter(p => p.title.toLowerCase().includes(searchTerm.toLowerCase()));
     }, [presetData.all, searchTerm, viewMode]);
 
+    const filteredFioriPresets = useMemo(() => {
+        if (viewMode !== 'FIORI_PRESETS') return [];
+        if (!searchTerm) return fioriPresetData.all;
+        return fioriPresetData.all.filter(p => p.title.toLowerCase().includes(searchTerm.toLowerCase()));
+    }, [fioriPresetData.all, searchTerm, viewMode]);
+
     const filteredAbapDocs = useMemo(() => {
         if (viewMode !== 'ABAP_DOC') return [];
         if (!searchTerm) return abapDocPrepared.all;
@@ -349,6 +363,7 @@ function App() {
     const selectedBapi = viewMode === 'BAPIS' ? findBapiFunc(selectedItemName) : null;
     const selectedCds = viewMode === 'CDS' ? findCdsFunc(selectedItemName) : null;
     const selectedPreset = viewMode === 'PRESETS' ? presetData.find(selectedItemName) : null;
+    const selectedFioriPreset = viewMode === 'FIORI_PRESETS' ? fioriPresetData.find(selectedItemName) : null; // Aggiunto
     const selectedAbapDoc = viewMode === 'ABAP_DOC' ? findAbapDocFunc(selectedItemName) : null;
     const selectedBadi = viewMode === 'BADIS' ? findBadiFunc(selectedItemName) : null;
     const selectedSmartform = viewMode === 'SMARTFORMS' ? findSmartformFunc(selectedItemName) : null;
@@ -362,7 +377,8 @@ function App() {
         'ABAP_DOC': ['All'],
         'BADIS': badiDataPrepared.modules,
         'SMARTFORMS': smartformDataPrepared.modules,
-        'ADOBEFORMS': adobeformDataPrepared.modules
+        'ADOBEFORMS': adobeformDataPrepared.modules,
+        'FIORI_PRESETS': ['All'], // Aggiunto
     }[viewMode] || [];
 
     const currentModuleNames = {
@@ -372,7 +388,8 @@ function App() {
         'ABAP_DOC': { 'All': 'Tutte le Docs' },
         'BADIS': badiDataPrepared.names,
         'SMARTFORMS': smartformDisplayNames,
-        'ADOBEFORMS': adobeformDisplayNames
+        'ADOBEFORMS': adobeformDisplayNames,
+        'FIORI_PRESETS': { 'All': 'Tutti i Preset Fiori' }, // Aggiunto
     }[viewMode] || {};
 
     return (
@@ -405,6 +422,7 @@ function App() {
                     badis={filteredBadis}
                     smartforms={filteredSmartforms}
                     adobeforms={filteredAdobeforms}
+                    fioriPresets={filteredFioriPresets} // Aggiunto
                     transactionModules={staticTransactionData.navModules}
                     onSelectItem={setSelectedItemName}
                 />
@@ -414,6 +432,7 @@ function App() {
                     selectedBapi={selectedBapi}
                     selectedCds={selectedCds}
                     selectedPreset={selectedPreset}
+                    selectedFioriPreset={selectedFioriPreset} // Aggiunto
                     selectedAbapDoc={selectedAbapDoc}
                     selectedBadi={selectedBadi}
                     selectedSmartform={selectedSmartform}

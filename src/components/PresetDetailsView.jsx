@@ -1,23 +1,32 @@
+
+
 import React, { useState } from 'react';
 import AbapCode from './AbapCode.jsx';
+import MarkdownRenderer from './MarkdownRenderer.jsx'; // Using MarkdownRenderer for description
 
 const PresetDetailsView = ({ preset }) => {
     const [copyButtonText, setCopyButtonText] = useState('Copia Codice');
 
     if (!preset) return null;
 
-    // La funzione di copia ora gestisce sia stringhe che array di codice
     const handleCopy = () => {
         let codeToCopy = '';
 
-        if (typeof preset.content === 'string') {
+        if (preset.snippets && Array.isArray(preset.snippets)) {
+            // New structure for Fiori presets
+            codeToCopy = preset.snippets.map(snippet =>
+                `/* --- File: ${snippet.title} --- */\n\n${snippet.code}`
+            ).join('\n\n\n');
+        } else if (typeof preset.content === 'string') {
+            // Old structure for single ABAP presets
             codeToCopy = preset.content;
         } else if (Array.isArray(preset.content)) {
-            // Se è un array, unisce tutti i blocchi di codice separandoli con un commento
-            codeToCopy = preset.content.map(item => 
+            // Old structure for multi-part ABAP presets
+            codeToCopy = preset.content.map(item =>
                 `*--------------------------------------------------\n* Esempio: ${item.title}\n*--------------------------------------------------\n\n${item.code}`
             ).join('\n\n\n');
         }
+
 
         if (!codeToCopy) return;
 
@@ -39,9 +48,31 @@ const PresetDetailsView = ({ preset }) => {
         setTimeout(() => setCopyButtonText('Copia Codice'), 2000);
     };
 
-    // Funzione per renderizzare il contenuto in modo flessibile
     const renderContent = () => {
-        // Se il contenuto è un array, mappa ogni elemento
+        // New structure with description and snippets
+        if (preset.snippets) {
+            return (
+                <>
+                    {preset.description && (
+                        <div className="prose" style={{maxWidth: '100%', marginBottom: '2rem'}}>
+                             <MarkdownRenderer text={preset.description} />
+                        </div>
+                    )}
+                    {preset.snippets.map((snippet, index) => (
+                        <div key={index} className="code-example-block" style={{ marginBottom: '2rem' }}>
+                            <h4 style={{ fontSize: '1.2rem', fontWeight: '600', marginBottom: '1rem', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem' }}>
+                                {snippet.title}
+                            </h4>
+                            <div className="preset-code-container">
+                                <AbapCode code={snippet.code} />
+                            </div>
+                        </div>
+                    ))}
+                </>
+            );
+        }
+
+        // Fallback for old structure (ABAP presets)
         if (Array.isArray(preset.content)) {
             return preset.content.map((item, index) => (
                 <div key={index} className="code-example-block" style={{ marginBottom: '2rem' }}>
@@ -54,8 +85,7 @@ const PresetDetailsView = ({ preset }) => {
                 </div>
             ));
         }
-        
-        // Altrimenti, se è una stringa, renderizza come prima
+
         if (typeof preset.content === 'string') {
             return (
                 <div className="preset-code-container">
@@ -75,7 +105,7 @@ const PresetDetailsView = ({ preset }) => {
                     {copyButtonText}
                 </button>
             </div>
-            
+
             {renderContent()}
 
         </div>

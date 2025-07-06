@@ -62,12 +62,15 @@ const Navbar = ({
                     <button onClick={() => onViewModeSelect('ADOBEFORMS')} className={viewMode === 'ADOBEFORMS' ? 'active' : 'inactive'}>
                         Adobe Forms
                     </button>
+                    <button onClick={() => onViewModeSelect('FIORI_PRESETS')} className={viewMode === 'FIORI_PRESETS' ? 'active' : 'inactive'}>
+                        Preset Fiori
+                    </button>
                 </div>
             </nav>
 
             {/* 2. BARRA DEI FILTRI: APPARE CONTESTUALMENTE */}
             {/* AGGIORNA LA CONDIZIONE PER INCLUDERE SMARTFORMS E ADOBE FORMS */}
-            {(viewMode === 'TABLES' || viewMode === 'BAPIS' || viewMode === 'CDS' || viewMode === 'ABAP_DOC' || viewMode === 'BADIS' || viewMode === 'SMARTFORMS' || viewMode === 'ADOBEFORMS') && (
+            {(viewMode === 'TABLES' || viewMode === 'BAPIS' || viewMode === 'CDS' || viewMode === 'ABAP_DOC' || viewMode === 'BADIS' || viewMode === 'SMARTFORMS' || viewMode === 'ADOBEFORMS' || viewMode === 'FIORI_PRESETS') && (
                 <div className="filter-bar">
                     {/* Filtro per Modulo */}
                     <div className="filter-group">

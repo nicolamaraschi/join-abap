@@ -18,6 +18,7 @@ const MainContent = ({
     selectedBapi,
     selectedCds, // Assicurati di ricevere selectedCds come prop
     selectedPreset,
+    selectedFioriPreset, // Aggiunto
     selectedAbapDoc,
     selectedBadi,
     selectedSmartform, // Nuovo prop per Smartform
@@ -39,6 +40,10 @@ const MainContent = ({
             case 'PRESETS':
                 return selectedPreset
                     ? <PresetDetailsView preset={selectedPreset} />
+                    : <WelcomeView isPresetMode={true} />;
+            case 'FIORI_PRESETS': // Aggiunto
+                return selectedFioriPreset
+                    ? <PresetDetailsView preset={selectedFioriPreset} />
                     : <WelcomeView isPresetMode={true} />;
             case 'CDS': // <--- Modificato da 'CDS_DOCS' a 'CDS'
                 return <CdsDocumentationView cdsDoc={selectedCds} />; // <--- Passa selectedCds a CdsDocumentationView

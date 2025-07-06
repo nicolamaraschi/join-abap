@@ -20,6 +20,7 @@ const Sidebar = ({
   bapis,
   cdsViews, // Assicurati che questa prop sia ricevuta (conterrà il documento overview da App.jsx)
   presets,
+  fioriPresets, // Aggiunto
   abapDocs,
   badis,
   smartforms,
@@ -49,6 +50,7 @@ const Sidebar = ({
       case 'BADIS': return "Cerca BADI...";
       case 'SMARTFORMS': return "Cerca Smartform...";
       case 'ADOBEFORMS': return "Cerca Adobe Form...";
+      case 'FIORI_PRESETS': return "Cerca preset Fiori..."; // Aggiunto
       default: return "Cerca...";
     }
   };
@@ -64,6 +66,8 @@ const Sidebar = ({
         return <CdsList cdsDocs={cdsViews} onSelectCdsDoc={onSelectItem} />;
       case 'PRESETS':
         return <PresetList presets={presets} onSelectPreset={onSelectItem} />;
+      case 'FIORI_PRESETS': // Aggiunto
+        return <PresetList presets={fioriPresets} onSelectPreset={onSelectItem} />;
       case 'ABAP_DOC':
         return <AbapDocList docs={abapDocs} onSelectDoc={onSelectItem} />;
       case 'BADIS':
