@@ -25,8 +25,11 @@ const Sidebar = ({
   badis,
   smartforms,
   adobeforms,
+  cdsPresets, // Aggiunto
   transactionModules,
-  onSelectItem
+  onSelectItem,
+  cdsSubMode, // Aggiunto
+  onCdsSubModeChange, // Aggiunto
 }) => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -46,7 +49,7 @@ const Sidebar = ({
       case 'PRESETS': return "Cerca preset...";
       case 'ABAP_DOC': return "Cerca documentazione...";
       case 'TRANSACTIONS': return "Navigazione Report Transazioni";
-      case 'CDS': return "Cerca CDS..."; // <--- Modificato da 'CDS_DOCS' a 'CDS' e aggiornato placeholder
+      case 'CDS': return "Cerca in CDS..."; // Aggiornato placeholder
       case 'BADIS': return "Cerca BADI...";
       case 'SMARTFORMS': return "Cerca Smartform...";
       case 'ADOBEFORMS': return "Cerca Adobe Form...";
@@ -61,9 +64,30 @@ const Sidebar = ({
         return <TableList tables={tables} onSelectTable={onSelectItem} />;
       case 'BAPIS':
         return <BapiList bapis={bapis} onSelectBapi={onSelectItem} />;
-      case 'CDS': // <--- Modificato da 'CDS_DOCS' a 'CDS'
-        // Ora renderizza CdsList e gli passa i cdsViews (il documento overview) e onSelectItem
-        return <CdsList cdsDocs={cdsViews} onSelectCdsDoc={onSelectItem} />;
+      case 'CDS':
+        return (
+          <>
+            <div className="cds-view-selector">
+              <button
+                onClick={() => onCdsSubModeChange('docs')}
+                className={cdsSubMode === 'docs' ? 'active' : ''}
+              >
+                Documentazione
+              </button>
+              <button
+                onClick={() => onCdsSubModeChange('presets')}
+                className={cdsSubMode === 'presets' ? 'active' : ''}
+              >
+                Preset Codice
+              </button>
+            </div>
+            {cdsSubMode === 'docs' ? (
+              <CdsList cdsDocs={cdsViews} onSelectCdsDoc={onSelectItem} />
+            ) : (
+              <PresetList presets={cdsPresets} onSelectPreset={onSelectItem} />
+            )}
+          </>
+        );
       case 'PRESETS':
         return <PresetList presets={presets} onSelectPreset={onSelectItem} />;
       case 'FIORI_PRESETS': // Aggiunto

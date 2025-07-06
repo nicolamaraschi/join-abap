@@ -15,6 +15,7 @@ import { badiData } from './modules/BadiData.jsx';
 import { smartformData } from './modules/SmartformData.jsx';
 import { adobeformData } from './modules/AdobeformData.jsx';
 import { fioriPresetsData } from './modules/FioriPresetsData.jsx';
+import { cdsPresetsData } from './modules/CdsPresetsData.jsx';
 
 import './App.css';
 
@@ -123,6 +124,7 @@ function App() {
     const [selectedItemName, setSelectedItemName] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedSubgroup, setSelectedSubgroup] = useState('All');
+    const [cdsSubMode, setCdsSubMode] = useState('docs'); // 'docs' o 'presets'
 
     const {
         tableData,
@@ -145,6 +147,7 @@ function App() {
         findBadiFunc,
         findAbapDocFunc,
         fioriPresetData, // Aggiunto
+        cdsPresetData, // Aggiunto
     } = useMemo(() => {
         const tables = parseTableData(tableDataRaw);
         const bapis = bapiData;
@@ -232,6 +235,14 @@ function App() {
             find: (id) => id ? fioriPresetsData.find(p => p.id === id) : null
         };
 
+        const cdsPresets = {
+            all: cdsPresetsData,
+            find: (id) => id ? cdsPresetsData.find(p => p.id === id) : null
+        };
+
+        console.log('cdsPresetsData (imported array):', cdsPresetsData);
+        console.log('cdsPresets (prepared object):', cdsPresets);
+
         return {
             tableData: { all: tables.allTables, modules: tableModuleList, names: tableDisplayNames, subgroups: subgroupsMap, find: findTableFunc },
             bapiDataPrepared: { all: bapis, modules: bapiModuleList, names: bapiDisplayNames, find: findBapiFunc },
@@ -259,6 +270,7 @@ function App() {
             findBadiFunc,
             findAbapDocFunc,
             fioriPresetData: fioriPresets, // Aggiunto
+            cdsPresetData: cdsPresets, // Aggiunto
         };
     }, []);
 
@@ -365,7 +377,8 @@ function App() {
 
     const selectedTable = viewMode === 'TABLES' ? findTableFunc(selectedItemName) : null;
     const selectedBapi = viewMode === 'BAPIS' ? findBapiFunc(selectedItemName) : null;
-    const selectedCds = viewMode === 'CDS' ? findCdsFunc(selectedItemName) : null;
+    const selectedCds = viewMode === 'CDS' && cdsSubMode === 'docs' ? findCdsFunc(selectedItemName) : null;
+    const selectedCdsPreset = viewMode === 'CDS' && cdsSubMode === 'presets' ? cdsPresetData.find(selectedItemName) : null;
     const selectedPreset = viewMode === 'PRESETS' ? presetData.find(selectedItemName) : null;
     const selectedFioriPreset = viewMode === 'FIORI_PRESETS' ? fioriPresetData.find(selectedItemName) : null; // Aggiunto
     const selectedAbapDoc = viewMode === 'ABAP_DOC' ? findAbapDocFunc(selectedItemName) : null;
@@ -426,8 +439,11 @@ function App() {
                     badis={filteredBadis}
                     smartforms={filteredSmartforms}
                     adobeforms={filteredAdobeforms}
-                    fioriPresets={filteredFioriPresets} // Aggiunto
+                    fioriPresets={filteredFioriPresets}
+                    cdsPresets={cdsPresetData.all} // Aggiunto
                     transactionModules={staticTransactionData.navModules}
+                    cdsSubMode={cdsSubMode} // Aggiunto
+                    onCdsSubModeChange={setCdsSubMode} // Aggiunto
                     onSelectItem={setSelectedItemName}
                 />
                 <MainContent
@@ -435,6 +451,7 @@ function App() {
                     selectedTable={selectedTable}
                     selectedBapi={selectedBapi}
                     selectedCds={selectedCds}
+                    selectedCdsPreset={selectedCdsPreset} // Aggiunto
                     selectedPreset={selectedPreset}
                     selectedFioriPreset={selectedFioriPreset} // Aggiunto
                     selectedAbapDoc={selectedAbapDoc}
@@ -443,6 +460,7 @@ function App() {
                     selectedAdobeform={selectedAdobeform}
                     transactionData={staticTransactionData}
                     allTables={tableData.all}
+                    cdsSubMode={cdsSubMode} // Aggiunto
                     onSelectTable={setSelectedItemName}
                 />
             </div>

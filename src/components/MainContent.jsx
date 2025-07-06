@@ -16,16 +16,18 @@ const MainContent = ({
     viewMode,
     selectedTable,
     selectedBapi,
-    selectedCds, // Assicurati di ricevere selectedCds come prop
+    selectedCds,
+    selectedCdsPreset, // Aggiunto
     selectedPreset,
-    selectedFioriPreset, // Aggiunto
+    selectedFioriPreset,
     selectedAbapDoc,
     selectedBadi,
-    selectedSmartform, // Nuovo prop per Smartform
-    selectedAdobeform, // Nuovo prop per Adobe Form
+    selectedSmartform,
+    selectedAdobeform,
     transactionData,
     allTables,
-    onSelectTable
+    onSelectTable,
+    cdsSubMode, // Aggiunto
 }) => {
     const renderContent = () => {
         switch (viewMode) {
@@ -41,12 +43,21 @@ const MainContent = ({
                 return selectedPreset
                     ? <PresetDetailsView preset={selectedPreset} />
                     : <WelcomeView isPresetMode={true} />;
-            case 'FIORI_PRESETS': // Aggiunto
+            case 'FIORI_PRESETS':
                 return selectedFioriPreset
                     ? <PresetDetailsView preset={selectedFioriPreset} />
                     : <WelcomeView isPresetMode={true} />;
-            case 'CDS': // <--- Modificato da 'CDS_DOCS' a 'CDS'
-                return <CdsDocumentationView cdsDoc={selectedCds} />; // <--- Passa selectedCds a CdsDocumentationView
+            case 'CDS':
+                if (cdsSubMode === 'docs') {
+                    return selectedCds
+                        ? <CdsDocumentationView cdsDoc={selectedCds} />
+                        : <WelcomeView isCdsMode={true} />;
+                } else if (cdsSubMode === 'presets') {
+                    return selectedCdsPreset
+                        ? <PresetDetailsView preset={selectedCdsPreset} />
+                        : <WelcomeView isCdsPresetMode={true} />;
+                }
+                return <WelcomeView />;
             case 'ABAP_DOC':
                 return selectedAbapDoc
                     ? <AbapDocDetailsView doc={selectedAbapDoc} />
