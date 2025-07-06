@@ -374,6 +374,79 @@ function App() {
         return abapDocPrepared.all.filter(d => d.title.toLowerCase().includes(searchTerm.toLowerCase()));
     }, [abapDocPrepared.all, searchTerm, viewMode]);
 
+    const filteredTransactions = useMemo(() => {
+        if (viewMode !== 'TRANSACTIONS') return [];
+        const term = searchTerm.toLowerCase();
+
+        let allTransactions = [];
+
+        // Process Fiori transactions (nested under submodules)
+        staticTransactionData.fiori.modules.forEach(module => {
+            module.submodules.forEach(submodule => {
+                submodule.transactions.forEach(tx => {
+                    allTransactions.push({ ...tx, moduleId: module.id, submoduleId: submodule.id, type: 'fiori' });
+                });
+            });
+        });
+
+        // Process GUI transactions (directly under modules)
+        staticTransactionData.gui.modules.forEach(module => {
+            module.transactions.forEach(tx => {
+                allTransactions.push({ ...tx, moduleId: module.id, type: 'gui' });
+            });
+        });
+
+        // Process ABAP transactions (directly under modules)
+        staticTransactionData.abap.modules.forEach(module => {
+            module.transactions.forEach(tx => {
+                allTransactions.push({ ...tx, moduleId: module.id, type: 'abap' });
+            });
+        });
+
+        const filtered = allTransactions.filter(tx => {
+            if (!searchTerm) return true; // If no search term, include all
+
+            // Fiori transactions
+            if (tx.type === 'fiori') {
+                return (
+                    (tx.process && tx.process.toLowerCase().includes(term)) ||
+                    (tx.appName && tx.appName.toLowerCase().includes(term)) ||
+                    (tx.appId && tx.appId.toLowerCase().includes(term)) ||
+                    (tx.tCode && tx.tCode.toLowerCase().includes(term)) ||
+                    (tx.purpose && tx.purpose.toLowerCase().includes(term))
+                );
+            }
+            // GUI/ABAP transactions
+            return (
+                (tx.tCode && tx.tCode.toLowerCase().includes(term)) ||
+                (tx.description && tx.description.toLowerCase().includes(term)) ||
+                (tx.notes && tx.notes.toLowerCase().includes(term))
+            );
+        });
+
+        // Format the filtered results for TransactionNavList
+        return filtered.map(tx => {
+            let uniqueId;
+            let displayName;
+
+            if (tx.type === 'fiori') {
+                uniqueId = `${tx.moduleId}-${tx.submoduleId}-${tx.appId || tx.tCode}`;
+                displayName = tx.appName ? `${tx.appName} (${tx.appId || tx.tCode})` : `${tx.process} (${tx.tCode})`;
+            } else { // gui or abap
+                uniqueId = `${tx.moduleId}-${tx.tCode}`;
+                displayName = `${tx.tCode} - ${tx.description}`;
+            }
+
+            return {
+                id: uniqueId,
+                name: displayName,
+                originalModuleId: tx.moduleId,
+                transactionDetails: tx
+            };
+        });
+
+    }, [staticTransactionData, searchTerm, viewMode]);
+
 
     const selectedTable = viewMode === 'TABLES' ? findTableFunc(selectedItemName) : null;
     const selectedBapi = viewMode === 'BAPIS' ? findBapiFunc(selectedItemName) : null;
@@ -441,7 +514,7 @@ function App() {
                     adobeforms={filteredAdobeforms}
                     fioriPresets={filteredFioriPresets}
                     cdsPresets={cdsPresetData.all} // Aggiunto
-                    transactionModules={staticTransactionData.navModules}
+                    transactionModules={filteredTransactions}
                     cdsSubMode={cdsSubMode} // Aggiunto
                     onCdsSubModeChange={setCdsSubMode} // Aggiunto
                     onSelectItem={setSelectedItemName}
