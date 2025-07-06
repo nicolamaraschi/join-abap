@@ -140,7 +140,7 @@ export const transactionData = {
       },
     ],
   },
- // Nuovi dati per le transazioni SAP GUI
+  // Nuovi dati per le transazioni SAP GUI
   "gui": {
     "introduction": {
       "title": "Guida alle Transazioni SAP GUI in S/4HANA",
@@ -667,6 +667,168 @@ export const transactionData = {
             "status": "Valido",
             "notes": "Reinvio documenti elettronici in errore."
           }
+        ]
+      },
+      {
+            "id": "ABAP",
+            "name": "Transazioni ABAP",
+            "introduction": "Transazioni SAP GUI essenziali per lo sviluppo e la manutenzione di programmi ABAP.",
+            "transactions": [
+              {
+                "tCode": "SE38",
+                "description": "Editor ABAP (Programmi, Report)",
+                "status": "Valido",
+                "notes": "Ambiente principale per scrivere e gestire il codice ABAP."
+              },
+              {
+                "tCode": "SE80",
+                "description": "Object Navigator (Programmi, Classi, Funzioni, Dynpro)",
+                "status": "Valido",
+                "notes": "Strumento integrato per la gestione di tutti gli oggetti di sviluppo ABAP."
+              },
+              {
+                "tCode": "SE24",
+                "description": "Class Builder (Classi e Interfacce ABAP)",
+                "status": "Valido",
+                "notes": "Per la creazione e gestione di classi e interfacce ABAP Objects."
+              },
+              {
+                "tCode": "SE37",
+                "description": "Function Builder (Moduli Funzione)",
+                "status": "Valido",
+                "notes": "Per la creazione e gestione di moduli funzione e gruppi di funzioni."
+              },
+              {
+                "tCode": "SE11",
+                "description": "ABAP Dictionary (Tabelle, Viste, Tipi)",
+                "status": "Valido",
+                "notes": "Per la gestione degli oggetti del dizionario dati ABAP."
+              },
+              {
+                "tCode": "SE09",
+                "description": "Transport Organizer (Richieste di Trasporto)",
+                "status": "Valido",
+                "notes": "Per la gestione delle richieste di trasporto (Workbench e Customizing)."
+              },
+              {
+                "tCode": "SE16N",
+                "description": "Data Browser (Visualizzazione Dati Tabella)",
+                "status": "Valido",
+                "notes": "Per visualizzare il contenuto di qualsiasi tabella SAP."
+              },
+              {
+                "tCode": "SM30",
+                "description": "Manutenzione Viste (Customizing)",
+                "status": "Valido",
+                "notes": "Per la manutenzione dei dati di customizing tramite viste."
+              },
+              {
+                "tCode": "ST22",
+                "description": "ABAP Dump Analysis (Analisi Errori Runtime)",
+                "status": "Valido",
+                "notes": "Per analizzare i dump (errori di runtime) dei programmi ABAP."
+              },
+              {
+                "tCode": "SM13",
+                "description": "Update Records (Monitoraggio Aggiornamenti)",
+                "status": "Valido",
+                "notes": "Per monitorare e gestire i processi di aggiornamento del database."
+              },
+              {
+                "tCode": "SPRO",
+                "description": "Customizing (Guida Implementazione)",
+                "status": "Valido",
+                "notes": "Punto di accesso principale per la configurazione del sistema SAP."
+              },
+              {
+                "tCode": "SMARTFORMS",
+                "description": "Smart Forms Builder",
+                "status": "Valido",
+                "notes": "Per la creazione e gestione di Smart Forms."
+              },
+              {
+                "tCode": "SFP",
+                "description": "Adobe Forms Workbench",
+                "status": "Valido",
+                "notes": "Per la creazione e gestione di Adobe Forms."
+              },
+              {
+                "tCode": "SWO1",
+                "description": "Business Object Builder",
+                "status": "Valido",
+                "notes": "Per la gestione dei Business Object (Workflow)."
+              },
+              {
+                "tCode": "SWDD",
+                "description": "Workflow Builder",
+                "status": "Valido",
+                "notes": "Per la creazione e gestione dei workflow SAP."
+              },
+              {
+                "tCode": "SICF",
+                "description": "Maintain Services (HTTP/HTTPS)",
+                "status": "Valido",
+                "notes": "Per attivare e configurare i servizi web (HTTP/HTTPS) in SAP."
+              },
+              {
+                "tCode": "SRAL",
+                "description": "Service Registry",
+                "status": "Valido",
+                "notes": "Per registrare e gestire i servizi OData e altri servizi."
+              },
+              {
+                "tCode": "LSMW",
+                "description": "Legacy System Migration Workbench",
+                "status": "Valido",
+                "notes": "Strumento per la migrazione dati da sistemi legacy."
+              },
+              {
+                "tCode": "SQVI",
+                "description": "QuickViewer (Query Semplici)",
+                "status": "Valido",
+                "notes": "Per creare query rapide su tabelle e viste."
+              },
+              {
+                "tCode": "ABAPHELP",
+                "description": "ABAP Keyword Documentation",
+                "status": "Valido",
+                "notes": "Documentazione della sintassi ABAP."
+              }
+            ]
+          }
+        ]
+      },
+  abap: {
+    introduction: {
+      title: "Guida alle Transazioni ABAP",
+      content: "Questa sezione elenca le transazioni ABAP più comuni e utili per lo sviluppo e la manutenzione nel sistema SAP."
+    },
+    modules: [
+      {
+        id: "DEV",
+        name: "Sviluppo ABAP",
+        introduction: "Transazioni essenziali per gli sviluppatori ABAP.",
+        transactions: [
+          { tCode: "SE38", description: "Editor ABAP", status: "Valido", notes: "Per la scrittura e l'esecuzione di programmi ABAP." },
+          { tCode: "SE80", description: "Object Navigator", status: "Valido", notes: "Ambiente di sviluppo integrato per oggetti ABAP." },
+          { tCode: "SE24", description: "Class Builder", status: "Valido", notes: "Per la creazione e gestione di classi e interfacce ABAP." },
+          { tCode: "SE37", description: "Function Builder", status: "Valido", notes: "Per la creazione e gestione di moduli funzione." },
+          { tCode: "SE11", description: "ABAP Dictionary", status: "Valido", notes: "Per la gestione di tabelle, viste, tipi di dati." },
+          { tCode: "SE09", description: "Transport Organizer", status: "Valido", notes: "Per la gestione delle richieste di trasporto." },
+          { tCode: "SE16N", description: "Data Browser", status: "Valido", notes: "Per la visualizzazione del contenuto delle tabelle." },
+          { tCode: "SM30", description: "Manutenzione Viste", status: "Valido", notes: "Per la manutenzione dei dati di customizing." },
+          { tCode: "ST22", description: "ABAP Dump Analysis", status: "Valido", notes: "Per l'analisi degli errori di runtime ABAP." },
+          { tCode: "SM13", description: "Update Records", status: "Valido", notes: "Per il monitoraggio dei processi di aggiornamento." },
+          { tCode: "SPRO", description: "Customizing (IMG)", status: "Valido", notes: "Punto di accesso per la configurazione del sistema." },
+          { tCode: "SMARTFORMS", description: "Smart Forms Builder", status: "Valido", notes: "Per la creazione e gestione di Smart Forms." },
+          { tCode: "SFP", description: "Adobe Forms Workbench", status: "Valido", notes: "Per la creazione e gestione di Adobe Forms." },
+          { tCode: "SWO1", description: "Business Object Builder", status: "Valido", notes: "Per la gestione dei Business Object (Workflow)." },
+          { tCode: "SWDD", description: "Workflow Builder", status: "Valido", notes: "Per la creazione e gestione dei workflow SAP." },
+          { tCode: "SICF", description: "Maintain Services (HTTP/HTTPS)", status: "Valido", notes: "Per attivare e configurare i servizi web in SAP." },
+          { tCode: "SRAL", description: "Service Registry", status: "Valido", notes: "Per registrare e gestire i servizi OData." },
+          { tCode: "LSMW", description: "Legacy System Migration Workbench", status: "Valido", notes: "Strumento per la migrazione dati da sistemi legacy." },
+          { tCode: "SQVI", description: "QuickViewer", status: "Valido", notes: "Per creare query rapide su tabelle e viste." },
+          { tCode: "ABAPHELP", description: "ABAP Keyword Documentation", status: "Valido", notes: "Documentazione della sintassi ABAP." }
         ]
       }
     ]

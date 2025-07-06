@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './ReportView.css';
 
 const ReportView = ({ data }) => {
-    const [view, setView] = useState('fiori'); // 'fiori' o 'gui'
+    const [view, setView] = useState('fiori'); // 'fiori', 'gui' o 'abap'
 
     // Controllo di sicurezza per assicurarsi che i dati e le loro proprietà esistano
     if (!data || !data.fiori || !data.gui) {
@@ -99,6 +99,43 @@ const ReportView = ({ data }) => {
         </>
     );
 
+    const renderAbapView = () => (
+        <>
+            <div className="report-introduction">
+                <h1>{data.abap.introduction.title}</h1>
+                <p>{data.abap.introduction.content}</p>
+            </div>
+            {data.abap.modules.map(module => (
+                <section key={`abap-${module.id}`} id={`module-section-${module.id}`} className="module-section">
+                    <h2>{module.name}</h2>
+                    <p className="module-context">{module.introduction}</p>
+                    <div className="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>T-Code</th>
+                                    <th>Descrizione</th>
+                                    <th>Stato</th>
+                                    <th>Note</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {module.transactions.map((tx, index) => (
+                                    <tr key={index}>
+                                        <td><strong>{tx.tCode}</strong></td>
+                                        <td>{tx.description}</td>
+                                        <td>{tx.status}</td>
+                                        <td>{tx.notes}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            ))}
+        </>
+    );
+
     return (
         <div className="details-view">
             <div className="view-selector">
@@ -108,9 +145,12 @@ const ReportView = ({ data }) => {
                 <button onClick={() => setView('gui')} className={view === 'gui' ? 'active' : ''}>
                     Transazioni GUI
                 </button>
+                <button onClick={() => setView('abap')} className={view === 'abap' ? 'active' : ''}>
+                    Transazioni ABAP
+                </button>
             </div>
             <div className="report-content prose">
-                {view === 'fiori' ? renderFioriView() : renderGuiView()}
+                {view === 'fiori' ? renderFioriView() : (view === 'gui' ? renderGuiView() : renderAbapView())}
             </div>
         </div>
     );

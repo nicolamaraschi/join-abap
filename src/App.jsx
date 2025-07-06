@@ -219,7 +219,11 @@ function App() {
             find: (id) => id ? codePresets.find(p => p.id === id) : null
         };
 
-        const transactionModules = transactionData.fiori.modules.map(m => ({ id: m.id, name: m.name }));
+        const transactionModules = [
+            ...transactionData.fiori.modules.map(m => ({ id: m.id, name: m.name })),
+            ...transactionData.gui.modules.map(m => ({ id: m.id, name: m.name })),
+            ...transactionData.abap.modules.map(m => ({ id: m.id, name: m.name }))
+        ];
         const findAbapDocFunc = (id) => id ? abapDocs.find(d => d.id === id) : null;
         const docs = { all: abapDocs, find: findAbapDocFunc };
 
