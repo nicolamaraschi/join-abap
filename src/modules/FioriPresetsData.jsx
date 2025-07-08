@@ -2,6 +2,7 @@
 import { content as listReportContent } from './presets/fiori/FioriListReportView.jsx';
 import { content as objectPageContent } from './presets/fiori/FioriObjectPageView.jsx';
 import { content as controllerContent } from './presets/fiori/FioriController.jsx';
+import { content as testContent } from './presets/fiori/FioriTest.jsx';
 
 export const fioriPresetsData = [
   {
@@ -20,6 +21,17 @@ export const fioriPresetsData = [
       {
         title: 'Base.controller.js',
         code: controllerContent
+      }
+    ]
+  },
+  {
+    id: 'FIORI_TEST_PRESET',
+    title: 'Fiori Test Preset',
+    description: 'Questo è un preset di test per Fiori.',
+    snippets: [
+      {
+        title: 'Test.view.xml',
+        code: testContent
       }
     ]
   }

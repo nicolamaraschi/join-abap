@@ -6,12 +6,18 @@ import { content as docClSalvTableContent } from './DocClSalvTable.jsx';
 import { content as docClSalvHierseqTableContent } from './DocClSalvHierseqTable.jsx';
 import { content as docReuseAlvContent } from './DocReuseAlv.jsx';
 import { content as docAbapEvolutionContent } from './DocAbapEvolution.jsx';
+import { content as compilerIssuesContent } from './CompilerIssues.jsx';
 
 // IMPORT CORRETTO PER DYNPRO: USA LE PARENTESI GRAFFE
 import { content as docdympro } from './Dynpro.jsx';
 import { content as docbabi} from './Bapi.jsx';
 
 export const abapDocData = [
+  {
+    id: 'COMPILER_ISSUES',
+    title: 'Problemi Compilatore ABAP',
+    content: compilerIssuesContent,
+  },
   {
     id: 'DOC_ABAP_EVOLUTION',
     title: 'Guida: Evoluzione ABAP da ECC a S/4HANA',
