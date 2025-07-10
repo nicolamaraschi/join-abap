@@ -132,71 +132,121 @@ DATA:
   gs_fp_outputparams TYPE sfpoutputparams,
   gs_fp_docparams    TYPE sfpdocparams,
   gs_fp_formoutput   TYPE fpformoutput,
-  g_except           TYPE REF TO cx_root.
+  gv_pdf_xstring     TYPE xstring,
+  go_cx_root         TYPE REF TO cx_root,
+  gv_messaggio_errore TYPE string.
 
 START-OF-SELECTION.
 
-  " 1. Impostare i parametri di output
-  gs_fp_outputparams-getpdf   = 'X'. " Richiede il PDF come xstring
-  gs_fp_outputparams-nodialog = 'X'. " Sopprime la finestra di dialogo di stampa
+  " 1. Impostare i parametri di output per ottenere il PDF come xstring
+  gs_fp_outputparams-getpdf   = abap_true.
+  gs_fp_outputparams-nodialog = abap_true.
 
-  " 2. Aprire il job di stampa
-  CALL FUNCTION 'FP_JOB_OPEN'
-    CHANGING
-      ie_outputparams = gs_fp_outputparams
-    EXCEPTIONS
-      OTHERS          = 4.
-  IF sy-subrc <> 0.
-    " Gestione errore
-    RETURN.
-  ENDIF.
+  TRY.
+      " 2. Aprire il job di stampa
+      CALL FUNCTION 'FP_JOB_OPEN'
+        CHANGING
+          ie_outputparams = gs_fp_outputparams.
+      IF sy-subrc <> 0.
+        MESSAGE 'Errore durante l''apertura del job di stampa (FP_JOB_OPEN).' TYPE 'E'.
+        LEAVE PROGRAM.
+      ENDIF.
 
-  " 3. Ottenere il nome del function module generato dinamicamente
-  CALL FUNCTION 'FP_FUNCTION_MODULE_NAME'
-    EXPORTING
-      i_name     = 'Z_FRM_CUSTOMER_SHEET'
-    IMPORTING
-      e_funcname = gv_fm_name
-    EXCEPTIONS
-      OTHERS     = 3.
-  IF sy-subrc <> 0.
-    " Gestione errore
-    RETURN.
-  ENDIF.
+      " 3. Ottenere il nome del function module del form
+      CALL FUNCTION 'FP_FUNCTION_MODULE_NAME'
+        EXPORTING
+          i_name     = 'Z_FRM_CUSTOMER_SHEET'
+        IMPORTING
+          e_funcname = gv_fm_name.
+      IF sy-subrc <> 0.
+        MESSAGE 'Impossibile trovare il function module per il form Z_FRM_CUSTOMER_SHEET.' TYPE 'E'.
+        LEAVE PROGRAM.
+      ENDIF.
 
-  " 4. Chiamare il function module del form, passando i parametri dell'interfaccia
-  CALL FUNCTION gv_fm_name
-    EXPORTINGS
-      im_customer_id = p_cust
-    IMPORTING
-      /1bcdwb/formoutput = gs_fp_formoutput
-    EXCEPTIONS
-      usage_error    = 1
-      system_error   = 2
-      internal_error = 3.
-  IF sy-subrc <> 0.
-    " Gestione errore
-    RETURN.
-  ENDIF.
+      " 4. Chiamare il function module del form
+      CALL FUNCTION gv_fm_name
+        EXPORTING
+          im_customer_id   = p_cust
+        IMPORTING
+          /1bcdwb/formoutput = gs_fp_formoutput
+        EXCEPTIONS
+          usage_error      = 1
+          system_error     = 2
+          internal_error   = 3.
+      IF sy-subrc <> 0.
+        MESSAGE 'Errore durante la generazione del modulo Adobe Form.' TYPE 'E'.
+        LEAVE PROGRAM.
+      ENDIF.
 
-  " 5. Chiudere il job di stampa
-  CALL FUNCTION 'FP_JOB_CLOSE'
-    EXCEPTIONS
-      OTHERS = 4.
-  IF sy-subrc <> 0.
-    " Gestione errore
-  ENDIF.
+      " 5. Chiudere il job di stampa
+      CALL FUNCTION 'FP_JOB_CLOSE'.
+      IF sy-subrc <> 0.
+        MESSAGE 'Avviso: errore durante la chiusura del job di stampa.' TYPE 'W'.
+      ENDIF.
+
+    CATCH cx_root INTO go_cx_root.
+      gv_messaggio_errore = go_cx_root->get_text( ).
+      MESSAGE gv_messaggio_errore TYPE 'E'.
+      LEAVE PROGRAM.
+  ENDTRY.
+
 
   " 6. Visualizzare il PDF
-  " Il PDF è ora nella variabile gs_fp_formoutput-pdf (tipo xstring)
-  " Si può usare la classe cl_gui_frontend_services per salvarlo o cl_wd_runtime_services per visualizzarlo in Web Dynpro.
-  " Per un semplice test, si può usare la classe cl_document_bcs per inviarlo via email o salvarlo.
-  " Per la visualizzazione diretta, il metodo più semplice è usare un visualizzatore di PDF.
-  cl_gui_frontend_services=>show_document(
-    exporting
-      document_url = gs_fp_formoutput-pdf
-      document_format = 'PDF'
-  ).
+  gv_pdf_xstring = gs_fp_formoutput-pdf.
+
+  IF gv_pdf_xstring IS NOT INITIAL.
+    DATA: lv_percorso_file TYPE string,
+          lv_percorso      TYPE string,
+          lv_nome_file     TYPE string,
+          lt_pdf_solix     TYPE solix_tab. " Tabella per dati binari
+
+    " Crea un nome file univoco
+    CONCATENATE 'scheda_cliente_' p_cust '.pdf' INTO lv_nome_file.
+
+    " Ottiene il percorso completo per il file temporaneo
+    " *** CORREZIONE 1: Usato il parametro corretto 'temp_dir' ***
+    CALL METHOD cl_gui_frontend_services=>get_temp_directory
+      CHANGING
+        temp_dir = lv_percorso
+      EXCEPTIONS
+        OTHERS   = 4.
+    IF sy-subrc <> 0.
+      MESSAGE 'Impossibile determinare la directory temporanea.' TYPE 'E'.
+      LEAVE PROGRAM.
+    ENDIF.
+
+    CONCATENATE lv_percorso '\' lv_nome_file INTO lv_percorso_file.
+
+    " *** CORREZIONE 2: Convertire XSTRING in una tabella per GUI_DOWNLOAD ***
+    lt_pdf_solix = cl_bcs_convert=>xstring_to_solix( iv_xstring = gv_pdf_xstring ).
+
+    " Salva il PDF in un file locale usando la tabella di dati binari
+    CALL METHOD cl_gui_frontend_services=>gui_download
+      EXPORTING
+        filename = lv_percorso_file
+        filetype = 'BIN' " Obbligatorio per dati binari
+      CHANGING
+        data_tab = lt_pdf_solix
+      EXCEPTIONS
+        OTHERS   = 24.
+    IF sy-subrc <> 0.
+      MESSAGE 'Errore durante il salvataggio del file PDF temporaneo.' TYPE 'E'.
+      LEAVE PROGRAM.
+    ENDIF.
+
+    " Esegue il file PDF con il visualizzatore predefinito
+    CALL METHOD cl_gui_frontend_services=>execute
+      EXPORTING
+        document = lv_percorso_file
+      EXCEPTIONS
+        OTHERS   = 8.
+    IF sy-subrc <> 0.
+      MESSAGE 'Impossibile aprire il file PDF.' TYPE 'W'.
+    ENDIF.
+
+  ELSE.
+    MESSAGE 'Il modulo Adobe Form non ha restituito un PDF.' TYPE 'W'.
+  ENDIF.
 \`\`\`
 
 ### Padroneggiare i Contenuti Dinamici: Tabelle e Subform che si Adattano
@@ -323,53 +373,130 @@ Questo scenario si concentra specificamente sul meccanismo di invio email, che �
 
 **Codice Esempio:**
 \`\`\`abap
-DATA: lo_send_request TYPE REF TO cl_bcs,
-      lo_document     TYPE REF TO cl_document_bcs,
-      lo_recipient    TYPE REF TO if_recipient_bcs,
-      lt_binary_content TYPE solix_tab,
-      lv_pdf_xstring  TYPE xstring.
+REPORT z_call_customer_form.
 
-"... (lv_pdf_xstring viene popolata dalla chiamata al form)..."
+PARAMETERS: p_cust TYPE kunnr DEFAULT '0000001234'.
 
-" Converti XSTRING in tabella binaria
-CALL FUNCTION 'SCMS_XSTRING_TO_BINARY'
-  EXPORTING
-    buffer        = lv_pdf_xstring
-  IMPORTING
-    output_length = DATA(lv_size)
-  TABLES
-    binary_tab    = lt_binary_content.
+DATA:
+  gv_fm_name         TYPE rs38l_fnam,
+  gs_fp_outputparams TYPE sfpoutputparams,
+  gs_fp_docparams    TYPE sfpdocparams,
+  gs_fp_formoutput   TYPE fpformoutput,
+  gv_pdf_xstring     TYPE xstring,
+  go_cx_root         TYPE REF TO cx_root,
+  gv_messaggio_errore TYPE string.
 
-TRY.
-    " Crea la richiesta di invio
-    lo_send_request = cl_bcs=>create_persistent( ).
+START-OF-SELECTION.
 
-    " Crea il documento con corpo e oggetto
-    lo_document = cl_document_bcs=>create_document(
-      i_type    = 'RAW'
-      i_text    = 'Testo del corpo della mail.'
-      i_subject = 'Oggetto della mail' ).
+  " 1. Impostare i parametri di output per ottenere il PDF come xstring
+  gs_fp_outputparams-getpdf   = abap_true.
+  gs_fp_outputparams-nodialog = abap_true.
 
-    " Aggiungi l'allegato PDF
-    lo_document->add_attachment(
-      i_attachment_type    = 'PDF'
-      i_attachment_subject = 'NomeAllegato.pdf'
-      i_att_content_hex    = lt_binary_content ).
+  TRY.
+      " 2. Aprire il job di stampa
+      CALL FUNCTION 'FP_JOB_OPEN'
+        CHANGING
+          ie_outputparams = gs_fp_outputparams.
+      IF sy-subrc <> 0.
+        MESSAGE 'Errore durante l''apertura del job di stampa (FP_JOB_OPEN).' TYPE 'E'.
+        LEAVE PROGRAM.
+      ENDIF.
 
-    " Imposta il documento nella richiesta
-    lo_send_request->set_document( lo_document ).
+      " 3. Ottenere il nome del function module del form
+      CALL FUNCTION 'FP_FUNCTION_MODULE_NAME'
+        EXPORTING
+          i_name     = 'Z_FRM_CUSTOMER_SHEET'
+        IMPORTING
+          e_funcname = gv_fm_name.
+      IF sy-subrc <> 0.
+        MESSAGE 'Impossibile trovare il function module per il form Z_FRM_CUSTOMER_SHEET.' TYPE 'E'.
+        LEAVE PROGRAM.
+      ENDIF.
 
-    " Crea e aggiungi il destinatario
-    lo_recipient = cl_cam_address_bcs=>create_internet_address( 'destinatario@esempio.com' ).
-    lo_send_request->add_recipient( lo_recipient ).
+      " 4. Chiamare il function module del form
+      CALL FUNCTION gv_fm_name
+        EXPORTING
+          im_customer_id   = p_cust
+        IMPORTING
+          /1bcdwb/formoutput = gs_fp_formoutput
+        EXCEPTIONS
+          usage_error      = 1
+          system_error     = 2
+          internal_error   = 3.
+      IF sy-subrc <> 0.
+        MESSAGE 'Errore durante la generazione del modulo Adobe Form.' TYPE 'E'.
+        LEAVE PROGRAM.
+      ENDIF.
 
-    " Invia l'email
-    lo_send_request->send( i_with_error_screen = 'X' ).
-    COMMIT WORK.
+      " 5. Chiudere il job di stampa
+      CALL FUNCTION 'FP_JOB_CLOSE'.
+      IF sy-subrc <> 0.
+        MESSAGE 'Avviso: errore durante la chiusura del job di stampa.' TYPE 'W'.
+      ENDIF.
 
-  CATCH cx_bcs INTO DATA(lx_bcs).
-    " Gestione errore
-ENDTRY.
+    CATCH cx_root INTO go_cx_root.
+      gv_messaggio_errore = go_cx_root->get_text( ).
+      MESSAGE gv_messaggio_errore TYPE 'E'.
+      LEAVE PROGRAM.
+  ENDTRY.
+
+
+  " 6. Visualizzare il PDF
+  gv_pdf_xstring = gs_fp_formoutput-pdf.
+
+  IF gv_pdf_xstring IS NOT INITIAL.
+    DATA: lv_percorso_file TYPE string,
+          lv_percorso      TYPE string,
+          lv_nome_file     TYPE string,
+          lt_pdf_solix     TYPE solix_tab. " Tabella per dati binari
+
+    " Crea un nome file univoco
+    CONCATENATE 'scheda_cliente_' p_cust '.pdf' INTO lv_nome_file.
+
+    " Ottiene il percorso completo per il file temporaneo
+    " *** CORREZIONE 1: Usato il parametro corretto 'temp_dir' ***
+    CALL METHOD cl_gui_frontend_services=>get_temp_directory
+      CHANGING
+        temp_dir = lv_percorso
+      EXCEPTIONS
+        OTHERS   = 4.
+    IF sy-subrc <> 0.
+      MESSAGE 'Impossibile determinare la directory temporanea.' TYPE 'E'.
+      LEAVE PROGRAM.
+    ENDIF.
+
+    CONCATENATE lv_percorso '\' lv_nome_file INTO lv_percorso_file.
+
+    " *** CORREZIONE 2: Convertire XSTRING in una tabella per GUI_DOWNLOAD ***
+    lt_pdf_solix = cl_bcs_convert=>xstring_to_solix( iv_xstring = gv_pdf_xstring ).
+
+    " Salva il PDF in un file locale usando la tabella di dati binari
+    CALL METHOD cl_gui_frontend_services=>gui_download
+      EXPORTING
+        filename = lv_percorso_file
+        filetype = 'BIN' " Obbligatorio per dati binari
+      CHANGING
+        data_tab = lt_pdf_solix
+      EXCEPTIONS
+        OTHERS   = 24.
+    IF sy-subrc <> 0.
+      MESSAGE 'Errore durante il salvataggio del file PDF temporaneo.' TYPE 'E'.
+      LEAVE PROGRAM.
+    ENDIF.
+
+    " Esegue il file PDF con il visualizzatore predefinito
+    CALL METHOD cl_gui_frontend_services=>execute
+      EXPORTING
+        document = lv_percorso_file
+      EXCEPTIONS
+        OTHERS   = 8.
+    IF sy-subrc <> 0.
+      MESSAGE 'Impossibile aprire il file PDF.' TYPE 'W'.
+    ENDIF.
+
+  ELSE.
+    MESSAGE 'Il modulo Adobe Form non ha restituito un PDF.' TYPE 'W'.
+  ENDIF.
 \`\`\`
 
 ### 7.3 Archiviazione e Compliance: Conservazione a Lungo Termine con Archivelink

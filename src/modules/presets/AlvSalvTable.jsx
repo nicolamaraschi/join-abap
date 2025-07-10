@@ -453,5 +453,147 @@ FORM f_gestisci_ucomm_alv USING iv_ucomm TYPE salv_de_function.
   ENDCASE.
 ENDFORM.
 `
+  },
+  {
+    title: 'Esempio 3: ALV Report con impostazione filtro, impostazioen layout, ordinamento,aggregazione totale, impostazione eventi,e impostazioen generali, cella con semafori',
+    code: ` 
+REPORT z_monoreport_salv_finale.
+
+"----------------------------------------------------------------------
+" SEZIONE 1: TIPI E DATI
+"----------------------------------------------------------------------
+TABLES: vbak.
+
+" La struttura finale include solo il campo per le icone.
+TYPES: BEGIN OF ty_s_report_output,
+         VKORG       TYPE vkorg,
+         VBELN       TYPE vbeln_va,
+         AUDAT       TYPE audat,
+         KUNNR       TYPE kunnr,
+         NAME1       TYPE name1_gp,
+         NETWR       TYPE netwr_ap,
+         WAERK       TYPE waerk,
+         STATUS_ICON TYPE char4,       " Per icone/semafori
+       END OF ty_s_report_output.
+
+DATA: gt_output_data  TYPE STANDARD TABLE OF ty_s_report_output,
+      go_event_handler TYPE REF TO lcl_event_handler.
+
+"----------------------------------------------------------------------
+" SEZIONE 2: CLASSE PER EVENTI
+"----------------------------------------------------------------------
+CLASS lcl_event_handler DEFINITION.
+  PUBLIC SECTION.
+    METHODS: on_double_click FOR EVENT double_click OF cl_salv_events_table IMPORTING row column.
+ENDCLASS.
+
+CLASS lcl_event_handler IMPLEMENTATION.
+  METHOD on_double_click.
+    READ TABLE gt_output_data INDEX row INTO DATA(ls_riga_cliccata).
+    IF sy-subrc = 0.
+      MESSAGE |Hai cliccato sull'ordine: { ls_riga_cliccata-VBELN }| TYPE 'S'.
+    ENDIF.
+  ENDMETHOD.
+ENDCLASS.
+
+"----------------------------------------------------------------------
+" SEZIONE 3: SCHERMATA DI SELEZIONE
+"----------------------------------------------------------------------
+SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE TEXT-001.
+  SELECT-OPTIONS: so_audat FOR vbak-audat OBLIGATORY.
+  PARAMETERS:     p_righe  TYPE i DEFAULT 100.
+SELECTION-SCREEN END OF BLOCK b1.
+
+"----------------------------------------------------------------------
+" SEZIONE 4: LOGICA PRINCIPALE
+"----------------------------------------------------------------------
+START-OF-SELECTION.
+  PERFORM f_leggi_dati.
+  PERFORM f_imposta_icone. " Ora imposta solo le icone
+  PERFORM f_visualizza_alv.
+
+"----------------------------------------------------------------------
+" SEZIONE 5: SUBROUTINES
+"----------------------------------------------------------------------
+FORM f_leggi_dati.
+  SELECT
+    vbak~vkorg, vbak~vbeln, vbak~audat, vbak~kunnr,
+    kna1~name1, vbap~netwr, vbak~waerk
+    FROM vbak
+    INNER JOIN kna1 ON kna1~kunnr = vbak~kunnr
+    INNER JOIN vbap ON vbap~vbeln = vbak~vbeln
+    WHERE vbak~audat IN @so_audat
+      AND vbap~posnr = '000010'
+    INTO CORRESPONDING FIELDS OF TABLE @gt_output_data
+    UP TO @p_righe ROWS.
+ENDFORM.
+
+FORM f_imposta_icone.
+  FIELD-SYMBOLS: <fs_data> LIKE LINE OF gt_output_data.
+  LOOP AT gt_output_data ASSIGNING <fs_data>.
+    " Logica per le icone semaforiche
+    IF <fs_data>-NETWR > 10000.
+      <fs_data>-STATUS_ICON = '@08@'. " Semaforo Verde
+    ELSEIF <fs_data>-NETWR < 500.
+      <fs_data>-STATUS_ICON = '@0A@'. " Semaforo Rosso
+    ELSE.
+      <fs_data>-STATUS_ICON = '@09@'. " Semaforo Giallo
+    ENDIF.
+  ENDLOOP.
+ENDFORM.
+
+FORM f_visualizza_alv.
+  IF gt_output_data IS INITIAL.
+    MESSAGE 'Nessun dato trovato.' TYPE 'I'.
+    RETURN.
+  ENDIF.
+
+  TRY.
+      cl_salv_table=>factory(
+        IMPORTING r_salv_table = DATA(lo_alv)
+        CHANGING  t_table      = gt_output_data ).
+
+      " --- Impostazione Filtro (con valore corretto) ---
+      DATA(lo_filters) = lo_alv->get_filters( ).
+      lo_filters->add_filter( columnname = 'VKORG' sign = 'I' option = 'EQ' low = '2310' ).
+
+      " --- Impostazione Layout ---
+      DATA(lo_layout) = lo_alv->get_layout( ).
+      lo_layout->set_key( VALUE #( report = sy-repid ) ).
+      lo_layout->set_save_restriction( if_salv_c_layout=>restrict_user_dependant ).
+
+      " --- Impostazione Ordinamenti ---
+      DATA(lo_sorts) = lo_alv->get_sorts( ).
+      lo_sorts->add_sort( 'VKORG' ).
+      lo_sorts->add_sort( columnname = 'AUDAT' sequence = if_salv_c_sort=>sort_down ).
+
+      " --- Impostazione Aggregazioni (Totali) ---
+      DATA(lo_aggregations) = lo_alv->get_aggregations( ).
+      lo_aggregations->add_aggregation( 'NETWR' ).
+
+      " --- Impostazione Eventi ---
+      DATA(lo_events) = lo_alv->get_event( ).
+      CREATE OBJECT go_event_handler.
+      SET HANDLER go_event_handler->on_double_click FOR lo_events.
+
+      " --- Impostazioni Generali ---
+      lo_alv->get_functions( )->set_all( abap_true ).
+      lo_alv->get_columns( )->set_optimize( 'X' ).
+      lo_alv->get_display_settings( )->set_list_header( 'Report SALV Finale' ).
+
+      lo_alv->display( ).
+
+    CATCH cx_salv_data_error.
+      MESSAGE 'Errore ALV: Dati o descrizione errati.' TYPE 'E'.
+    CATCH cx_salv_existing.
+      MESSAGE 'Errore ALV: Impostazione già esistente.' TYPE 'E'.
+    CATCH cx_salv_not_found.
+      MESSAGE 'Errore ALV: Oggetto o colonna non trovata.' TYPE 'E'.
+    CATCH cx_salv_msg INTO DATA(lx_salv).
+      MESSAGE lx_salv->get_text( ) TYPE 'E'.
+  ENDTRY.
+ENDFORM.
+    `
+
   }
 ];

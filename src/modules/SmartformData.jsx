@@ -247,7 +247,7 @@ ENDIF.
 **Passo 4: Chiamare lo Smart Form Dinamicamente:** Chiamare il modulo funzione utilizzando il nome della variabile. Passare i dati recuperati nel Passo 2 ai parametri e alle tabelle corrispondenti definiti nella Form Interface.
 \`\`\`abap
 CALL FUNCTION gv_fm_name
-  EXPORTINGS
+  EXPORTING
     is_vbak            = gs_vbak " Struttura singola
   TABLES
     it_vbap            = gt_vbap " Tabella interna
