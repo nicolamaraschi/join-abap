@@ -185,15 +185,22 @@ const MarkdownRenderer = ({ text }) => {
       
       // Codice inline e testo formattato (MIGLIORATO per documentazione tecnica)
       .replace(/`([^`]+)`/g, (match, code) => {
+        // Ripristina i field symbols ABAP prima del processing
+        const restoredCode = code.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+        
+        // Stile speciale per field symbols ABAP
+        if (restoredCode.match(/^<[^>]+>$/)) {
+          return `<code class="bg-purple-100 text-purple-900 px-2 py-1 rounded text-sm font-mono font-semibold border border-purple-200">${restoredCode}</code>`;
+        }
         // Stile speciale per variabili ABAP e codici funzione
-        if (code.match(/^[A-Z][A-Z0-9_]*$/) || code.match(/^gv_|^lv_|^gs_|^gt_/i)) {
-          return `<code class="bg-blue-100 text-blue-900 px-2 py-1 rounded text-sm font-mono font-semibold border border-blue-200">${code}</code>`;
+        if (restoredCode.match(/^[A-Z][A-Z0-9_]*$/) || restoredCode.match(/^gv_|^lv_|^gs_|^gt_/i)) {
+          return `<code class="bg-blue-100 text-blue-900 px-2 py-1 rounded text-sm font-mono font-semibold border border-blue-200">${restoredCode}</code>`;
         }
         // Stile per transazioni SAP
-        if (code.match(/^[A-Z]{2}\d{2}$|^SE\d{2}$/)) {
-          return `<code class="bg-green-100 text-green-900 px-2 py-1 rounded text-sm font-mono font-semibold border border-green-200">${code}</code>`;
+        if (restoredCode.match(/^[A-Z]{2}\d{2}$|^SE\d{2}$/)) {
+          return `<code class="bg-green-100 text-green-900 px-2 py-1 rounded text-sm font-mono font-semibold border border-green-200">${restoredCode}</code>`;
         }
-        return `<code class="bg-slate-200 text-slate-800 px-2 py-1 rounded text-sm font-mono">${code}</code>`;
+        return `<code class="bg-slate-200 text-slate-800 px-2 py-1 rounded text-sm font-mono">${restoredCode}</code>`;
       })
       .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-gray-900">$1</strong>')
       .replace(/\*([^*]+)\*/g, '<em class="italic text-gray-700">$1</em>')

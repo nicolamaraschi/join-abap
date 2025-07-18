@@ -1,16 +1,26 @@
 import React from 'react';
-import MarkdownRenderer from './MarkdownRenderer.jsx'; // Usiamo il nuovo componente
+import MarkdownRenderer from './MarkdownRenderer.jsx';
 
 const AbapDocDetailsView = ({ doc }) => {
     if (!doc) return null;
 
+    // Se il documento ha il flag isMarkdown, usa il renderer
+    if (doc.isMarkdown) {
+        return (
+            <div className="details-view">
+                <div className="report-content prose" style={{ maxWidth: '100%' }}>
+                    <MarkdownRenderer text={doc.content} />
+                </div>
+            </div>
+        );
+    }
+
+    // Altrimenti, renderizza il contenuto come componente React (comportamento precedente)
+    const DocContent = doc.content;
     return (
         <div className="details-view">
-            {/* Usiamo la classe "prose" per dare una bella formattazione di base al testo,
-              tipica della documentazione.
-            */}
-            <div className="report-content prose" style={{maxWidth: '100%'}}>
-                <MarkdownRenderer text={doc.content} />
+            <div className="report-content prose" style={{ maxWidth: '100%' }}>
+                <DocContent />
             </div>
         </div>
     );

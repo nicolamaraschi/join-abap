@@ -10,6 +10,7 @@ import CdsDocumentationView from './CdsDocumentationView.jsx';
 import BadiDetailsView from './BadiDetailsView.jsx';
 // Importa i nuovi componenti per Smartforms e Adobe Forms
 import SmartformDetailsView from './SmartformDetailsView.jsx';
+
 import AdobeformDetailsView from './AdobeformDetailsView.jsx';
 
 const MainContent = ({
@@ -59,9 +60,13 @@ const MainContent = ({
                 }
                 return <WelcomeView />;
             case 'ABAP_DOC':
-                return selectedAbapDoc
-                    ? <AbapDocDetailsView doc={selectedAbapDoc} />
-                    : <WelcomeView isAbapDocMode={true} />;
+                if (selectedAbapDoc) {
+                    return <AbapDocDetailsView doc={selectedAbapDoc} />;
+                } else if (window.location.pathname.includes('/sap-abap-guide/')) {
+                    return <SapAbapGuideDetailsView />;
+                } else {
+                    return <WelcomeView isAbapDocMode={true} />;
+                }
             case 'BADIS':
                 return selectedBadi
                     ? <BadiDetailsView badi={selectedBadi} />

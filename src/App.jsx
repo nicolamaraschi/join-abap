@@ -9,7 +9,7 @@ import { tableDataRaw } from './modules/index.js';
 import { bapiData } from './modules/BapiData.jsx';
 import { codePresets } from './modules/CodePresets.jsx';
 import { transactionData } from './modules/TransactionData.jsx';
-import { cdsData } from './modules/CdsData.jsx'; // cdsData ora è un array
+import { cdsData } from './modules/CdsData.jsx';
 import { abapDocData } from './modules/doc_abap/AbapDocData.jsx';
 import { badiData } from './modules/BadiData.jsx';
 import { smartformData } from './modules/SmartformData.jsx';
@@ -18,12 +18,6 @@ import { fioriPresetsData } from './modules/FioriPresetsData.jsx';
 import { cdsPresetsData } from './modules/CdsPresetsData.jsx';
 
 import './App.css';
-
-// Inserisci questo codice in src/App.jsx, sostituendo la vecchia funzione parseTableData
-
-// Inserisci questo codice in src/App.jsx, sostituendo la vecchia funzione parseTableData
-
-// Inserisci questo codice in src/App.jsx, sostituendo la funzione parseTableData esistente
 
 const parseTableData = (text) => {
     const lines = text.split('\n');
@@ -41,7 +35,6 @@ const parseTableData = (text) => {
     const descRegex = /^\*\s*Descrizione:\s*(.*)/;
     const joinRegex = /^\s{2,}\*\s*(Possibili Join:|)\s*\*\*(.*?)\*\*\s*.*:\s*su\s*`(.*?)`/;
 
-    // FASE 1: Lettura e creazione degli oggetti tabella base
     for (const line of lines) {
         if (line.trim() === '') continue;
         let match;
@@ -90,18 +83,14 @@ const parseTableData = (text) => {
         }
     }
 
-    // FASE 2: Risoluzione dei join con creazione di segnaposto
     allTables.forEach(table => {
         if (table.joins && table.joins.length > 0) {
             const resolvedJoins = [];
             table.joins.forEach(join => {
                 const target = allTables.find(t => t.name === join.table);
                 if (target) {
-                    // Se la tabella di destinazione esiste, crea il link normale
                     resolvedJoins.push({ table: target, on: join.on });
                 } else {
-                    // --- NUOVA LOGICA ---
-                    // Se la tabella di destinazione NON esiste, crea un oggetto segnaposto
                     const dummyTarget = {
                         name: join.table,
                         description: 'Definizione non trovata.',
@@ -124,12 +113,12 @@ function App() {
     const [selectedItemName, setSelectedItemName] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedSubgroup, setSelectedSubgroup] = useState('All');
-    const [cdsSubMode, setCdsSubMode] = useState('docs'); // 'docs' o 'presets'
+    const [cdsSubMode, setCdsSubMode] = useState('docs');
 
     const {
         tableData,
         bapiDataPrepared,
-        cdsDataPrepared, // cdsDataPrepared ora sarà una versione preparata dell'array flat
+        cdsDataPrepared,
         presetData,
         staticTransactionData,
         abapDocPrepared,
@@ -138,26 +127,25 @@ function App() {
         adobeformDataPrepared,
         smartformDisplayNames,
         adobeformDisplayNames,
-        cdsDocumentation, // cdsDocumentation sarà il documento overview (il primo elemento dell'array)
-        findCdsFunc, // findCdsFunc sarà la funzione per cercare nell'array flat
+        cdsDocumentation,
+        findCdsFunc,
         findTableFunc,
         findBapiFunc,
         findSmartformFunc,
         findAdobeformFunc,
         findBadiFunc,
         findAbapDocFunc,
-        fioriPresetData, // Aggiunto
-        cdsPresetData, // Aggiunto
+        fioriPresetData,
+        cdsPresetData,
     } = useMemo(() => {
         const tables = parseTableData(tableDataRaw);
         const bapis = bapiData;
-        const cds = cdsData; // cds è ora l'array flat
+        const cds = cdsData;
         const abapDocs = abapDocData;
         const badis = badiData;
         const smartforms = smartformData;
         const adobeforms = adobeformData;
 
-        // cdsOverviewDoc sarà semplicemente il primo documento nell'array cds
         const cdsOverviewDoc = cds.length > 0 ? cds[0] : null;
 
         const tableModuleList = ['All', ...Object.keys(tables.sapData).sort()];
@@ -166,8 +154,6 @@ function App() {
         const bapiModuleList = ['All', ...Object.keys(bapis).sort()];
         const bapiDisplayNames = { 'All': 'Tutti i Moduli', ...Object.fromEntries(Object.keys(bapis).map(abbr => [abbr, tables.moduleNames[abbr] || abbr])) };
 
-        // Queste variabili non sono più usate per CDS in questa struttura flat
-        // Le manteniamo per coerenza del template ma non influiscono sul CDS ora
         const cdsModuleList = ['All'];
         const cdsDisplayNames = { 'All': 'Documentazione CDS' };
 
@@ -180,7 +166,6 @@ function App() {
         const adobeformModuleList = ['All', ...Object.keys(adobeforms).sort()];
         const aFDisplayNames = { 'All': 'Tutti i Moduli', ...Object.fromEntries(Object.keys(adobeforms).map(abbr => [abbr, tables.moduleNames[abbr] || abbr])) };
 
-
         const subgroupsMap = {};
         Object.keys(tables.sapData).forEach(moduleKey => {
             const subgroups = new Set();
@@ -189,39 +174,28 @@ function App() {
         });
 
         const findTableFunc = (name) => name ? tables.allTables.find(t => t.name === name) : null;
-
         const findBapiFunc = (name) => {
             if (!name) return null;
             for (const moduleKey in bapis) { const found = bapis[moduleKey].find(b => b.name === name); if (found) return found; } return null;
         };
-
-        // FIX: Riscrivi findCdsFunc per cercare direttamente nell'array cds
         const findCdsFunc = (name) => {
             if (!name) return null;
-            return cds.find(doc => doc.name === name); // Cerca direttamente nell'array flat
+            return cds.find(doc => doc.name === name);
         };
-
         const findBadiFunc = (name) => {
             if (!name) return null;
             for (const moduleKey in badis) { const found = badis[moduleKey].find(b => b.name === name); if (found) return found; } return null;
         };
-
         const findSmartformFunc = (name) => {
             if (!name) return null;
             for (const moduleKey in smartforms) { const found = smartforms[moduleKey].find(sf => sf.name === name); if (found) return found; } return null;
         };
-
         const findAdobeformFunc = (name) => {
             if (!name) return null;
             for (const moduleKey in adobeforms) { const found = adobeforms[moduleKey].find(af => af.name === name); if (found) return found; } return null;
         };
 
-
-        const presets = {
-            all: codePresets,
-            find: (id) => id ? codePresets.find(p => p.id === id) : null
-        };
-
+        const presets = { all: codePresets, find: (id) => id ? codePresets.find(p => p.id === id) : null };
         const transactionModules = [
             ...transactionData.fiori.modules.map(m => ({ id: m.id, name: m.name })),
             ...transactionData.gui.modules.map(m => ({ id: m.id, name: m.name })),
@@ -230,29 +204,13 @@ function App() {
         const findAbapDocFunc = (id) => id ? abapDocs.find(d => d.id === id) : null;
         const docs = { all: abapDocs, find: findAbapDocFunc };
 
-        const fioriPresets = {
-            all: fioriPresetsData,
-            find: (id) => id ? fioriPresetsData.find(p => p.id === id) : null
-        };
-
-        const cdsPresets = {
-            all: cdsPresetsData,
-            find: (id) => id ? cdsPresetsData.find(p => p.id === id) : null
-        };
-
-        console.log('cdsPresetsData (imported array):', cdsPresetsData);
-        console.log('cdsPresets (prepared object):', cdsPresets);
+        const fioriPresets = { all: fioriPresetsData, find: (id) => id ? fioriPresetsData.find(p => p.id === id) : null };
+        const cdsPresets = { all: cdsPresetsData, find: (id) => id ? cdsPresetsData.find(p => p.id === id) : null };
 
         return {
             tableData: { all: tables.allTables, modules: tableModuleList, names: tableDisplayNames, subgroups: subgroupsMap, find: findTableFunc },
             bapiDataPrepared: { all: bapis, modules: bapiModuleList, names: bapiDisplayNames, find: findBapiFunc },
-            // cdsDataPrepared ora usa direttamente l'array flat cds
-            cdsDataPrepared: {
-                all: cds, // cds è già l'array di documenti
-                modules: cdsModuleList,
-                names: cdsDisplayNames,
-                find: findCdsFunc
-            },
+            cdsDataPrepared: { all: cds, modules: cdsModuleList, names: cdsDisplayNames, find: findCdsFunc },
             presetData: presets,
             staticTransactionData: { ...transactionData, navModules: transactionModules },
             abapDocPrepared: docs,
@@ -262,15 +220,15 @@ function App() {
             smartformDisplayNames: sFDisplayNames,
             adobeformDisplayNames: aFDisplayNames,
             cdsDocumentation: cdsOverviewDoc,
-            findCdsFunc, // FIX: Esporta findCdsFunc
+            findCdsFunc,
             findTableFunc,
             findBapiFunc,
             findSmartformFunc,
             findAdobeformFunc,
             findBadiFunc,
             findAbapDocFunc,
-            fioriPresetData: fioriPresets, // Aggiunto
-            cdsPresetData: cdsPresets, // Aggiunto
+            fioriPresetData: fioriPresets,
+            cdsPresetData: cdsPresets,
         };
     }, []);
 
@@ -287,14 +245,14 @@ function App() {
             else if (mode === 'SMARTFORMS') moduleToSelect = smartformDataPrepared.modules[1] || 'All';
             else if (mode === 'ADOBEFORMS') moduleToSelect = adobeformDataPrepared.modules[1] || 'All';
             else if (mode === 'CDS') {
-                moduleToSelect = 'All'; // Nessun modulo specifico per il dropdown
+                moduleToSelect = 'All';
                 if (cdsDocumentation) {
-                    setSelectedItemName(cdsDocumentation.name); // Seleziona il documento principale
+                    setSelectedItemName(cdsDocumentation.name);
                 } else {
-                    setSelectedItemName(null); // Nessun documento da selezionare
+                    setSelectedItemName(null);
                 }
             }
-            handleModuleSelect(moduleToSelect); // Passa il modulo (anche se 'All' o [] per overview)
+            handleModuleSelect(moduleToSelect);
         } else {
              setCurrentModule('All');
         }
@@ -325,14 +283,12 @@ function App() {
         return bapisToFilter.filter(b => b.name.toLowerCase().includes(searchTerm.toLowerCase()) || (b.description && b.description.toLowerCase().includes(searchTerm.toLowerCase())));
     }, [bapiDataPrepared.all, currentModule, searchTerm, viewMode]);
 
-    // FIX: filteredCds deve ora gestire solo l'array flat
     const filteredCds = useMemo(() => {
         if (viewMode !== 'CDS') return [];
-        let cdsToFilter = cdsDataPrepared.all; // Ora cdsDataPrepared.all è già l'array flat di documenti
+        let cdsToFilter = cdsDataPrepared.all;
         if (!searchTerm) return cdsToFilter;
         return cdsToFilter.filter(doc => doc.name.toLowerCase().includes(searchTerm.toLowerCase()) || (doc.description && doc.description.toLowerCase().includes(searchTerm.toLowerCase())));
     }, [cdsDataPrepared.all, searchTerm, viewMode]);
-
 
     const filteredBadis = useMemo(() => {
         if (viewMode !== 'BADIS') return [];
@@ -355,7 +311,6 @@ function App() {
         return adobeformsToFilter.filter(af => af.name.toLowerCase().includes(searchTerm.toLowerCase()) || (af.description && af.description.toLowerCase().includes(searchTerm.toLowerCase())));
     }, [adobeformDataPrepared.all, currentModule, searchTerm, viewMode]);
 
-
     const filteredPresets = useMemo(() => {
         if (viewMode !== 'PRESETS') return [];
         if (!searchTerm) return presetData.all;
@@ -377,10 +332,7 @@ function App() {
     const filteredTransactions = useMemo(() => {
         if (viewMode !== 'TRANSACTIONS') return [];
         const term = searchTerm.toLowerCase();
-
         let allTransactions = [];
-
-        // Process Fiori transactions (nested under submodules)
         staticTransactionData.fiori.modules.forEach(module => {
             module.submodules.forEach(submodule => {
                 submodule.transactions.forEach(tx => {
@@ -388,25 +340,18 @@ function App() {
                 });
             });
         });
-
-        // Process GUI transactions (directly under modules)
         staticTransactionData.gui.modules.forEach(module => {
             module.transactions.forEach(tx => {
                 allTransactions.push({ ...tx, moduleId: module.id, type: 'gui' });
+                });
             });
-        });
-
-        // Process ABAP transactions (directly under modules)
         staticTransactionData.abap.modules.forEach(module => {
             module.transactions.forEach(tx => {
                 allTransactions.push({ ...tx, moduleId: module.id, type: 'abap' });
+                });
             });
-        });
-
         const filtered = allTransactions.filter(tx => {
-            if (!searchTerm) return true; // If no search term, include all
-
-            // Fiori transactions
+            if (!searchTerm) return true;
             if (tx.type === 'fiori') {
                 return (
                     (tx.process && tx.process.toLowerCase().includes(term)) ||
@@ -416,27 +361,22 @@ function App() {
                     (tx.purpose && tx.purpose.toLowerCase().includes(term))
                 );
             }
-            // GUI/ABAP transactions
             return (
                 (tx.tCode && tx.tCode.toLowerCase().includes(term)) ||
                 (tx.description && tx.description.toLowerCase().includes(term)) ||
                 (tx.notes && tx.notes.toLowerCase().includes(term))
             );
         });
-
-        // Format the filtered results for TransactionNavList
         return filtered.map(tx => {
             let uniqueId;
             let displayName;
-
             if (tx.type === 'fiori') {
                 uniqueId = `${tx.moduleId}-${tx.submoduleId}-${tx.appId || tx.tCode}`;
                 displayName = tx.appName ? `${tx.appName} (${tx.appId || tx.tCode})` : `${tx.process} (${tx.tCode})`;
-            } else { // gui or abap
+            } else {
                 uniqueId = `${tx.moduleId}-${tx.tCode}`;
                 displayName = `${tx.tCode} - ${tx.description}`;
             }
-
             return {
                 id: uniqueId,
                 name: displayName,
@@ -444,21 +384,18 @@ function App() {
                 transactionDetails: tx
             };
         });
-
     }, [staticTransactionData, searchTerm, viewMode]);
-
 
     const selectedTable = viewMode === 'TABLES' ? findTableFunc(selectedItemName) : null;
     const selectedBapi = viewMode === 'BAPIS' ? findBapiFunc(selectedItemName) : null;
     const selectedCds = viewMode === 'CDS' && cdsSubMode === 'docs' ? findCdsFunc(selectedItemName) : null;
     const selectedCdsPreset = viewMode === 'CDS' && cdsSubMode === 'presets' ? cdsPresetData.find(selectedItemName) : null;
     const selectedPreset = viewMode === 'PRESETS' ? presetData.find(selectedItemName) : null;
-    const selectedFioriPreset = viewMode === 'FIORI_PRESETS' ? fioriPresetData.find(selectedItemName) : null; // Aggiunto
-    const selectedAbapDoc = viewMode === 'ABAP_DOC' ? findAbapDocFunc(selectedItemName) : null;
+    const selectedFioriPreset = viewMode === 'FIORI_PRESETS' ? fioriPresetData.find(selectedItemName) : null;
+        const selectedAbapDoc = viewMode === 'ABAP_DOC' ? findAbapDocFunc(selectedItemName) : null;
     const selectedBadi = viewMode === 'BADIS' ? findBadiFunc(selectedItemName) : null;
     const selectedSmartform = viewMode === 'SMARTFORMS' ? findSmartformFunc(selectedItemName) : null;
     const selectedAdobeform = viewMode === 'ADOBEFORMS' ? findAdobeformFunc(selectedItemName) : null;
-
 
     const currentModules = {
         'TABLES': tableData.modules,
@@ -468,7 +405,7 @@ function App() {
         'BADIS': badiDataPrepared.modules,
         'SMARTFORMS': smartformDataPrepared.modules,
         'ADOBEFORMS': adobeformDataPrepared.modules,
-        'FIORI_PRESETS': ['All'], // Aggiunto
+        'FIORI_PRESETS': ['All'],
     }[viewMode] || [];
 
     const currentModuleNames = {
@@ -479,7 +416,7 @@ function App() {
         'BADIS': badiDataPrepared.names,
         'SMARTFORMS': smartformDisplayNames,
         'ADOBEFORMS': adobeformDisplayNames,
-        'FIORI_PRESETS': { 'All': 'Tutti i Preset Fiori' }, // Aggiunto
+        'FIORI_PRESETS': { 'All': 'Tutti i Preset Fiori' },
     }[viewMode] || {};
 
     return (
@@ -513,10 +450,10 @@ function App() {
                     smartforms={filteredSmartforms}
                     adobeforms={filteredAdobeforms}
                     fioriPresets={filteredFioriPresets}
-                    cdsPresets={cdsPresetData.all} // Aggiunto
+                    cdsPresets={cdsPresetData.all}
                     transactionModules={filteredTransactions}
-                    cdsSubMode={cdsSubMode} // Aggiunto
-                    onCdsSubModeChange={setCdsSubMode} // Aggiunto
+                    cdsSubMode={cdsSubMode}
+                    onCdsSubModeChange={setCdsSubMode}
                     onSelectItem={setSelectedItemName}
                 />
                 <MainContent
@@ -524,16 +461,16 @@ function App() {
                     selectedTable={selectedTable}
                     selectedBapi={selectedBapi}
                     selectedCds={selectedCds}
-                    selectedCdsPreset={selectedCdsPreset} // Aggiunto
+                    selectedCdsPreset={selectedCdsPreset}
                     selectedPreset={selectedPreset}
-                    selectedFioriPreset={selectedFioriPreset} // Aggiunto
+                    selectedFioriPreset={selectedFioriPreset}
                     selectedAbapDoc={selectedAbapDoc}
                     selectedBadi={selectedBadi}
                     selectedSmartform={selectedSmartform}
                     selectedAdobeform={selectedAdobeform}
                     transactionData={staticTransactionData}
                     allTables={tableData.all}
-                    cdsSubMode={cdsSubMode} // Aggiunto
+                    cdsSubMode={cdsSubMode}
                     onSelectTable={setSelectedItemName}
                 />
             </div>
