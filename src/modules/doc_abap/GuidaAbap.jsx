@@ -221,7 +221,296 @@ SELECT t1~campo_chiave,
   * Verificare che le tabelle driver non siano vuote prima di usare FOR ALL ENTRIES.
   * Privilegiare JOIN quando si selezionano campi da tutte le tabelle coinvolte.
   * Utilizzare alias per le tabelle per migliorare la leggibilità del codice.
+  
+## 5.5. FOR ALL ENTRIES - Alternativa alle JOIN
 
+### 5.5.1. Quando Utilizzare FOR ALL ENTRIES
+FOR ALL ENTRIES è utile quando:
+- Le tabelle non hanno relazioni dirette per una JOIN
+- Serve maggiore controllo sui filtri applicati
+- Si vogliono evitare prodotti cartesiani indesiderati
+
+**Sintassi di base:**
+\`abap
+SELECT campo1, campo2
+  FROM tabella2
+  FOR ALL ENTRIES IN lt_tabella_driver
+  WHERE campo_chiave = lt_tabella_driver-campo_chiave
+  INTO TABLE lt_risultato.
+\`
+
+### 5.5.2. Esempio Pratico con FOR ALL ENTRIES
+\`abap
+" Prima: Selezione tabella driver
+SELECT vbeln, kunnr
+  FROM vbak
+  WHERE audat >= '20240101'
+  INTO TABLE @DATA(lt_ordini).
+
+" Controllo fondamentale: verificare che la tabella non sia vuota
+IF lt_ordini IS NOT INITIAL.
+  " Seconda: Selezione con FOR ALL ENTRIES
+  SELECT vbeln, posnr, matnr, kwmeng
+    FROM vbap
+    FOR ALL ENTRIES IN lt_ordini
+    WHERE vbeln = lt_ordini-vbeln
+    INTO TABLE @DATA(lt_posizioni).
+ENDIF.
+\`
+
+### 5.5.3. Regole Critiche per FOR ALL ENTRIES
+
+**⚠️ CONTROLLO OBBLIGATORIO:**
+\`abap
+" ❌ ERRORE - Senza controllo
+SELECT campo FROM tabella
+  FOR ALL ENTRIES IN lt_driver
+  WHERE chiave = lt_driver-chiave
+  INTO TABLE lt_result.
+" Se lt_driver è vuota, vengono estratti TUTTI i record!
+
+" ✅ CORRETTO - Con controllo
+IF lt_driver IS NOT INITIAL.
+  SELECT campo FROM tabella
+    FOR ALL ENTRIES IN lt_driver
+    WHERE chiave = lt_driver-chiave
+    INTO TABLE lt_result.
+ENDIF.
+\`
+
+**Regole aggiuntive:**
+- Non usare DISTINCT con FOR ALL ENTRIES
+- I duplicati vengono automaticamente rimossi
+- La tabella driver deve avere almeno un record
+
+## 5.6. Confronto JOIN vs FOR ALL ENTRIES
+
+### 5.6.1. Tabella Comparativa
+
+| Aspetto | JOIN | FOR ALL ENTRIES |
+|---------|------|----------------|
+| **Performance** | Migliore per grandi volumi | Migliore per piccoli volumi |
+| **Flessibilità** | Limitata dalle relazioni | Maggiore libertà nei filtri |
+| **Complessità** | Sintassi più semplice | Richiede controlli aggiuntivi |
+| **Duplicati** | Possibili prodotti cartesiani | Eliminazione automatica |
+| **Controlli** | Nessuno richiesto | Controllo tabella vuota obbligatorio |
+
+### 5.6.2. Quando Scegliere JOIN
+\`abap
+" ✅ Usa JOIN quando:
+" - Relazioni dirette tra tabelle
+" - Serve tutti i dati da tutte le tabelle
+" - Volume dati elevato
+" - Struttura query semplice
+
+SELECT v~vbeln,
+       v~audat,
+       p~posnr,
+       p~matnr
+  FROM vbak AS v
+  INNER JOIN vbap AS p ON v~vbeln = p~vbeln
+  WHERE v~audat >= '20240101'
+ INTO CORRESPONDING FIELDS OF TABLE @DATA(lt_ordini_completi).
+\`
+
+### 5.6.3. Quando Scegliere FOR ALL ENTRIES
+\`abap
+" ✅ Usa FOR ALL ENTRIES quando:
+" - Logica di filtro complessa sulla tabella driver
+" - Non servono tutti i campi da tutte le tabelle
+" - Controllo granulare sui dati estratti
+
+" Prima estrazione con logica complessa
+SELECT vbeln, kunnr
+  FROM vbak
+  WHERE audat BETWEEN '20240101' AND '20241231'
+    AND vkorg = '1000'
+    AND vtweg IN ('10', '20')
+    AND spart = '00'
+  INTO TABLE @DATA(lt_ordini_filtrati).
+
+IF lt_ordini_filtrati IS NOT INITIAL.
+  " Seconda estrazione solo per gli ordini che passano i filtri
+  SELECT kunnr, name1, ort01
+    FROM kna1
+    FOR ALL ENTRIES IN lt_ordini_filtrati
+    WHERE kunnr = lt_ordini_filtrati-kunnr
+    INTO TABLE @DATA(lt_clienti).
+ENDIF.
+\`
+
+## 5.7. Ottimizzazione delle Query
+
+### 5.7.1. Indici Database
+\`abap
+" ✅ OTTIMIZZATO - Usa campi dell'indice primario o secondario
+SELECT vbeln, audat, kunnr
+  FROM vbak
+  WHERE vbeln IN s_vbeln     " Campo chiave primaria
+  INTO TABLE @DATA(lt_ordini).
+
+" ❌ NON OTTIMIZZATO - Campo senza indice
+SELECT vbeln, audat, kunnr
+  FROM vbak
+  WHERE bstnk = 'ABC123'     " Campo senza indice
+  INTO TABLE @DATA(lt_ordini_lenti).
+\`
+
+### 5.7.2. Limitazione Record
+\`abap
+" Usa UP TO per limitare i record estratti
+SELECT vbeln, audat, kunnr
+  FROM vbak
+  WHERE audat >= '20240101'
+  INTO CORRESPONDING FIELDS OF TABLE @DATA(lt_ordini)
+  UP TO 1000 ROWS.
+
+" Per paginazione
+DATA: lv_offset TYPE i VALUE 0,
+      lv_limit  TYPE i VALUE 100.
+
+SELECT vbeln, audat, kunnr
+  FROM vbak
+  WHERE audat >= '20240101'
+  ORDER BY vbeln
+  INTO CORRESPONDING FIELDS OF TABLE@DATA(lt_pagina)
+  OFFSET @lv_offset ROWS
+  FETCH NEXT @lv_limit ROWS ONLY.
+\`
+
+### 5.7.3. Proiezione Campi
+\`abap
+" ✅ CORRETTO - Solo campi necessari
+SELECT vbeln, audat
+  FROM vbak
+  WHERE kunnr = '1000'
+  INTO CORRESPONDING FIELDS OF TABLE @DATA(lt_essenziale).
+
+" ❌ EVITARE - SELECT * quando non necessario
+SELECT *
+  FROM vbak
+  WHERE kunnr = '1000'
+  INTO CORRESPONDING FIELDS OF TABLE @DATA(lt_tutto).  " Spreco di risorse
+\`
+
+## 5.8. Gestione Errori nelle SELECT
+
+### 5.8.1. Controllo SY-SUBRC
+\`abap
+SELECT SINGLE vbeln, audat, kunnr
+  FROM vbak
+  WHERE vbeln = '1000000001'
+  INTO @DATA(ls_ordine).
+
+IF sy-subrc = 0.
+  " Record trovato
+  MESSAGE 'Ordine trovato' TYPE 'S'.
+ELSE.
+  " Record non trovato
+  MESSAGE 'Ordine non esistente' TYPE 'E'.
+ENDIF.
+\`
+
+### 5.8.2. Controllo Tabelle Vuote
+\`abap
+SELECT vbeln, audat, kunnr
+  FROM vbak
+  WHERE audat >= '20240101'
+  INTO TABLE @DATA(lt_ordini).
+
+IF sy-subrc = 0 AND lines( lt_ordini ) > 0.
+  " Elaborazione dati
+  LOOP AT lt_ordini INTO DATA(ls_ordine).
+    " Processamento record
+  ENDLOOP.
+ELSE.
+  MESSAGE 'Nessun ordine trovato per il periodo' TYPE 'I'.
+ENDIF.
+\`
+
+## 5.9. Esempio Completo: Query Complessa Multi-Tabella
+
+\`abap
+" Definizione struttura risultato
+TYPES: BEGIN OF ty_ordine_dettaglio,
+         numero_ordine    TYPE vbak-vbeln,
+         data_ordine      TYPE vbak-audat,
+         tipo_ordine      TYPE vbak-auart,
+         cliente          TYPE vbak-kunnr,
+         nome_cliente     TYPE kna1-name1,
+         città_cliente    TYPE kna1-ort01,
+         posizione        TYPE vbap-posnr,
+         materiale        TYPE vbap-matnr,
+         descrizione      TYPE makt-maktx,
+         quantità         TYPE vbap-kwmeng,
+         valore           TYPE vbap-netwr,
+         stato_ordine     TYPE vbuk-wbstk,
+       END OF ty_ordine_dettaglio.
+
+DATA: lt_ordini_completi TYPE TABLE OF ty_ordine_dettaglio.
+
+" Query ottimizzata con JOIN multiple
+SELECT v~vbeln AS numero_ordine,
+       v~audat AS data_ordine,
+       v~auart AS tipo_ordine,
+       v~kunnr AS cliente,
+       k~name1 AS nome_cliente,
+       k~ort01 AS città_cliente,
+       p~posnr AS posizione,
+       p~matnr AS materiale,
+       m~maktx AS descrizione,
+       p~kwmeng AS quantità,
+       p~netwr AS valore,
+       s~wbstk AS stato_ordine
+  FROM vbak AS v
+  INNER JOIN kna1 AS k ON v~kunnr = k~kunnr
+  INNER JOIN vbap AS p ON v~vbeln = p~vbeln
+  LEFT OUTER JOIN makt AS m ON p~matnr = m~matnr
+                           AND m~spras = @sy-langu
+  LEFT OUTER JOIN vbuk AS s ON v~vbeln = s~vbeln
+  WHERE v~audat BETWEEN '20240101' AND '20241231'
+    AND v~vkorg = '1000'
+    AND v~vtweg IN ('10', '20')
+  ORDER BY v~vbeln, p~posnr
+  INTO CORRESPONDING FIELDS OF TABLE lt_ordini_completi.
+
+" Controllo risultato
+IF sy-subrc = 0.
+  MESSAGE |Estratti { lines( lt_ordini_completi ) } record| TYPE 'S'.
+  
+  " Elaborazione risultati
+  LOOP AT lt_ordini_completi INTO DATA(ls_dettaglio).
+    " Logica di business sui dati estratti
+    WRITE: / ls_dettaglio-numero_ordine,
+           ls_dettaglio-nome_cliente,
+           ls_dettaglio-quantità.
+  ENDLOOP.
+  
+ELSE.
+  MESSAGE 'Nessun dato trovato per i criteri specificati' TYPE 'I'.
+ENDIF.
+\`
+
+## 5.10. Checklist Best Practice per le SELECT
+
+### ✅ Da Fare SEMPRE:
+-  Usare alias per tutte le tabelle in JOIN
+-  Qualificare i campi con tabella~campo nelle JOIN  
+-  Controllare sy-subrc dopo le SELECT
+-  Verificare tabelle vuote prima di FOR ALL ENTRIES
+-  Usare INTO CORRESPONDING per mapping flessibile
+-  Limitare i campi selezionati al necessario
+-  Aggiungere UP TO per limitare record
+-  Formattare il codice per leggibilità
+
+### ❌ Da EVITARE:
+-  SELECT * quando non necessario
+-  JOIN senza qualificatori di campo
+-  FOR ALL ENTRIES senza controllo tabella vuota
+-  Query senza indici appropriati
+-  Nomi di campo ambigui
+-  Mancanza controllo errori
+-  WHERE dinamiche non validate
 -----
 ## Sezione 6: Programmazione Dinamica (RTTI)
 
@@ -433,7 +722,7 @@ Un report eseguibile deve essere suddiviso in file INCLUDE per separare le diver
 
 ### 9.2. Sottoprogrammi (FORM / ENDFORM)
 
-Le FORM sono blocchi di codice riutilizzabili all'interno di un programma.
+## Le FORM sono blocchi di codice riutilizzabili all'interno di un programma.
 
 \`abap
 " Chiamata al sottoprogramma
@@ -457,6 +746,127 @@ FORM f_calcola_totale
 ENDFORM.
 \`
 
+## Definizione di un sottoprogramma
+
+\`abap
+FORM nome_sottoprogramma
+  [USING parametri_input] "VALORI SOLO LETTURA
+  [CHANGING parametri_input_output] " VALORI IN LETTURA E SCRITTURA
+  [TABLES parametri_tabella]. "PASSAGGIO TABELLA INTERNA IN LETTURA E SCRITTURA
+
+  " Logica del sottoprogramma
+  
+ENDFORM.
+\`
+
+
+## Chiamata di un sottoprogramma
+
+\`abap
+PERFORM nome_sottoprogramma
+  [USING valori_input] "VALORI SOLO LETTURA
+  [CHANGING valori_input_output] " VALORI IN LETTURA E SCRITTURA
+  [TABLES tabelle].
+\`
+
+
+## Tipi di passaggio parametri
+## 1. USING - Parametri di input LETTURA NON SCRITTURA
+## I parametri USING vengono passati per val LETTURA E SCRITTURA
+
+\`abap
+" Esempio completo
+DATA: lv_numero1 TYPE i VALUE 10,
+      lv_numero2 TYPE i VALUE 20,
+      lv_risultato TYPE i.
+
+" Chiamata
+PERFORM calcola_somma
+  USING lv_numero1
+        lv_numero2
+  CHANGING lv_risultato.
+
+WRITE: / 'Risultato:', lv_risultato.
+
+" Definizione
+FORM calcola_somma
+  USING iv_num1 TYPE i
+        iv_num2 TYPE i
+  CHANGING cv_risultato TYPE i.
+  
+  cv_risultato = iv_num1 + iv_num2.
+  " iv_num1 e iv_num2 sono di sola lettura
+  
+ENDFORM.
+\`
+
+## 2. CHANGING - Parametri di input/output (pass by reference)
+## I parametri CHANGING vengono passati per riferimento e possono essere sia letti che modificati all'interno della FORM.
+
+\`abap
+DATA: lv_valore TYPE i VALUE 100.
+
+" Il valore verrà modificato dalla FORM
+PERFORM raddoppia_valore
+  CHANGING lv_valore.
+
+WRITE: / 'Valore raddoppiato:', lv_valore. " Output: 200
+
+FORM raddoppia_valore
+  CHANGING cv_valore TYPE i.
+  
+  cv_valore = cv_valore * 2.
+  " cv_valore può essere sia letto che modificato
+  
+ENDFORM.
+\`
+
+## 3. TABLES - Parametri per tabelle interne
+## Il parametro TABLES viene utilizzato per passare tabelle interne al sottoprogramma.
+
+\`abap
+" Definizione di una struttura e tabella
+TYPES: BEGIN OF ty_prodotto,
+         id    TYPE i,
+         nome  TYPE string,
+         prezzo TYPE p DECIMALS 2,
+       END OF ty_prodotto.
+
+DATA: lt_prodotti TYPE TABLE OF ty_prodotto,
+      ls_prodotto TYPE ty_prodotto.
+
+" Popolamento tabella di esempio
+ls_prodotto-id = 1.
+ls_prodotto-nome = 'Laptop'.
+ls_prodotto-prezzo = '999.99'.
+APPEND ls_prodotto TO lt_prodotti.
+
+ls_prodotto-id = 2.
+ls_prodotto-nome = 'Mouse'.
+ls_prodotto-prezzo = '25.50'.
+APPEND ls_prodotto TO lt_prodotti.
+
+" Chiamata con tabella
+PERFORM elabora_prodotti
+  TABLES lt_prodotti.
+
+" Definizione che elabora la tabella
+FORM elabora_prodotti
+  TABLES pt_prodotti STRUCTURE ty_prodotto.
+  
+  DATA: ls_prodotto_local TYPE ty_prodotto.
+  
+  LOOP AT pt_prodotti INTO ls_prodotto_local.
+    " Applicare uno sconto del 10%
+    ls_prodotto_local-prezzo = ls_prodotto_local-prezzo * '0.9'.
+    MODIFY pt_prodotti FROM ls_prodotto_local.
+    
+    WRITE: / 'Prodotto:', ls_prodotto_local-nome, 
+           'Prezzo scontato:', ls_prodotto_local-prezzo.
+  ENDLOOP.
+  
+ENDFORM.
+\`
 ### 9.3. PERFORM Dinamica
 
 È possibile chiamare una FORM il cui nome è definito a runtime in una variabile.

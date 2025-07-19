@@ -98,8 +98,12 @@ const MarkdownRenderer = ({ text }) => {
       const language = lang || 'text';
       const isAbap = language.toLowerCase() === 'abap';
       
+      // === LA CORREZIONE È QUI ===
+      // Rimuoviamo la seconda conversione (escape) che era ridondante e causava il bug.
+      // La variabile 'code' contiene già il testo correttamente "escapato" dalla conversione globale.
+      
       if (isAbap) {
-        // Per ABAP, usa uno stile speciale ma non interferire con il componente AbapCode esistente
+        // Usiamo 'code' direttamente, senza ri-convertirlo.
         return `<pre class="bg-blue-50 border border-blue-200 rounded-lg p-4 overflow-x-auto my-4"><code class="language-abap text-sm font-mono text-blue-900">${code.trim()}</code></pre>`;
       }
       
@@ -111,7 +115,8 @@ const MarkdownRenderer = ({ text }) => {
 
   // Funzione per processare citazioni (NUOVA FUNZIONALITÀ)
   const processBlockquotes = (content) => {
-    content = content.replace(/^>\s*(.+)$/gm, '<blockquote class="border-l-4 border-blue-500 pl-4 italic my-4 text-gray-700">$1</blockquote>');
+    // Lasciamo la modifica che cerca '&gt;' perché viene eseguita dopo l'escape globale.
+    content = content.replace(/^&gt;\s*(.+)$/gm, '<blockquote class="border-l-4 border-blue-500 pl-4 italic my-4 text-gray-700">$1</blockquote>');
     return content;
   };
 
@@ -186,7 +191,7 @@ const MarkdownRenderer = ({ text }) => {
       // Codice inline e testo formattato (MIGLIORATO per documentazione tecnica)
       .replace(/`([^`]+)`/g, (match, code) => {
         // Ripristina i field symbols ABAP prima del processing
-        const restoredCode = code.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+        const restoredCode = code.replace(/&lt;/g, '<').replace(/>/g, '>');
         
         // Stile speciale per field symbols ABAP
         if (restoredCode.match(/^<[^>]+>$/)) {
@@ -200,7 +205,8 @@ const MarkdownRenderer = ({ text }) => {
         if (restoredCode.match(/^[A-Z]{2}\d{2}$|^SE\d{2}$/)) {
           return `<code class="bg-green-100 text-green-900 px-2 py-1 rounded text-sm font-mono font-semibold border border-green-200">${restoredCode}</code>`;
         }
-        return `<code class="bg-slate-200 text-slate-800 px-2 py-1 rounded text-sm font-mono">${restoredCode}</code>`;
+        // Per il codice generico, usiamo la variabile 'code' originale, che contiene già la versione sicura (&gt;).
+        return `<code class="bg-slate-200 text-slate-800 px-2 py-1 rounded text-sm font-mono">${code}</code>`;
       })
       .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-gray-900">$1</strong>')
       .replace(/\*([^*]+)\*/g, '<em class="italic text-gray-700">$1</em>')
