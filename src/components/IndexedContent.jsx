@@ -1,53 +1,83 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import MarkdownRenderer from './MarkdownRenderer';
+import SearchBar from './SearchBar';
 
 /**
- * Un componente che analizza un testo Markdown, genera un indice dai titoli (h2, h3)
- * e renderizza sia l'indice che il contenuto completo.
+ * Un componente che analizza un testo Markdown, genera un indice e una barra di ricerca
+ * e renderizza tutto insieme al contenuto.
  * @param {{text: string}} props - Il testo Markdown da processare.
  */
 const IndexedContent = ({ text }) => {
-  
-  /**
-   * Estrae i titoli (h2 e h3) da una stringa Markdown.
-   * @param {string} markdownText - Il testo da cui estrarre i titoli.
-   * @returns {{level: number, title: string, id: string}[]} Un array di oggetti titolo.
-   */
-  const getHeadings = (markdownText) => {
-    if (!markdownText) return [];
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Estrae e memoizza i titoli per non ricalcolarli ad ogni render
+  const headings = useMemo(() => {
+    if (!text) return [];
     
     const headings = [];
-    const lines = markdownText.split('\n');
-    // Regex per trovare titoli di livello 2 (##) e 3 (###)
+    const lines = text.split('\n');
     const headingRegex = /^(##|###)\s(.+)/;
 
-    // Funzione per creare uno "slug" da un titolo per usarlo come ID
     const createSlug = (text) => {
       return text
         .toLowerCase()
-        .replace(/[^\w\s-]/g, '') // Rimuovi caratteri non alfanumerici eccetto spazi e trattini
+        .replace(/[^\w\s-]/g, '')
         .trim()
-        .replace(/\s+/g, '-') // Sostituisci spazi con trattini
-        .replace(/-+/g, '-'); // Rimuovi trattini multipli
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
     };
 
     for (const line of lines) {
       const match = line.match(headingRegex);
       if (match) {
-        const level = match[1].length; // 2 per ##, 3 per ###
+        const level = match[1].length;
         const title = match[2].trim();
         const id = createSlug(title);
         headings.push({ level, title, id });
       }
     }
     return headings;
+  }, [text]);
+
+  // Filtra i risultati della ricerca
+  const filteredResults = useMemo(() => {
+    if (!searchQuery) return [];
+    return headings.filter(h => 
+      h.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery, headings]);
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
   };
 
-  const headings = getHeadings(text);
+  const handleResultClick = (id) => {
+    document.getElementById(id)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+    setSearchQuery(''); // Pulisce la ricerca dopo il click
+  };
+
+  const handleStaticLinkClick = (e, id) => {
+    e.preventDefault();
+    document.getElementById(id)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  };
 
   return (
     <div>
-      {/* Sezione Indice (mostrata solo se ci sono titoli) */}
+      {/* Barra di ricerca */}
+      <SearchBar
+        searchQuery={searchQuery}
+        onSearchChange={handleSearchChange}
+        results={filteredResults}
+        onResultClick={handleResultClick}
+      />
+
+      {/* Sezione Indice Statico (invariata) */}
       {headings.length > 0 && (
         <div className="p-6 mb-8 bg-slate-50 border border-slate-200 rounded-lg shadow-sm">
           <h2 className="text-xl font-bold mb-4 text-slate-800 border-b pb-2">Indice della Guida</h2>
@@ -57,14 +87,7 @@ const IndexedContent = ({ text }) => {
                 <a 
                   href={`#${heading.id}`} 
                   className="text-blue-600 hover:text-blue-800 hover:underline transition-colors duration-200"
-                  // Aggiunge uno scroll fluido
-                  onClick={(e) => {
-                    e.preventDefault();
-                    document.getElementById(heading.id)?.scrollIntoView({
-                      behavior: 'smooth',
-                      block: 'start'
-                    });
-                  }}
+                  onClick={(e) => handleStaticLinkClick(e, heading.id)}
                 >
                   {heading.title}
                 </a>
