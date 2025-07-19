@@ -1,3 +1,5 @@
+import IndexedContent from '../../components/IndexedContent.jsx';
+
 export const content = `
 # Guida SAP ABAP - Tipi di Dati e Dichiarazioni
 ==============================================
@@ -1933,3 +1935,9 @@ ENDIF.
 Questa documentazione copre tutte le keyword ABAP che erano state omesse dalla prima versione, fornendo per ciascuna una spiegazione dettagliata e esempi pratici di utilizzo.
 
 `;
+
+const GuidaAbap = () => {
+  return <IndexedContent text={content} />;
+};
+
+export default GuidaAbap;
