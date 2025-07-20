@@ -70,9 +70,8 @@ const Navbar = ({
 
             {/* 2. BARRA DEI FILTRI: APPARE CONTESTUALMENTE */}
             {/* AGGIORNA LA CONDIZIONE PER INCLUDERE SMARTFORMS E ADOBE FORMS */}
-            {(viewMode === 'TABLES' || viewMode === 'BAPIS' || viewMode === 'CDS' || viewMode === 'ABAP_DOC' || viewMode === 'BADIS' || viewMode === 'SMARTFORMS' || viewMode === 'ADOBEFORMS' || viewMode === 'FIORI_PRESETS') && (
+            {(viewMode === 'TABLES' || viewMode === 'BAPIS' || viewMode === 'BADIS' || viewMode === 'SMARTFORMS' || viewMode === 'ADOBEFORMS') && (
                 <div className="filter-bar">
-                    {/* Filtro per Modulo */}
                     <div className="filter-group">
                         <label htmlFor="module-select">Modulo</label>
                         <select
@@ -80,7 +79,6 @@ const Navbar = ({
                             value={currentModule}
                             onChange={handleModuleChange}
                             className="filter-select"
-                            disabled={viewMode === 'ABAP_DOC'} // ABAP_DOC è l'unico che non ha moduli nel dropdown
                         >
                             {(modules || []).map(moduleKey => (
                                 <option key={moduleKey} value={moduleKey}>

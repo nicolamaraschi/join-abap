@@ -400,23 +400,17 @@ function App() {
     const currentModules = {
         'TABLES': tableData.modules,
         'BAPIS': bapiDataPrepared.modules,
-        'CDS': ['All'],
-        'ABAP_DOC': ['All'],
         'BADIS': badiDataPrepared.modules,
         'SMARTFORMS': smartformDataPrepared.modules,
         'ADOBEFORMS': adobeformDataPrepared.modules,
-        'FIORI_PRESETS': ['All'],
     }[viewMode] || [];
 
     const currentModuleNames = {
         'TABLES': tableData.names,
         'BAPIS': bapiDataPrepared.names,
-        'CDS': { 'All': 'Documentazione CDS' },
-        'ABAP_DOC': { 'All': 'Tutte le Docs' },
         'BADIS': badiDataPrepared.names,
         'SMARTFORMS': smartformDisplayNames,
         'ADOBEFORMS': adobeformDisplayNames,
-        'FIORI_PRESETS': { 'All': 'Tutti i Preset Fiori' },
     }[viewMode] || {};
 
     return (
