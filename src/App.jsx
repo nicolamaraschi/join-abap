@@ -401,16 +401,12 @@ function App() {
         'TABLES': tableData.modules,
         'BAPIS': bapiDataPrepared.modules,
         'BADIS': badiDataPrepared.modules,
-        'SMARTFORMS': smartformDataPrepared.modules,
-        'ADOBEFORMS': adobeformDataPrepared.modules,
     }[viewMode] || [];
 
     const currentModuleNames = {
         'TABLES': tableData.names,
         'BAPIS': bapiDataPrepared.names,
         'BADIS': badiDataPrepared.names,
-        'SMARTFORMS': smartformDisplayNames,
-        'ADOBEFORMS': adobeformDisplayNames,
     }[viewMode] || {};
 
     return (
@@ -449,6 +445,7 @@ function App() {
                     cdsSubMode={cdsSubMode}
                     onCdsSubModeChange={setCdsSubMode}
                     onSelectItem={setSelectedItemName}
+                    selectedItemName={selectedItemName}
                 />
                 <MainContent
                     viewMode={viewMode}

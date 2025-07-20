@@ -1,7 +1,7 @@
 // FILE: src/components/TableList.jsx
 import React, { useMemo } from 'react';
 
-const TableList = ({ tables, onSelectTable }) => {
+const TableList = ({ tables, onSelectTable, selectedTable }) => {
     const groupedTables = useMemo(() => {
         return tables.reduce((acc, table) => {
             const subModule = table.subModule || 'Generale';
@@ -21,7 +21,7 @@ const TableList = ({ tables, onSelectTable }) => {
                     <h3 className="submodule-header">{subModule}</h3>
                     <ul className="table-list">
                         {groupedTables[subModule].map(table => (
-                            <li key={table.name} onClick={() => onSelectTable(table.name)} className="table-list-item">
+                            <li key={table.name} onClick={() => onSelectTable(table.name)} className={`table-list-item ${table.name === selectedTable ? 'active' : ''}`}>
                                 <div>
                                     <p className="table-name">{table.name}</p>
                                     <p className="table-description">{table.description || 'N/A'}</p>

@@ -70,7 +70,7 @@ const Navbar = ({
 
             {/* 2. BARRA DEI FILTRI: APPARE CONTESTUALMENTE */}
             {/* AGGIORNA LA CONDIZIONE PER INCLUDERE SMARTFORMS E ADOBE FORMS */}
-            {(viewMode === 'TABLES' || viewMode === 'BAPIS' || viewMode === 'BADIS' || viewMode === 'SMARTFORMS' || viewMode === 'ADOBEFORMS') && (
+            {(viewMode === 'TABLES' || viewMode === 'BAPIS' || viewMode === 'BADIS') && (
                 <div className="filter-bar">
                     <div className="filter-group">
                         <label htmlFor="module-select">Modulo</label>

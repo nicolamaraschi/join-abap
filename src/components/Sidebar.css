@@ -108,6 +108,7 @@
   border: 1px solid transparent;
   /* FIX: Assicura che il flex container gestisca correttamente il contenuto */
   min-height: fit-content;
+  position: relative; /* Aggiunto per posizionare il pseudo-elemento */
 }
 
 .table-list-item:hover { 
@@ -118,8 +119,19 @@
 
 .table-list-item.active {
   background-color: #dbeafe;
-  border-color: #3b82f6;
   color: #1e40af;
+}
+
+.table-list-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: #3b82f6;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
 }
 
 .table-info {

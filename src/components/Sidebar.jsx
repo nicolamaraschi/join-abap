@@ -28,6 +28,7 @@ const Sidebar = ({
   cdsPresets, // Aggiunto
   transactionModules,
   onSelectItem,
+  selectedItemName, // Aggiunto
   cdsSubMode, // Aggiunto
   onCdsSubModeChange, // Aggiunto
 }) => {
@@ -61,9 +62,9 @@ const Sidebar = ({
   const renderList = () => {
     switch (viewMode) {
       case 'TABLES':
-        return <TableList tables={tables} onSelectTable={onSelectItem} />;
+        return <TableList tables={tables} onSelectTable={onSelectItem} selectedTable={selectedItemName} />;
       case 'BAPIS':
-        return <BapiList bapis={bapis} onSelectBapi={onSelectItem} />;
+        return <BapiList bapis={bapis} onSelectBapi={onSelectItem} selectedBapi={selectedItemName} />;
       case 'CDS':
         return (
           <>
@@ -82,24 +83,24 @@ const Sidebar = ({
               </button>
             </div>
             {cdsSubMode === 'docs' ? (
-              <CdsList cdsDocs={cdsViews} onSelectCdsDoc={onSelectItem} />
+              <CdsList cdsDocs={cdsViews} onSelectCdsDoc={onSelectItem} selectedCdsDoc={selectedItemName} />
             ) : (
-              <PresetList presets={cdsPresets} onSelectPreset={onSelectItem} />
+              <PresetList presets={cdsPresets} onSelectPreset={onSelectItem} selectedPreset={selectedItemName} />
             )}
           </>
         );
       case 'PRESETS':
-        return <PresetList presets={presets} onSelectPreset={onSelectItem} />;
+        return <PresetList presets={presets} onSelectPreset={onSelectItem} selectedPreset={selectedItemName} />;
       case 'FIORI_PRESETS': // Aggiunto
-        return <PresetList presets={fioriPresets} onSelectPreset={onSelectItem} />;
+        return <PresetList presets={fioriPresets} onSelectPreset={onSelectItem} selectedPreset={selectedItemName} />;
       case 'ABAP_DOC':
-        return <AbapDocList docs={abapDocs} onSelectDoc={onSelectItem} />;
+        return <AbapDocList docs={abapDocs} onSelectDoc={onSelectItem} selectedDoc={selectedItemName} />;
       case 'BADIS':
-        return <BadiList badis={badis} onSelectBadi={onSelectItem} />;
+        return <BadiList badis={badis} onSelectBadi={onSelectItem} selectedBadi={selectedItemName} />;
       case 'SMARTFORMS':
-        return <SmartformList smartforms={smartforms} onSelectSmartform={onSelectItem} />;
+        return <SmartformList smartforms={smartforms} onSelectSmartform={onSelectItem} selectedSmartform={selectedItemName} />;
       case 'ADOBEFORMS':
-        return <AdobeformList adobeforms={adobeforms} onSelectAdobeform={onSelectItem} />;
+        return <AdobeformList adobeforms={adobeforms} onSelectAdobeform={onSelectItem} selectedAdobeform={selectedItemName} />;
       case 'TRANSACTIONS':
         return <TransactionNavList modules={transactionModules} />;
       default:
