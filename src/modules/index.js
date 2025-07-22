@@ -6,6 +6,7 @@ import { ppData } from './PP.jsx';
 import { psData } from './PS.jsx';
 import { qmData } from './QM.jsx';
 import { sdData } from './SD.jsx';
+import { SplitAlv } from './presets/SplitAlv.jsx';
 
 // Esportiamo la variabile con il nome corretto: tableDataRaw
 export const tableDataRaw = [
@@ -17,4 +18,5 @@ export const tableDataRaw = [
   pmData,
   psData,
   qmData,
-].join('\\n');
+  SplitAlv,
+].join('\n');

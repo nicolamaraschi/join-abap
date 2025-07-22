@@ -7,7 +7,7 @@ const SmartformList = ({ smartforms, onSelectSmartform, selectedSmartform }) => 
         <div className="list-container">
             {smartforms.length > 0 ? (
                 <ul className="item-list">
-                    {groupedSmartforms[module].map(sf => (
+                    {smartforms.map(sf => (
                             <li key={sf.name} onClick={() => onSelectSmartform(sf.name)} className={`table-list-item ${sf.name === selectedSmartform ? 'active' : ''}`}>
                                 <div>
                                     <p className="table-name">{sf.name}</p>

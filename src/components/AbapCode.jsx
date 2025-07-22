@@ -78,6 +78,10 @@ const highlightAbapSyntax = (code) => {
       'TRUNCATE', 'TRUNCATION', 'TRYING', 'UNIQUE', 'UNIT', 'UNIX', 'UNWIND', 'UP', 'UPPER',
       'USER', 'USER-COMMAND', 'USING', 'UTF-8', 'VALID', 'VARIANT', 'VARYING', 'VERSION',
       'VIA', 'VISIBLE', 'WARNING', 'WHERE', 'WIDTH', 'WINDOW', 'WRITE-ONLY', 'ZERO', 'ZONE',
+      'RETURNING','CONCAT','CONCAT_WITH_SPACE','SUBSTRING','LTRIM','FIELD-SYMBOL','ASSIGNING',
+
+      'EndUserText.label','AbapCatalog.sqlViewName','AccessControl.authorizationCheck','VDM.viewType',
+      'OData.publish','view','',
       
       // Data types
       'C', 'D', 'F', 'I', 'N', 'P', 'STRING', 'T', 'X', 'XSTRING',

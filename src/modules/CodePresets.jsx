@@ -15,6 +15,8 @@ import { content as popup_get_value } from './presets/popup_get_value.jsx';
 import { content as popup_with_table_display } from './presets/popup_with_table_display.jsx';
 import { content as cl_gui_alv_grid2 } from './presets/cl_gui_alv_grid2.jsx';
 import { content as reuse_alv_popup_to_select } from './presets/reuse_alv_popup_to_select.jsx';
+import { SplitAlv } from './presets/SplitAlv.jsx';
+
 export const codePresets = [
   {
     id: 'EXCEL_TO_ABAP',
@@ -100,6 +102,11 @@ export const codePresets = [
     id: 'reuse_alv_popup_to_select',
     title: 'reuse_alv_popup_to_select ossia alv dentro pop up senza dympro',
     content: reuse_alv_popup_to_select
+  },
+  {
+    id: 'SPLIT_ALV',
+    title: 'ALV con Split Screen (due ALV uno sopra l\'altro)',
+    content: SplitAlv
   }
 ];
 
