@@ -1,36 +1,46 @@
-export const content = `"CODICE POPUP
+export const content = `""CODICE POPUP
 
-DATA: 
+DATA:
+        iv_matnr          TYPE matnr,
+        lv_ebeln          TYPE ebeln,
+        lv_ebelp          TYPE ebelp,
+        lv_belnr_mat      TYPE mblnr,
+        lv_budat_char     TYPE char10,
         lv_popup_title    TYPE string,          " Titolo del popup
         lv_text_for_popup TYPE string,          " Testo completo per TEXT_QUESTION
         lv_answer         TYPE c LENGTH 1,      " Risposta dell'utente
-        lv_text_btn1        TYPE c LENGTH 60,
-        lv_text_btn2        TYPE c LENGTH 60,
-        lv_quickinfo_btn1   TYPE text132.
+        lv_text_btn1      TYPE c LENGTH 60,
+        lv_text_btn2      TYPE c LENGTH 60,
+        lv_quickinfo_btn1 TYPE text132.
 
     " COSTRUISCO COSA METTERE NEL POPUP
     CLEAR lv_text_for_popup.
-    CONCATENATE 'Materiale:' iv_matnr
+    " text-001: Materiale:
+    CONCATENATE TEXT-001 iv_matnr
             INTO lv_text_for_popup SEPARATED BY space.
 
+    " text-002: Ultima E.M. (BWART 101) per ODA:
     CONCATENATE lv_text_for_popup cl_abap_char_utilities=>newline
-                'Ultima E.M. (BWART 101) per ODA:' lv_ebeln '/' lv_ebelp
+                TEXT-002 lv_ebeln '/' lv_ebelp
             INTO lv_text_for_popup SEPARATED BY space.
 
+    " text-003: Doc. Materiale:
+    " text-004: del
     CONCATENATE lv_text_for_popup cl_abap_char_utilities=>newline
-                'Doc. Materiale:' lv_belnr_mat 'del' lv_budat_char
+                TEXT-003 lv_belnr_mat TEXT-004 lv_budat_char
             INTO lv_text_for_popup SEPARATED BY space.
 
+    " text-005: Vuoi visualizzare i dettagli dell'Ordine d'Acquisto?
     CONCATENATE lv_text_for_popup cl_abap_char_utilities=>newline cl_abap_char_utilities=>newline
-                'Vuoi visualizzare i dettagli dell''Ordine d''Acquisto?'
+                TEXT-005
             INTO lv_text_for_popup SEPARATED BY space.
 
     " Definizione testi per i bottoni e quickinfo
-    " È consigliabile usare elementi di testo per la traducibilità, es. 'Visualizza ODA'(001)
-    lv_popup_title = 'Ultimo ODA Trovato (Entrata Merci)'.
-    lv_text_btn1 = 'Visualizza ODA'. " o TEXT-001 se definito
-    lv_text_btn2 = 'Annulla'.       " o TEXT-002 se definito
-    lv_quickinfo_btn1 = 'Visualizza dettagli Ordine d''Acquisto'. " o TEXT-003 se definito
+    " È consigliabile usare elementi di testo per la traducibilità
+    lv_popup_title    = TEXT-006. " Ultimo ODA Trovato (Entrata Merci)
+    lv_text_btn1      = TEXT-007. " Visualizza ODA
+    lv_text_btn2      = TEXT-008. " Annulla
+    lv_quickinfo_btn1 = TEXT-009. " Visualizza dettagli Ordine d'Acquisto
 
     CALL FUNCTION 'POPUP_TO_CONFIRM'
       EXPORTING
@@ -50,9 +60,9 @@ DATA:
 
     IF sy-subrc <> 0. "  Errore  nella  chiamata  a  POPUP_TO_CONFIRM
       IF sy-subrc = 1.
-        MESSAGE 'errore:  testo  non  trovato  ' TYPE 'E'.
+        MESSAGE TEXT-010 TYPE 'E'. " errore: testo non trovato
       ELSE.
-        MESSAGE 'errore:  errore  generico  ' TYPE 'E'.
+        MESSAGE TEXT-011 TYPE 'E'. " errore: errore generico
       ENDIF.
     ENDIF.
 
@@ -64,6 +74,5 @@ DATA:
           SET PARAMETER ID 'BSP' FIELD lv_ebelp.
           CALL TRANSACTION 'ME23N' AND SKIP FIRST SCREEN.
       ELSE.
-        MESSAGE 'Numero  Ordine  d  Acquisto  non  disponibile  per  la  visualizzazione' TYPE 'E'.
-      ENDIF.
-    ENDIF.`;
+        MESSAGE TEXT-012 TYPE 'E'. " Numero Ordine d Acquisto non disponibile per la visualizzazione
+      ENDIF.`;

@@ -1,6 +1,8 @@
 export const content = `
 REPORT z_test_cl_gui_alv_grid.
 
+REPORT Z_POPUP_CLEAN.
+
 "**********************************************************************
 "* REPORT Z_TEST_CL_GUI_ALV_GRID_FINALE
 "* DESCRIZIONE:
@@ -21,7 +23,6 @@ REPORT z_test_cl_gui_alv_grid.
 "* - Evento USER_COMMAND gestito per il pulsante "Salva" che applica
 "* le modifiche alla tabella interna e aggiorna la griglia,
 "* evitando il rischio di loop infiniti.
-"**********************************************************************
 
 "----------------------------------------------------------------------
 " DICHIARAZIONI GLOBALI
@@ -68,7 +69,7 @@ START-OF-SELECTION.
   IF gt_dati_voli IS NOT INITIAL.
     CALL SCREEN 100.
   ELSE.
-    MESSAGE 'Nessun dato di test trovato.' TYPE 'S' DISPLAY LIKE 'I'.
+    MESSAGE TEXT-001 TYPE 'S' DISPLAY LIKE 'I'. " Nessun dato di test trovato.
   ENDIF.
 
 "----------------------------------------------------------------------
@@ -76,7 +77,7 @@ START-OF-SELECTION.
 "----------------------------------------------------------------------
 MODULE status_0100 OUTPUT.
   SET PF-STATUS 'STATUS_0100'.
-  SET TITLEBAR 'TIT_0100' WITH 'Report ALV Completo'.
+  SET TITLEBAR 'TIT_0100' WITH TEXT-002. " Report ALV Completo
   PERFORM f_visualizza_griglia_alv.
 ENDMODULE.
 
@@ -114,15 +115,14 @@ FORM f_elabora_righe_selezionate.
   FIELD-SYMBOLS: <fs_dati_riga> TYPE sflight.
   CALL METHOD go_griglia_alv->get_selected_rows IMPORTING et_index_rows = lt_righe_selezionate.
   IF lt_righe_selezionate IS INITIAL.
-    MESSAGE 'Nessuna riga selezionata.' TYPE 'I'.
+    MESSAGE TEXT-003 TYPE 'I'. " Nessuna riga selezionata.
   ELSE.
-    " Nota: la sintassi ABAP per i template string e' |...{ }...|
-    lv_messaggio = |Inizio elaborazione di { lines( lt_righe_selezionate ) } righe...|.
-    MESSAGE lv_messaggio TYPE 'S'.
+    DATA(lv_num_righe) = lines( lt_righe_selezionate ).
+    MESSAGE S004(ZMSG) WITH lv_num_righe. " Inizio elaborazione di & righe...
     LOOP AT lt_righe_selezionate INTO ls_riga_selezionata.
       READ TABLE gt_dati_voli ASSIGNING <fs_dati_riga> INDEX ls_riga_selezionata-index.
       IF sy-subrc = 0.
-        WRITE: / 'Elaborata riga:', <fs_dati_riga>-carrid, <fs_dati_riga>-connid, <fs_dati_riga>-fldate.
+        WRITE: / TEXT-005, <fs_dati_riga>-carrid, <fs_dati_riga>-connid, <fs_dati_riga>-fldate. " Elaborata riga:
       ENDIF.
     ENDLOOP.
   ENDIF.
@@ -132,10 +132,10 @@ FORM f_visualizza_griglia_alv.
   IF go_contenitore IS NOT BOUND.
     CREATE OBJECT go_contenitore
       EXPORTING container_name = gv_nome_control_custom EXCEPTIONS OTHERS = 1.
-    IF sy-subrc <> 0. MESSAGE 'Errore contenitore ALV.' TYPE 'E'. LEAVE PROGRAM. ENDIF.
+    IF sy-subrc <> 0. MESSAGE TEXT-006 TYPE 'E'. LEAVE PROGRAM. ENDIF. " Errore contenitore ALV.
     CREATE OBJECT go_griglia_alv
       EXPORTING i_parent = go_contenitore EXCEPTIONS OTHERS = 1.
-    IF sy-subrc <> 0. MESSAGE 'Errore griglia ALV.' TYPE 'E'. LEAVE PROGRAM. ENDIF.
+    IF sy-subrc <> 0. MESSAGE TEXT-007 TYPE 'E'. LEAVE PROGRAM. ENDIF. " Errore griglia ALV.
     CREATE OBJECT go_gestore_eventi.
     SET HANDLER go_gestore_eventi->handle_hotspot_click FOR go_griglia_alv.
     SET HANDLER go_gestore_eventi->handle_toolbar FOR go_griglia_alv.
@@ -149,19 +149,19 @@ FORM f_visualizza_griglia_alv.
       EXPORTING i_structure_name = 'SFLIGHT'
       CHANGING ct_fieldcat = gt_catalogo_campi
       EXCEPTIONS OTHERS = 1.
-    IF sy-subrc <> 0. MESSAGE 'Errore catalogo campi.' TYPE 'E'. LEAVE PROGRAM. ENDIF.
+    IF sy-subrc <> 0. MESSAGE TEXT-008 TYPE 'E'. LEAVE PROGRAM. ENDIF. " Errore catalogo campi.
 
     FIELD-SYMBOLS: <fs_campo_cat> TYPE lvc_s_fcat.
     LOOP AT gt_catalogo_campi ASSIGNING <fs_campo_cat>.
       CASE <fs_campo_cat>-fieldname.
-        WHEN 'CARRID'.   <fs_campo_cat>-coltext = 'Compagnia Aerea'. <fs_campo_cat>-hotspot = abap_true.
-        WHEN 'CONNID'.   <fs_campo_cat>-coltext = 'ID Connessione'.
-        WHEN 'FLDATE'.   <fs_campo_cat>-coltext = 'Data Volo'.
-        WHEN 'PRICE'.    <fs_campo_cat>-coltext = 'Prezzo del Volo'. <fs_campo_cat>-do_sum = abap_true.
-        WHEN 'CURRENCY'. <fs_campo_cat>-coltext = 'Valuta'.
-        WHEN 'PLANETYPE'.<fs_campo_cat>-coltext = 'Tipo Aeromobile'.
+        WHEN 'CARRID'.   <fs_campo_cat>-coltext = TEXT-009. <fs_campo_cat>-hotspot = abap_true. " Compagnia Aerea
+        WHEN 'CONNID'.   <fs_campo_cat>-coltext = TEXT-010. " ID Connessione
+        WHEN 'FLDATE'.   <fs_campo_cat>-coltext = TEXT-011. " Data Volo
+        WHEN 'PRICE'.    <fs_campo_cat>-coltext = TEXT-012. <fs_campo_cat>-do_sum = abap_true. " Prezzo del Volo
+        WHEN 'CURRENCY'. <fs_campo_cat>-coltext = TEXT-013. " Valuta
+        WHEN 'PLANETYPE'.<fs_campo_cat>-coltext = TEXT-014. " Tipo Aeromobile
         WHEN 'SEATSOCC'.
-          <fs_campo_cat>-coltext  = 'Posti Occupati'.
+          <fs_campo_cat>-coltext  = TEXT-015. " Posti Occupati
           <fs_campo_cat>-edit     = abap_true.
       ENDCASE.
     ENDLOOP.
@@ -169,7 +169,7 @@ FORM f_visualizza_griglia_alv.
     gs_layout-sel_mode   = 'A'.
     gs_layout-zebra      = abap_true.
     gs_layout-cwidth_opt = abap_true.
-    gs_layout-grid_title = 'Elenco Voli Disponibili'.
+    gs_layout-grid_title = TEXT-016. " Elenco Voli Disponibili
     gs_variante-report = sy-repid.
 
     PERFORM f_imposta_ordinamento_iniziale.
@@ -187,13 +187,11 @@ ENDFORM.
 "----------------------------------------------------------------------
 CLASS lcl_gestore_eventi IMPLEMENTATION.
   METHOD handle_hotspot_click.
-    DATA: lv_messaggio TYPE string.
     FIELD-SYMBOLS: <fs_riga_cliccata> TYPE sflight.
     IF e_column_id-fieldname = 'CARRID'.
       READ TABLE gt_dati_voli ASSIGNING <fs_riga_cliccata> INDEX e_row_id-index.
       IF sy-subrc = 0.
-        lv_messaggio = |Hai cliccato sulla compagnia: { <fs_riga_cliccata>-carrid }, | && |volo n. { <fs_riga_cliccata>-connid } del { <fs_riga_cliccata>-fldate }.|.
-        MESSAGE lv_messaggio TYPE 'I'.
+        MESSAGE S017(ZMSG) WITH <fs_riga_cliccata>-carrid <fs_riga_cliccata>-connid <fs_riga_cliccata>-fldate. " Hai cliccato sulla compagnia: &1, volo n. &2 del &3.
       ENDIF.
     ENDIF.
   ENDMETHOD.
@@ -203,7 +201,7 @@ CLASS lcl_gestore_eventi IMPLEMENTATION.
     " Pulsante 'Elabora'
     CLEAR ls_pulsante.
     ls_pulsante-function  = 'PROC_SEL'. ls_pulsante-icon = '@8D@'.
-    ls_pulsante-quickinfo = 'Elabora Righe Selezionate'. ls_pulsante-text = 'Elabora'.
+    ls_pulsante-quickinfo = TEXT-018. ls_pulsante-text = TEXT-019. " Elabora Righe Selezionate, Elabora
     ls_pulsante-butn_type = '0'.
     APPEND ls_pulsante TO e_object->mt_toolbar.
 
@@ -215,8 +213,8 @@ CLASS lcl_gestore_eventi IMPLEMENTATION.
     CLEAR ls_pulsante.
     ls_pulsante-function  = 'SAVE_DATA'.
     ls_pulsante-icon      = '@0S@'. " Icona Salva
-    ls_pulsante-quickinfo = 'Salva le modifiche nella griglia'.
-    ls_pulsante-text      = 'Salva'.
+    ls_pulsante-quickinfo = TEXT-020. " Salva le modifiche nella griglia
+    ls_pulsante-text      = TEXT-021. " Salva
     APPEND ls_pulsante TO e_object->mt_toolbar.
   ENDMETHOD.
 
@@ -225,34 +223,27 @@ CLASS lcl_gestore_eventi IMPLEMENTATION.
       WHEN 'PROC_SEL'.
         PERFORM f_elabora_righe_selezionate.
       WHEN 'SAVE_DATA'.
-        " Applica le modifiche alla tabella interna
         CALL METHOD go_griglia_alv->check_changed_data.
-        " Aggiorna la visualizzazione per mostrare i dati salvati
-        " NOTA: Non è sempre necessario, ma garantisce la coerenza visiva
         CALL METHOD go_griglia_alv->refresh_table_display.
-        MESSAGE 'Modifiche applicate con successo!' TYPE 'S'.
-        " QUI andrebbe la logica per salvare GT_DATI_VOLI nel database
+        MESSAGE TEXT-022 TYPE 'S'. " Modifiche applicate con successo!
     ENDCASE.
   ENDMETHOD.
 
   METHOD handle_data_changed.
-    " Questo metodo si occupa SOLO della VALIDAZIONE dei dati inseriti
     FIELD-SYMBOLS: <fs_cella_modificata> TYPE lvc_s_modi.
     LOOP AT er_data_changed->mt_good_cells ASSIGNING <fs_cella_modificata>.
       IF <fs_cella_modificata>-fieldname = 'SEATSOCC'.
-        " Validazione 1: il valore non può essere negativo
         IF <fs_cella_modificata>-value < 0.
           CALL METHOD er_data_changed->add_protocol_entry
             EXPORTING i_msgid = '00' i_msgno = '001' i_msgty = 'E'
-                      i_msgv1 = 'Il numero di posti non può essere negativo.'
+                      i_msgv1 = TEXT-023 " Il numero di posti non può essere negativo.
                       i_fieldname = <fs_cella_modificata>-fieldname
                       i_row_id    = <fs_cella_modificata>-row_id.
         ENDIF.
-        " Validazione 2: il valore deve essere numerico
         IF <fs_cella_modificata>-value CN '1234567890'.
           CALL METHOD er_data_changed->add_protocol_entry
             EXPORTING i_msgid = '00' i_msgno = '001' i_msgty = 'E'
-                      i_msgv1 = 'Inserire solo valori numerici.'
+                      i_msgv1 = TEXT-024 " Inserire solo valori numerici.
                       i_fieldname = <fs_cella_modificata>-fieldname
                       i_row_id    = <fs_cella_modificata>-row_id.
         ENDIF.
@@ -260,5 +251,4 @@ CLASS lcl_gestore_eventi IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 ENDCLASS.
-
 `;

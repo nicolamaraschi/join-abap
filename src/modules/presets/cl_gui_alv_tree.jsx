@@ -1,269 +1,350 @@
-export const content = `REPORT z_alv_tree_finale_v6.
+export const content = `REPORT Z_POPUP_CLEAN.
 
 "**********************************************************************
-"* MONOREPORT V6 - Corretto secondo pattern SAP Standard (BCALV_TREE_01)
-"*--------------------------------------------------------------------*
-"* v13: Correzione logica decisiva.
-"* Risolto l'errore per cui si tentava di espandere anche i nodi "foglia".
-"* Ora il metodo EXPAND_NODE viene chiamato solo per i nodi
-"* contrassegnati come cartelle (e_cartella = 'X').
+"* REPORT Z_POPUP_CLEAN
+"* DESCRIZIONE:
+"* Report di test avanzato che dimostra l'integrazione tra le classi
+"* CL_GUI_ALV_TREE e CL_GUI_ALV_GRID.
+"*
+"* FUNZIONALITÀ IMPLEMENTATE:
+"*
+"* 1.  **Layout Schermo Diviso (Splitter)**:
+"*     - Utilizzo di CL_GUI_SPLITTER_CONTAINER per dividere la dynpro
+"*       in due sezioni: albero a sinistra e griglia a destra.
+"*
+"* 2.  **Albero Gerarchico (CL_GUI_ALV_TREE)**:
+"*     - Visualizzazione delle compagnie aeree (CARRID) come nodi
+"*       principali in una struttura ad albero.
+"*     - Gestione dell'evento NODE_DOUBLE_CLICK per catturare la
+"*       selezione di un nodo da parte dell'utente.
+"*
+"* 3.  **Griglia ALV (CL_GUI_ALV_GRID)**:
+"*     - Visualizzazione dei dati dei voli (tabella SFLIGHT).
+"*     - La griglia viene aggiornata dinamicamente in base al nodo
+"*       selezionato nell'albero.
+"*     - Catalogo campi personalizzato (intestazioni, hotspot).
+"*     - Ordinamento iniziale con subtotali (per Compagnia e Connessione).
+"*     - Griglia editabile per il campo 'Posti Occupati'.
+"*
+"* 4.  **Gestione Avanzata degli Eventi (Classe Locale)**:
+"*     - Gestione centralizzata di tutti gli eventi (albero e griglia)
+"*       tramite una classe locale (LCL_GESTORE_EVENTI).
+"*     - HOTSPOT_CLICK: Messaggio informativo al clic sulla compagnia aerea.
+"*     - TOOLBAR: Aggiunta di pulsanti custom ('Elabora', 'Salva').
+"*     - USER_COMMAND: Logica per i pulsanti custom.
+"*     - DATA_CHANGED: Validazione in tempo reale dei dati inseriti
+"*       nella cella editabile.
+"*
+"* 5.  **Interattività e Usabilità**:
+"*     - Selezione multipla delle righe nella griglia.
+"*     - Logica di elaborazione per le righe selezionate.
+"*     - Schema di salvataggio sicuro per la griglia editabile.
 "**********************************************************************
 
 "----------------------------------------------------------------------
-"& SECTION 1: DICHIARAZIONI GLOBALI
+" DICHIARAZIONI GLOBALI
 "----------------------------------------------------------------------
-TYPE-POOLS: slis, lvc, cntl.
+" Tipi locali per ALV Tree (sostituisce TYPE-POOLS slist)
+TYPES: BEGIN OF lty_treenode,
+         node_key   TYPE tv_nodekey,
+         relatkey   TYPE tv_nodekey,
+         relatship  TYPE i,
+         text       TYPE text30,
+         isfolder   TYPE c,
+         expanded   TYPE c,
+       END OF lty_treenode.
+TYPES: lty_treenodetab TYPE STANDARD TABLE OF lty_treenode WITH DEFAULT KEY.
 
-CONSTANTS:
-  gc_vero              TYPE abap_bool VALUE abap_true,
-  gc_nome_contenitore  TYPE c LENGTH 30 VALUE 'CONTENITORE_ALBERO_ALV'.
+DATA: go_contenitore_principale TYPE REF TO cl_gui_custom_container,
+      go_splitter             TYPE REF TO cl_gui_splitter_container,
+      go_contenitore_albero   TYPE REF TO cl_gui_container,
+      go_contenitore_griglia  TYPE REF TO cl_gui_container,
+      go_albero_alv           TYPE REF TO cl_gui_alv_tree,
+      go_griglia_alv          TYPE REF TO cl_gui_alv_grid,
+      gv_nome_control_custom  TYPE scrfname VALUE 'CONTENITORE_ALV'.
 
-TYPES:
-  BEGIN OF ty_riga_dati_albero,
-    chiave_nodo_logica  TYPE c LENGTH 32,
-    chiave_padre_logica TYPE c LENGTH 32,
-    livello             TYPE i,
-    testo_nodo          TYPE c LENGTH 128,
-    valore_nodo         TYPE c LENGTH 128,
-    e_cartella          TYPE abap_bool, " << REINTRODOTTO FLAG PER IDENTIFICARE LE CARTELLE
-  END OF ty_riga_dati_albero,
+DATA: gt_dati_voli      TYPE STANDARD TABLE OF sflight,
+      gt_dati_voli_filtrati TYPE STANDARD TABLE OF sflight.
 
-  BEGIN OF ty_mappa_chiavi,
-    chiave_logica TYPE c LENGTH 32,
-    chiave_alv    TYPE lvc_nkey,
-  END OF ty_mappa_chiavi.
+" Strutture per ALV Tree
+DATA: gt_gerarchia_nodi TYPE lty_treenodetab.
 
-"&---------------------------------------------------------------------*
-"& Classe per la gestione degli eventi dell'ALV Tree
-"&---------------------------------------------------------------------*
+" Strutture per ALV Grid
+DATA: gt_catalogo_campi        TYPE lvc_t_fcat,
+      gs_layout                TYPE lvc_s_layo,
+      gs_variante              TYPE disvariant,
+      gt_criteri_ord_iniziale  TYPE lvc_t_sort,
+      gs_criterio_ord_iniziale TYPE lvc_s_sort.
+
+"----------------------------------------------------------------------
+" CLASSE PER LA GESTIONE DEGLI EVENTI
+"----------------------------------------------------------------------
 CLASS lcl_gestore_eventi DEFINITION.
   PUBLIC SECTION.
     METHODS:
-      handle_nodo_doppio_click
+      " Eventi per ALV Grid
+      handle_hotspot_click
+        FOR EVENT hotspot_click OF cl_gui_alv_grid
+        IMPORTING e_row_id e_column_id,
+      handle_toolbar
+        FOR EVENT toolbar OF cl_gui_alv_grid
+        IMPORTING e_object,
+      handle_user_command
+        FOR EVENT user_command OF cl_gui_alv_grid
+        IMPORTING e_ucomm,
+      handle_data_changed
+        FOR EVENT data_changed OF cl_gui_alv_grid
+        IMPORTING er_data_changed,
+      " Eventi per ALV Tree
+      handle_node_double_click
         FOR EVENT node_double_click OF cl_gui_alv_tree
         IMPORTING node_key.
 ENDCLASS.
 
-CLASS lcl_gestore_eventi IMPLEMENTATION.
-  METHOD handle_nodo_doppio_click.
-    MESSAGE |Doppio click sul nodo con chiave ALV: { node_key }| TYPE 'S'.
-  ENDMETHOD.
-ENDCLASS.
-
-"&---------------------------------------------------------------------*
-"& Variabili Globali
-"&---------------------------------------------------------------------*
-DATA: go_contenitore       TYPE REF TO cl_gui_custom_container,
-      go_albero_alv        TYPE REF TO cl_gui_alv_tree,
-      go_gestore_eventi    TYPE REF TO lcl_gestore_eventi.
-
-DATA: gt_dati_alv_output   TYPE STANDARD TABLE OF ty_riga_dati_albero.
+DATA: go_gestore_eventi TYPE REF TO lcl_gestore_eventi.
 
 "----------------------------------------------------------------------
-"& SECTION 2: BLOCCHI DI ELABORAZIONE
+" BLOCCO DI ELABORAZIONE PRINCIPALE
 "----------------------------------------------------------------------
 START-OF-SELECTION.
-  CALL SCREEN 9000.
-
-"----------------------------------------------------------------------
-"& SECTION 3: MODULI DYNPRO
-"----------------------------------------------------------------------
-MODULE pbo_9000 OUTPUT.
-  SET PF-STATUS 'STATO_ALV'.
-  SET TITLEBAR 'TITOLO_ALV'.
-
-  IF go_contenitore IS INITIAL.
-    PERFORM inizializza_e_crea_albero.
+  PERFORM f_seleziona_dati.
+  IF gt_dati_voli IS NOT INITIAL.
+    CALL SCREEN 100.
+  ELSE.
+    MESSAGE TEXT-001 TYPE 'S' DISPLAY LIKE 'I'. " Nessun dato di test trovato.
   ENDIF.
+
+"----------------------------------------------------------------------
+" MODULI DI GESTIONE DYNPRO 100
+"----------------------------------------------------------------------
+MODULE status_0100 OUTPUT.
+  SET PF-STATUS 'STATUS_0100'.
+  SET TITLEBAR 'TIT_0100' WITH TEXT-002. " Report ALV Tree/Grid Integrato
+  PERFORM f_visualizza_controlli.
 ENDMODULE.
 
-MODULE pai_9000 INPUT.
-  DATA: lv_ok_code TYPE sy-ucomm.
-
-  lv_ok_code = sy-ucomm.
-  CLEAR sy-ucomm.
-
-  CASE lv_ok_code.
-    WHEN 'BACK' OR 'EXIT' OR 'CANC'.
-      IF go_albero_alv IS BOUND.
-        go_albero_alv->free( ).
-      ENDIF.
-      IF go_contenitore IS BOUND.
-        go_contenitore->free( ).
-      ENDIF.
-      FREE: go_albero_alv, go_contenitore.
+MODULE user_command_0100 INPUT.
+  CALL METHOD cl_gui_cfw=>dispatch.
+  CASE sy-ucomm.
+    WHEN '&F03' OR 'BACK' OR '&F15' OR 'EXIT' OR '&F12' OR 'CANCEL'.
+      " Free di tutte le risorse GUI
+      IF go_griglia_alv IS BOUND. go_griglia_alv->free( ). CLEAR go_griglia_alv. ENDIF.
+      IF go_albero_alv IS BOUND. go_albero_alv->free( ). CLEAR go_albero_alv. ENDIF.
+      IF go_splitter IS BOUND. go_splitter->free( ). CLEAR go_splitter. ENDIF.
+      IF go_contenitore_principale IS BOUND. go_contenitore_principale->free( ). CLEAR go_contenitore_principale. ENDIF.
       LEAVE TO SCREEN 0.
-
-    WHEN OTHERS.
-      CALL METHOD cl_gui_cfw=>dispatch.
   ENDCASE.
 ENDMODULE.
 
-
 "----------------------------------------------------------------------
-"& SECTION 4: LOGICA APPLICATIVA (FORMS)
+" SUBROUTINES (FORMS)
 "----------------------------------------------------------------------
-
-"&---------------------------------------------------------------------*
-"& Form  INIZIALIZZA_E_CREA_ALBERO
-"&---------------------------------------------------------------------*
-FORM inizializza_e_crea_albero.
-  CREATE OBJECT go_contenitore
-    EXPORTING
-      container_name = gc_nome_contenitore
-    EXCEPTIONS OTHERS = 1.
-  IF sy-subrc <> 0.
-    MESSAGE 'Errore: creare l''elemento Custom Control sulla Dynpro 9000.' TYPE 'E'.
-  ENDIF.
-
-  CREATE OBJECT go_albero_alv
-    EXPORTING
-      parent              = go_contenitore
-      item_selection      = gc_vero
-      node_selection_mode = cl_gui_column_tree=>node_sel_mode_single
-    EXCEPTIONS OTHERS = 1.
-  IF sy-subrc <> 0.
-    MESSAGE 'Errore nella creazione dell''oggetto ALV Tree.' TYPE 'E'.
-  ENDIF.
-
-  PERFORM registra_eventi_albero.
-  PERFORM definisci_struttura_albero.
-  PERFORM costruisci_albero_visivo.
-
-  CALL METHOD go_albero_alv->frontend_update.
+FORM f_seleziona_dati.
+  SELECT * FROM sflight INTO TABLE @gt_dati_voli UP TO 100 ROWS.
+  IF sy-subrc <> 0. CLEAR gt_dati_voli. ENDIF.
 ENDFORM.
 
-"&---------------------------------------------------------------------*
-"& Form  DEFINISCI_STRUTTURA_ALBERO
-"&---------------------------------------------------------------------*
-FORM definisci_struttura_albero.
-  DATA: lt_cat_campi  TYPE lvc_t_fcat,
-        ls_cat_campi  TYPE lvc_s_fcat,
-        ls_header     TYPE treev_hhdr.
+FORM f_costruisci_gerarchia_albero.
+  DATA: ls_nodo TYPE lty_treenode,
+        lt_compagnie_univoche TYPE STANDARD TABLE OF s_carr_id,
+        lv_chiave_nodo TYPE tv_nodekey.
 
-  CLEAR: ls_cat_campi, lt_cat_campi.
-  ls_cat_campi-fieldname = 'VALORE_NODO'.
-  ls_cat_campi-coltext   = 'Dettaglio Test'.
-  APPEND ls_cat_campi TO lt_cat_campi.
+  CLEAR gt_gerarchia_nodi.
+  lt_compagnie_univoche = VALUE #( FOR wa IN gt_dati_voli ( wa-carrid ) ).
+  SORT lt_compagnie_univoche.
+  DELETE ADJACENT DUPLICATES FROM lt_compagnie_univoche.
 
-  ls_header-heading = 'Gerarchia Test'.
-  ls_header-width   = 40.
-
-  CALL METHOD go_albero_alv->set_table_for_first_display
-    EXPORTING
-      is_hierarchy_header = ls_header
-    CHANGING
-      it_outtab           = gt_dati_alv_output
-      it_fieldcatalog     = lt_cat_campi.
+  LOOP AT lt_compagnie_univoche INTO DATA(lv_carrid).
+    CLEAR ls_nodo.
+    lv_chiave_nodo = lv_carrid.
+    ls_nodo-node_key = lv_chiave_nodo.
+    ls_nodo-text = |{ lv_carrid }|.
+    ls_nodo-isfolder = abap_true.
+    ls_nodo-expanded = abap_false.
+    APPEND ls_nodo TO gt_gerarchia_nodi.
+  ENDLOOP.
 ENDFORM.
 
-"&---------------------------------------------------------------------*
-"& Form  COSTRUISCI_ALBERO_VISIVO
-"&---------------------------------------------------------------------*
-FORM costruisci_albero_visivo.
-  DATA: lt_dati_logici       TYPE STANDARD TABLE OF ty_riga_dati_albero,
-        lt_mappa_chiavi      TYPE STANDARD TABLE OF ty_mappa_chiavi,
-        ls_mappa_chiavi      TYPE ty_mappa_chiavi,
-        lv_chiave_padre_alv  TYPE lvc_nkey,
-        lv_chiave_nodo_nuova TYPE lvc_nkey,
-        lv_testo_nodo        TYPE lvc_value.
+FORM f_visualizza_controlli.
+  IF go_contenitore_principale IS NOT BOUND.
+    " 1. Crea il contenitore principale e lo splitter
+    CREATE OBJECT go_contenitore_principale
+      EXPORTING container_name = gv_nome_control_custom EXCEPTIONS OTHERS = 1.
+    IF sy-subrc <> 0. MESSAGE TEXT-006 TYPE 'E'. LEAVE PROGRAM. ENDIF.
 
-  FIELD-SYMBOLS: <fs_riga_logica> LIKE LINE OF lt_dati_logici.
+    CREATE OBJECT go_splitter
+      EXPORTING parent = go_contenitore_principale rows = 1 columns = 2.
+    CALL METHOD go_splitter->set_column_width EXPORTING id = 1 width = 30. " 30% per l'albero
+    CALL METHOD go_splitter->set_column_width EXPORTING id = 2 width = 70. " 70% per la griglia
 
-  PERFORM popola_dati_gerarchia TABLES lt_dati_logici.
-  SORT lt_dati_logici BY livello ASCENDING.
+    go_contenitore_albero = go_splitter->get_container( row = 1 column = 1 ).
+    go_contenitore_griglia = go_splitter->get_container( row = 1 column = 2 ).
 
-  LOOP AT lt_dati_logici ASSIGNING <fs_riga_logica>.
-    CLEAR: lv_chiave_padre_alv, lv_chiave_nodo_nuova.
+    " 2. Crea l'istanza del gestore eventi
+    CREATE OBJECT go_gestore_eventi.
 
-    IF <fs_riga_logica>-chiave_padre_logica IS NOT INITIAL.
-      READ TABLE lt_mappa_chiavi INTO ls_mappa_chiavi
-        WITH KEY chiave_logica = <fs_riga_logica>-chiave_padre_logica.
+    " 3. Prepara e visualizza l'ALBERO
+    PERFORM f_costruisci_gerarchia_albero.
+    CREATE OBJECT go_albero_alv
+      EXPORTING
+        parent              = go_contenitore_albero
+        node_selection_mode = 1.
+    SET HANDLER go_gestore_eventi->handle_node_double_click FOR go_albero_alv.
+    CALL METHOD go_albero_alv->set_table_for_first_display
+      EXPORTING i_structure_name = 'LTY_TREENODE'
+      CHANGING it_outtab = gt_gerarchia_nodi.
+
+    " 4. Prepara e visualizza la GRIGLIA
+    CREATE OBJECT go_griglia_alv
+      EXPORTING i_parent = go_contenitore_griglia.
+    SET HANDLER go_gestore_eventi->handle_hotspot_click FOR go_griglia_alv.
+    SET HANDLER go_gestore_eventi->handle_toolbar FOR go_griglia_alv.
+    SET HANDLER go_gestore_eventi->handle_user_command FOR go_griglia_alv.
+    SET HANDLER go_gestore_eventi->handle_data_changed FOR go_griglia_alv.
+    CALL METHOD go_griglia_alv->register_edit_event
+      EXPORTING i_event_id = cl_gui_alv_grid=>mc_evt_enter.
+
+    PERFORM f_prep_cat_campi_grid.
+    PERFORM f_imposta_layout_griglia.
+    PERFORM f_imposta_ordinamento_iniziale.
+
+    " Visualizzazione iniziale con tutti i dati
+    gt_dati_voli_filtrati = gt_dati_voli.
+    CALL METHOD go_griglia_alv->set_toolbar_interactive.
+    CALL METHOD go_griglia_alv->set_table_for_first_display
+      EXPORTING is_layout = gs_layout is_variant = gs_variante i_save = 'A'
+      CHANGING  it_outtab = gt_dati_voli_filtrati it_fieldcatalog = gt_catalogo_campi
+                it_sort = gt_criteri_ord_iniziale.
+  ENDIF.
+ENDFORM.
+
+FORM f_prep_cat_campi_grid.
+  CALL FUNCTION 'LVC_FIELDCATALOG_MERGE'
+    EXPORTING i_structure_name = 'SFLIGHT'
+    CHANGING ct_fieldcat = gt_catalogo_campi
+    EXCEPTIONS OTHERS = 1.
+  IF sy-subrc <> 0. MESSAGE TEXT-008 TYPE 'E'. LEAVE PROGRAM. ENDIF.
+
+  FIELD-SYMBOLS: <fs_campo_cat> TYPE lvc_s_fcat.
+  LOOP AT gt_catalogo_campi ASSIGNING <fs_campo_cat>.
+    CASE <fs_campo_cat>-fieldname.
+      WHEN 'CARRID'.   <fs_campo_cat>-coltext = TEXT-009. <fs_campo_cat>-hotspot = abap_true.
+      WHEN 'CONNID'.   <fs_campo_cat>-coltext = TEXT-010.
+      WHEN 'FLDATE'.   <fs_campo_cat>-coltext = TEXT-011.
+      WHEN 'PRICE'.    <fs_campo_cat>-coltext = TEXT-012. <fs_campo_cat>-do_sum = abap_true.
+      WHEN 'CURRENCY'. <fs_campo_cat>-coltext = TEXT-013.
+      WHEN 'PLANETYPE'.<fs_campo_cat>-coltext = TEXT-014.
+      WHEN 'SEATSOCC'.
+        <fs_campo_cat>-coltext  = TEXT-015.
+        <fs_campo_cat>-edit     = abap_true.
+    ENDCASE.
+  ENDLOOP.
+ENDFORM.
+
+FORM f_imposta_layout_griglia.
+  gs_layout-sel_mode   = 'A'.
+  gs_layout-zebra      = abap_true.
+  gs_layout-cwidth_opt = abap_true.
+  gs_layout-grid_title = TEXT-016. " Elenco Voli Disponibili
+  gs_variante-report = sy-repid.
+ENDFORM.
+
+FORM f_imposta_ordinamento_iniziale.
+  CLEAR gt_criteri_ord_iniziale.
+  gs_criterio_ord_iniziale-spos = 1. gs_criterio_ord_iniziale-fieldname = 'CARRID'.
+  gs_criterio_ord_iniziale-up = abap_true. gs_criterio_ord_iniziale-subtot = abap_true.
+  APPEND gs_criterio_ord_iniziale TO gt_criteri_ord_iniziale.
+  CLEAR gs_criterio_ord_iniziale.
+  gs_criterio_ord_iniziale-spos = 2. gs_criterio_ord_iniziale-fieldname = 'CONNID'.
+  gs_criterio_ord_iniziale-up = abap_true.
+  APPEND gs_criterio_ord_iniziale TO gt_criteri_ord_iniziale.
+ENDFORM.
+
+FORM f_elabora_righe_selezionate.
+  DATA: lt_righe_selezionate TYPE lvc_t_row.
+  FIELD-SYMBOLS: <fs_dati_riga> TYPE sflight.
+  CALL METHOD go_griglia_alv->get_selected_rows IMPORTING et_index_rows = lt_righe_selezionate.
+  IF lt_righe_selezionate IS INITIAL.
+    MESSAGE TEXT-003 TYPE 'I'.
+  ELSE.
+    DATA(lv_num_righe) = lines( lt_righe_selezionate ).
+    MESSAGE S004(ZMSG) WITH lv_num_righe.
+    LOOP AT lt_righe_selezionate INTO DATA(ls_riga_selezionata).
+      READ TABLE gt_dati_voli_filtrati ASSIGNING <fs_dati_riga> INDEX ls_riga_selezionata-index.
       IF sy-subrc = 0.
-        lv_chiave_padre_alv = ls_mappa_chiavi-chiave_alv.
+        WRITE: / TEXT-005, <fs_dati_riga>-carrid, <fs_dati_riga>-connid, <fs_dati_riga>-fldate.
+      ENDIF.
+    ENDLOOP.
+  ENDIF.
+ENDFORM.
+
+"----------------------------------------------------------------------
+" IMPLEMENTAZIONE DELLA CLASSE GESTORE EVENTI
+"----------------------------------------------------------------------
+CLASS lcl_gestore_eventi IMPLEMENTATION.
+  METHOD handle_node_double_click.
+    gt_dati_voli_filtrati = VALUE #( FOR wa IN gt_dati_voli WHERE ( carrid = node_key ) ( wa ) ).
+    CALL METHOD go_griglia_alv->refresh_table_display.
+  ENDMETHOD.
+
+  METHOD handle_hotspot_click.
+    FIELD-SYMBOLS: <fs_riga_cliccata> TYPE sflight.
+    IF e_column_id-fieldname = 'CARRID'.
+      READ TABLE gt_dati_voli_filtrati ASSIGNING <fs_riga_cliccata> INDEX e_row_id-index.
+      IF sy-subrc = 0.
+        MESSAGE S017(ZMSG) WITH <fs_riga_cliccata>-carrid <fs_riga_cliccata>-connid <fs_riga_cliccata>-fldate.
       ENDIF.
     ENDIF.
+  ENDMETHOD.
 
-    lv_testo_nodo = <fs_riga_logica>-testo_nodo.
+  METHOD handle_toolbar.
+    DATA: ls_pulsante TYPE stb_button.
+    CLEAR ls_pulsante.
+    ls_pulsante-function  = 'PROC_SEL'. ls_pulsante-icon = '@8D@'.
+    ls_pulsante-quickinfo = TEXT-018. ls_pulsante-text = TEXT-019.
+    ls_pulsante-butn_type = '0'.
+    APPEND ls_pulsante TO e_object->mt_toolbar.
 
-    CALL METHOD go_albero_alv->add_node
-      EXPORTING
-        i_relat_node_key = lv_chiave_padre_alv
-        i_relationship   = cl_gui_column_tree=>relat_last_child
-        is_outtab_line   = <fs_riga_logica>
-        i_node_text      = lv_testo_nodo
-      IMPORTING
-        e_new_node_key   = lv_chiave_nodo_nuova.
+    CLEAR ls_pulsante.
+    ls_pulsante-butn_type = 3.
+    APPEND ls_pulsante TO e_object->mt_toolbar.
 
-    ls_mappa_chiavi-chiave_logica = <fs_riga_logica>-chiave_nodo_logica.
-    ls_mappa_chiavi-chiave_alv    = lv_chiave_nodo_nuova.
-    APPEND ls_mappa_chiavi TO lt_mappa_chiavi.
-  ENDLOOP.
+    CLEAR ls_pulsante.
+    ls_pulsante-function  = 'SAVE_DATA'. ls_pulsante-icon = '@0S@'.
+    ls_pulsante-quickinfo = TEXT-020. ls_pulsante-text = TEXT-021.
+    APPEND ls_pulsante TO e_object->mt_toolbar.
+  ENDMETHOD.
 
-  " >> CORREZIONE: Espandiamo solo i nodi che sono stati definiti come cartelle
-  LOOP AT lt_dati_logici ASSIGNING <fs_riga_logica> WHERE e_cartella = gc_vero.
+  METHOD handle_user_command.
+    CASE e_ucomm.
+      WHEN 'PROC_SEL'.
+        PERFORM f_elabora_righe_selezionate.
+      WHEN 'SAVE_DATA'.
+        CALL METHOD go_griglia_alv->check_changed_data.
+        CALL METHOD go_griglia_alv->refresh_table_display.
+        MESSAGE TEXT-022 TYPE 'S'.
+    ENDCASE.
+  ENDMETHOD.
 
-    " Per espandere il nodo, dobbiamo recuperare la sua chiave ALV dalla mappa
-    READ TABLE lt_mappa_chiavi INTO ls_mappa_chiavi
-        WITH KEY chiave_logica = <fs_riga_logica>-chiave_nodo_logica.
-
-    IF sy-subrc = 0.
-      CALL METHOD go_albero_alv->expand_node
-        EXPORTING
-          i_node_key = ls_mappa_chiavi-chiave_alv.
-    ENDIF.
-
-  ENDLOOP.
-ENDFORM.
-
-"&---------------------------------------------------------------------*
-"& Form  POPOLA_DATI_GERARCHIA
-"&---------------------------------------------------------------------*
-FORM popola_dati_gerarchia TABLES pt_dati_logici TYPE STANDARD TABLE.
-  DATA ls_riga_dati TYPE ty_riga_dati_albero.
-  CLEAR pt_dati_logici.
-
-  " >> CORREZIONE: Impostiamo il flag E_CARTELLA solo per i nodi genitore
-  ls_riga_dati = VALUE #( chiave_nodo_logica = 'RADICE'
-                          chiave_padre_logica = ''
-                          livello = 1
-                          testo_nodo = 'Progetto Principale S/4HANA (3 Righe)'
-                          valore_nodo = 'Budget Totale'
-                          e_cartella = gc_vero ). " Questo è una cartella
-  APPEND ls_riga_dati TO pt_dati_logici.
-
-  ls_riga_dati = VALUE #( chiave_nodo_logica = 'FASE1'
-                          chiave_padre_logica = 'RADICE'
-                          livello = 2
-                          testo_nodo = 'Fase 1: Analisi e Design'
-                          valore_nodo = 'Stato: Completata'
-                          e_cartella = abap_false ). " Questa è una foglia
-  APPEND ls_riga_dati TO pt_dati_logici.
-
-  ls_riga_dati = VALUE #( chiave_nodo_logica = 'FASE2'
-                          chiave_padre_logica = 'RADICE'
-                          livello = 2
-                          testo_nodo = 'Fase 2: Sviluppo'
-                          valore_nodo = 'Stato: In Corso'
-                          e_cartella = abap_false ). " Questa è una foglia
-  APPEND ls_riga_dati TO pt_dati_logici.
-ENDFORM.
-
-"&---------------------------------------------------------------------*
-"& Form  REGISTRA_EVENTI_ALBERO
-"&---------------------------------------------------------------------*
-FORM registra_eventi_albero.
-  DATA: lt_eventi TYPE cntl_simple_events,
-        ls_evento TYPE cntl_simple_event.
-
-  CREATE OBJECT go_gestore_eventi.
-  SET HANDLER go_gestore_eventi->handle_nodo_doppio_click FOR go_albero_alv.
-
-  ls_evento-eventid = cl_gui_column_tree=>eventid_node_double_click.
-  ls_evento-appl_event = gc_vero.
-  APPEND ls_evento TO lt_eventi.
-
-  CALL METHOD go_albero_alv->set_registered_events
-    EXPORTING
-      events = lt_eventi.
-ENDFORM.`;
+  METHOD handle_data_changed.
+    FIELD-SYMBOLS: <fs_cella_modificata> TYPE lvc_s_modi.
+    LOOP AT er_data_changed->mt_good_cells ASSIGNING <fs_cella_modificata>.
+      IF <fs_cella_modificata>-fieldname = 'SEATSOCC'.
+        IF <fs_cella_modificata>-value < 0.
+          CALL METHOD er_data_changed->add_protocol_entry
+            EXPORTING i_msgid = '00' i_msgno = '001' i_msgty = 'E'
+                      i_msgv1 = TEXT-023
+                      i_fieldname = <fs_cella_modificata>-fieldname
+                      i_row_id    = <fs_cella_modificata>-row_id.
+        ENDIF.
+        IF <fs_cella_modificata>-value CN '1234567890'.
+          CALL METHOD er_data_changed->add_protocol_entry
+            EXPORTING i_msgid = '00' i_msgno = '001' i_msgty = 'E'
+                      i_msgv1 = TEXT-024
+                      i_fieldname = <fs_cella_modificata>-fieldname
+                      i_row_id    = <fs_cella_modificata>-row_id.
+        ENDIF.
+      ENDIF.
+    ENDLOOP.
+  ENDMETHOD.
+ENDCLASS.`;

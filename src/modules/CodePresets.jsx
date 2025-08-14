@@ -15,6 +15,7 @@ import { content as popup_get_value } from './presets/popup_get_value.jsx';
 import { content as popup_with_table_display } from './presets/popup_with_table_display.jsx';
 import { content as cl_gui_alv_grid2 } from './presets/cl_gui_alv_grid2.jsx';
 import { content as reuse_alv_popup_to_select } from './presets/reuse_alv_popup_to_select.jsx';
+import { content as LvcFieldcatalogMerge } from './presets/LvcFieldcatalogMerge.jsx';
 import { SplitAlv } from './presets/SplitAlv.jsx';
 
 export const codePresets = [
@@ -105,8 +106,13 @@ export const codePresets = [
   },
   {
     id: 'SPLIT_ALV',
-    title: 'ALV con Split Screen (due ALV uno sopra l\'altro)',
+    title: "ALV con Split Screen (due ALV uno sopra l'altro)",
     content: SplitAlv
+  },
+  {
+    id: 'LVC_FIELDCATALOG_MERGE',
+    title: 'LVC_FIELDCATALOG_MERGE',
+    content: LvcFieldcatalogMerge
   }
 ];
 

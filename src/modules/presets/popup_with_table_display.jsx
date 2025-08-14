@@ -1,6 +1,8 @@
 export const content = `
 REPORT zdemo_popup_table_display.
 
+"
+
 "**********************************************************************
 "* *
 "* OBIETTIVO DEL PROGRAMMA:                                           *
@@ -39,7 +41,7 @@ CONSTANTS:
 "----------------------------------------------------------------------
 SELECTION-SCREEN BEGIN OF BLOCK blocco_dati WITH FRAME TITLE TEXT-001. " Titolo: 'Parametri Popup'
   PARAMETERS:
-    p_title(80) TYPE c DEFAULT 'Seleziona una riga dall''elenco'.
+    p_title(80) TYPE c.
 SELECTION-SCREEN END OF BLOCK blocco_dati.
 
 SELECTION-SCREEN BEGIN OF BLOCK blocco_pos WITH FRAME TITLE TEXT-002. " Titolo: 'Posizione Popup'
@@ -63,21 +65,28 @@ INITIALIZATION.
   " In un'applicazione reale, questi dati proverrebbero da una SELECT sul database.
   CLEAR gt_dati_per_popup.
 
-  gs_dati_per_popup-testo = 'Opzione 1: Visualizza Dettaglio Materiale'.
+  " text-003: Opzione 1: Visualizza Dettaglio Materiale
+  gs_dati_per_popup-testo = TEXT-003.
   APPEND gs_dati_per_popup TO gt_dati_per_popup.
 
-  gs_dati_per_popup-testo = 'Opzione 2: Crea Ordine di Acquisto'.
+  " text-004: Opzione 2: Crea Ordine di Acquisto
+  gs_dati_per_popup-testo = TEXT-004.
   APPEND gs_dati_per_popup TO gt_dati_per_popup.
 
-  gs_dati_per_popup-testo = 'Opzione 3: Esegui Stampa Inventario'.
+  " text-005: Opzione 3: Esegui Stampa Inventario
+  gs_dati_per_popup-testo = TEXT-005.
   APPEND gs_dati_per_popup TO gt_dati_per_popup.
 
-  gs_dati_per_popup-testo = 'Opzione 4: Annulla Operazione Corrente'.
+  " text-006: Opzione 4: Annulla Operazione Corrente
+  gs_dati_per_popup-testo = TEXT-006.
   APPEND gs_dati_per_popup TO gt_dati_per_popup.
 
-  gs_dati_per_popup-testo = 'Opzione 5: Esporta dati in Excel'.
+  " text-007: Opzione 5: Esporta dati in Excel
+  gs_dati_per_popup-testo = TEXT-007.
   APPEND gs_dati_per_popup TO gt_dati_per_popup.
 
+  " text-008: Seleziona una riga dall'elenco
+  p_title = TEXT-008.
 
 "----------------------------------------------------------------------
 " START-OF-SELECTION: Eseguito dopo l'input dell'utente nella SELECTION-SCREEN
@@ -86,7 +95,8 @@ START-OF-SELECTION.
 
   " Controllo preliminare: se non ci sono dati da mostrare, è inutile procedere.
   IF gt_dati_per_popup IS INITIAL.
-    MESSAGE 'Nessun dato di esempio da visualizzare nel popup.' TYPE 'I'.
+    " text-009: Nessun dato di esempio da visualizzare nel popup.
+    MESSAGE TEXT-009 TYPE 'I'.
     RETURN.
   ENDIF.
 
@@ -114,18 +124,27 @@ START-OF-SELECTION.
     READ TABLE gt_dati_per_popup INTO gs_riga_letta INDEX gv_riga_selezionata.
     IF sy-subrc = 0.
       " La lettura ha avuto successo, si mostra un messaggio con il risultato
-      DATA(lv_messaggio) = |Hai selezionato la riga numero { gv_riga_selezionata } con il testo: '{ gs_riga_letta-testo }'|.
+      DATA lv_messaggio TYPE string.
+      DATA lv_riga_char TYPE string.
+      lv_riga_char = gv_riga_selezionata.
+      " text-010: Hai selezionato la riga numero &1 con il testo: '&2'
+      lv_messaggio = TEXT-010.
+      REPLACE ALL OCCURRENCES OF '&1' IN lv_messaggio WITH lv_riga_char.
+      REPLACE ALL OCCURRENCES OF '&2' IN lv_messaggio WITH gs_riga_letta-testo.
       MESSAGE lv_messaggio TYPE 'S'.
     ELSE.
       " Errore improbabile se la logica è corretta
-      MESSAGE 'Errore interno: impossibile leggere la riga selezionata.' TYPE 'E'.
+      " text-011: Errore interno: impossibile leggere la riga selezionata.
+      MESSAGE TEXT-011 TYPE 'E'.
     ENDIF.
 
   ELSEIF sy-subrc = 1.
     " L'utente ha chiuso il popup o ha premuto 'Annulla'
-    MESSAGE 'Operazione annullata dall''utente.' TYPE 'I'.
+    " text-012: Operazione annullata dall'utente.
+    MESSAGE TEXT-012 TYPE 'I'.
 
   ELSE.
     " Altro errore durante la chiamata alla funzione
-    MESSAGE 'Errore imprevisto durante la visualizzazione del popup.' TYPE 'E'.
+    " text-013: Errore imprevisto durante la visualizzazione del popup.
+    MESSAGE TEXT-013 TYPE 'E'.
   ENDIF.`;

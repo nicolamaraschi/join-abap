@@ -1,4 +1,7 @@
-export const content = `REPORT zdemo_alv_fedele.
+export const content = [
+  {
+    title: 'Esempio 1: ALV base',
+    code: `REPORT zdemo_alv_fedele.
 
 *---------------------------------------------------------------------*
 * ATTENZIONE:
@@ -160,7 +163,7 @@ FORM f_visualizza_alv_vecchio.
     CASE <fs_fcat>-fieldname.
       WHEN 'CECK'.
         <fs_fcat>-checkbox  = gc_true.
-        <fs_fcat>-input     = gc_true.
+        <fs_fcat>-input     = gc_true;
         <fs_fcat>-seltext_m = 'Sel'.
       WHEN 'IMPORTO_CALC'.
         <fs_fcat>-cfieldname = 'WAERK'.
@@ -225,5 +228,146 @@ FORM f_user_command_vecchio USING r_ucomm     TYPE sy-ucomm
       LEAVE TO SCREEN 0.
   ENDCASE.
 
+ENDFORM.`
+  },
+  {
+    title: 'Esempio 2:',
+    code: ` 
+    REPORT Z_POPUP_CLEAN.
+
+"**********************************************************************
+"* REPORT Z_POPUP_CLEAN
+"* DESCRIZIONE:
+"* Versione finale del report ALV con tecnica RTTS. Risolve i problemi
+"* ATC utilizzando elementi di testo per tutti i testi visibili,
+"* incluse le intestazioni delle colonne ALV.
+"*
+"* FUNZIONALITÀ IMPLEMENTATE:
+"*
+"* 1.  **Creazione Catalogo via RTTS**:
+"*     - Utilizzo del metodo robusto CL_ABAP_TABLEDESCR per descrivere
+"*       la tabella interna e costruire il catalogo campi dinamicamente.
+"*
+"* 2.  **Intestazioni Colonne con Elementi di Testo**:
+"*     - Durante la costruzione manuale del catalogo, le intestazioni
+"*       delle colonne (seltext_m) vengono assegnate esplicitamente
+"*       da elementi di testo (TEXT-00X) per garantire la traducibilità
+"*       e superare i controlli ATC.
+"*
+"* 3.  **Codice Pulito per ATC**:
+"*     - Tutte le stringhe codificate per l'interfaccia utente sono
+"*       state sostituite da elementi di testo.
+"**********************************************************************
+
+"----------------------------------------------------------------------
+" SEZIONE 1: TIPI E DATI GLOBALI
+"----------------------------------------------------------------------
+
+TYPES: BEGIN OF ty_s_dati_display,
+         carrid     TYPE s_carr_id,
+         connid     TYPE s_conn_id,
+         fldate     TYPE s_date,
+         line_color TYPE c LENGTH 4,
+       END OF ty_s_dati_display.
+
+DATA: gt_dati_display TYPE STANDARD TABLE OF ty_s_dati_display.
+
+"----------------------------------------------------------------------
+" SEZIONE 2: LOGICA PRINCIPALE
+"----------------------------------------------------------------------
+
+START-OF-SELECTION.
+  PERFORM f_seleziona_dati.
+
+  IF gt_dati_display IS NOT INITIAL.
+    PERFORM f_visualizza_alv.
+  ENDIF.
+
+"----------------------------------------------------------------------
+" SEZIONE 3: SUBROUTINES (FORMS)
+"----------------------------------------------------------------------
+
+FORM f_seleziona_dati.
+  SELECT carrid, connid, fldate
+    FROM sflight
+    WHERE carrid = 'AA'
+    ORDER BY fldate DESCENDING
+    INTO CORRESPONDING FIELDS OF TABLE @gt_dati_display
+    UP TO 10 ROWS.
+
+  LOOP AT gt_dati_display ASSIGNING FIELD-SYMBOL(<fs_display>).
+    IF <fs_display>-carrid = 'AA'.
+      <fs_display>-line_color = 'C610'.
+    ENDIF.
+  ENDLOOP.
 ENDFORM.
-`;
+
+FORM f_visualizza_alv.
+  DATA: lt_catalogo_campi TYPE slis_t_fieldcat_alv,
+        ls_layout         TYPE slis_layout_alv.
+
+  PERFORM f_costruisci_catalogo_rtts CHANGING lt_catalogo_campi.
+
+  IF lt_catalogo_campi IS INITIAL.
+    MESSAGE TEXT-001 TYPE 'E'. " Errore critico: catalogo campi vuoto.
+    RETURN.
+  ENDIF.
+
+  ls_layout-zebra          = abap_true.
+  ls_layout-window_titlebar = TEXT-002. " Catalogo Campi via RTTS (Corretto)
+  ls_layout-info_fieldname = 'LINE_COLOR'.
+
+  CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+    EXPORTING
+      is_layout     = ls_layout
+      it_fieldcat   = lt_catalogo_campi
+    TABLES
+      t_outtab      = gt_dati_display.
+
+ENDFORM.
+
+FORM f_costruisci_catalogo_rtts
+  CHANGING ct_fieldcat TYPE slis_t_fieldcat_alv.
+
+  DATA: lo_tabledescr  TYPE REF TO cl_abap_tabledescr,
+        lo_structdescr TYPE REF TO cl_abap_structdescr,
+        lt_components  TYPE abap_component_tab,
+        ls_fieldcat    TYPE slis_fieldcat_alv.
+
+  FIELD-SYMBOLS: <fs_comp> LIKE LINE OF lt_components.
+
+  TRY.
+      lo_tabledescr ?= cl_abap_tabledescr=>describe_by_data(
+                         p_data = gt_dati_display ).
+      lo_structdescr ?= lo_tabledescr->get_table_line_type( ).
+      lt_components = lo_structdescr->get_components( ).
+    CATCH cx_root.
+      RETURN.
+  ENDTRY.
+
+  LOOP AT lt_components ASSIGNING <fs_comp>.
+    CLEAR ls_fieldcat.
+    ls_fieldcat-fieldname = <fs_comp>-name.
+
+    CASE <fs_comp>-name.
+      WHEN 'CARRID'.
+        ls_fieldcat-seltext_m = TEXT-003. " Compagnia
+      WHEN 'CONNID'.
+        ls_fieldcat-seltext_m = TEXT-004. " Connessione
+      WHEN 'FLDATE'.
+        ls_fieldcat-seltext_m = TEXT-005. " Data Volo
+      WHEN 'LINE_COLOR'.
+        ls_fieldcat-tech = 'X'.
+    ENDCASE.
+
+    APPEND ls_fieldcat TO ct_fieldcat.
+  ENDLOOP.
+
+ENDFO
+    `
+  },
+  {
+    title: 'Esempio 3:',
+    code: ` `
+  }
+];

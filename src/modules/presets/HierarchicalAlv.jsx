@@ -249,7 +249,7 @@ START-OF-SELECTION.
   IF gt_livello_1 IS NOT INITIAL.
     PERFORM f_visualizza_gerarchia_salv.
   ELSE.
-    MESSAGE 'Nessun dato trovato per i criteri di selezione.' TYPE 'I'.
+    MESSAGE TEXT-002 TYPE 'I'. "<- MODIFICATO
   ENDIF.
 
 **********************************************************************
@@ -305,7 +305,7 @@ FORM f_visualizza_gerarchia_salv.
       " Impostazioni di visualizzazione
       DATA(lo_impostazioni) = lo_alv_gerarchico->get_display_settings( ).
       lo_impostazioni->set_striped_pattern( abap_true ).
-      lo_impostazioni->set_list_header( 'Report Gerarchico Ordini di Vendita' ).
+      lo_impostazioni->set_list_header( TEXT-003 ). "<- MODIFICATO
 
       " Impostazioni layout
       DATA(lo_layout) = lo_alv_gerarchico->get_layout( ).
@@ -316,14 +316,14 @@ FORM f_visualizza_gerarchia_salv.
       " Configurazione colonne e aggregazioni
       DATA(lo_colonne_liv_1) = lo_alv_gerarchico->get_columns( level = 1 ).
       lo_colonne_liv_1->set_optimize( abap_true ).
-      lo_colonne_liv_1->get_column( 'VBELN' )->set_long_text( 'Ordine di Vendita' ).
+      lo_colonne_liv_1->get_column( 'VBELN' )->set_long_text( TEXT-004 ). "<- MODIFICATO
       DATA(lo_aggr_liv_1) = lo_alv_gerarchico->get_aggregations( level = 1 ).
       lo_aggr_liv_1->add_aggregation( 'NETWR' ).
 
       DATA(lo_colonne_liv_2) = lo_alv_gerarchico->get_columns( level = 2 ).
       lo_colonne_liv_2->set_optimize( abap_true ).
-      lo_colonne_liv_2->get_column( 'MATNR' )->set_long_text( 'Numero Materiale' ).
-      lo_colonne_liv_2->get_column( 'ARKTX' )->set_long_text( 'Descrizione Materiale' ).
+      lo_colonne_liv_2->get_column( 'MATNR' )->set_long_text( TEXT-005 ). "<- MODIFICATO
+      lo_colonne_liv_2->get_column( 'ARKTX' )->set_long_text( TEXT-006 ). "<- MODIFICATO
       DATA(lo_aggr_liv_2) = lo_alv_gerarchico->get_aggregations( level = 2 ).
       lo_aggr_liv_2->add_aggregation( 'KWMENG' ).
       lo_aggr_liv_2->add_aggregation( 'NETWR' ).
@@ -347,7 +347,7 @@ FORM f_visualizza_gerarchia_salv.
     CATCH cx_salv_existing INTO DATA(lx_esistente).
       MESSAGE lx_esistente TYPE 'E'.
     CATCH cx_salv_msg.
-      MESSAGE 'Errore imprevisto nella visualizzazione dell''ALV.' TYPE 'E'.
+      MESSAGE TEXT-007 TYPE 'E'. "<- MODIFICATO
   ENDTRY.
 ENDFORM.
 

@@ -100,9 +100,7 @@ ENDFORM.`
   {
     title: 'Esempio 2: Inserisci qui il titolo del secondo esempio',
     code: `
-    REPORT z_email_finale_completo.
-
-"----------------------------------------------------------------------
+   "----------------------------------------------------------------------
 " SEZIONE 1: DEFINIZIONI TIPI
 " Descrizione: Definiamo delle strutture dati personalizzate per gestire
 " in modo flessibile i destinatari e gli allegati.
@@ -117,7 +115,230 @@ TYPES: BEGIN OF ty_s_attachment,
          content TYPE solix_tab,       " Contenuto binario del file
          name    TYPE so_obj_des,      " Nome file (es. 'report.csv')
          type    TYPE so_obj_tp,       " Estensione (es. 'CSV')
+       END OF ty_s_attachment.REPORT Z_POPUP_CLEAN.
+
+"**********************************************************************
+"* REPORT Z_POPUP_CLEAN
+"* DESCRIZIONE:
+"* Report avanzato per l'invio di email tramite le classi BCS.
+"* Mostra come integrare l'invio di email nei processi di business,
+"* con funzionalità complesse e pronte per l'uso in scenari reali.
+"*
+"* FUNZIONALITÀ IMPLEMENTATE:
+"*
+"* 1.  **Collegamento a Oggetti di Business (GOS - Generic Object Services)**:
+"*     - Se viene fornito un numero d'ordine di vendita (parametro P_VBELN),
+"*       l'email inviata viene automaticamente collegata all'ordine.
+"*     - L'email diventa visibile nella lista allegati dell'ordine (VA02/VA03),
+"*       garantendo la massima tracciabilità delle comunicazioni.
+"*
+"* 2.  **Generazione e Invio di Allegati Dinamici (CSV)**:
+"*     - Il report simula l'estrazione di dati in una tabella interna.
+"*     - Questi dati vengono convertiti al volo in una stringa in formato CSV.
+"*     - La stringa CSV viene trasformata in un file binario e allegata
+"*       all'email, dimostrando come automatizzare l'invio di report.
+"*
+"* 3.  **Gestione Avanzata dei Destinatari**:
+"*     - Supporto per destinatari multipli, inclusi TO (A) e CC (Copia Carbone).
+"*     - La logica è facilmente estendibile per supportare BCC (Copia Carbone Nascosta).
+"*
+"* 4.  **Contenuto Email Flessibile**:
+"*     - Invio di email con corpo in formato HTML per un layout ricco.
+"*     - Oggetto dell'email costruito dinamicamente.
+"*
+"* 5.  **Opzioni di Invio Avanzate**:
+"*     - Impostazione della priorità dell'email (es. Alta).
+"*     - Definizione di un indirizzo di risposta (Reply-To) personalizzato.
+"*
+"* 6.  **Gestione Robusta degli Errori**:
+"*     - Utilizzo di un blocco TRY...CATCH per intercettare e gestire
+"*       in modo controllato qualsiasi eccezione sollevata dalle classi BCS.
+"**********************************************************************
+
+"----------------------------------------------------------------------
+" SEZIONE 1: DEFINIZIONI TIPI
+"----------------------------------------------------------------------
+TYPES: BEGIN OF ty_s_recipient,
+         email_address  TYPE ad_smtpadr,
+         recipient_type TYPE c LENGTH 1,
+       END OF ty_s_recipient.
+TYPES: ty_t_recipient TYPE STANDARD TABLE OF ty_s_recipient WITH EMPTY KEY.
+
+TYPES: BEGIN OF ty_s_attachment,
+         content TYPE solix_tab,
+         name    TYPE so_obj_des,
+         type    TYPE so_obj_tp,
        END OF ty_s_attachment.
+TYPES: ty_t_attachment TYPE STANDARD TABLE OF ty_s_attachment WITH EMPTY KEY.
+
+"----------------------------------------------------------------------
+" SEZIONE 2: SCHERMATA DI SELEZIONE
+"----------------------------------------------------------------------
+PARAMETERS: p_vbeln TYPE vbeln_va.
+
+"----------------------------------------------------------------------
+" SEZIONE 3: LOGICA PRINCIPALE
+"----------------------------------------------------------------------
+START-OF-SELECTION.
+
+  DATA: lv_subject      TYPE so_obj_des,
+        lt_body         TYPE bcsy_text,
+        lv_body_type    TYPE so_obj_tp,
+        lt_recipients   TYPE ty_t_recipient,
+        lt_attachments  TYPE ty_t_attachment,
+        lv_priority     TYPE c LENGTH 1,
+        lv_reply_to     TYPE ad_smtpadr,
+        lv_success      TYPE abap_bool.
+
+  DATA: ls_recipient  LIKE LINE OF lt_recipients,
+        ls_attachment LIKE LINE OF lt_attachments.
+
+  " --- Preparazione Dati ---
+  MESSAGE s001(zmsg) WITH p_vbeln INTO lv_subject.
+  APPEND TEXT-002 TO lt_body.
+  lv_body_type = 'HTM'.
+
+  ls_recipient-email_address = TEXT-003.
+  ls_recipient-recipient_type = 'A'.
+  APPEND ls_recipient TO lt_recipients.
+
+  CLEAR ls_recipient.
+  ls_recipient-email_address = TEXT-004.
+  ls_recipient-recipient_type = 'B'.
+  APPEND ls_recipient TO lt_recipients.
+
+  lv_priority = '1'.
+  lv_reply_to = TEXT-005.
+
+  " --- Preparazione Allegati ---
+  PERFORM f_prepara_allegati USING lt_attachments.
+
+  " --- Inizio Blocco Logica di Invio ---
+  CLEAR lv_success.
+  IF lt_recipients IS INITIAL.
+    WRITE: / TEXT-006.
+    RETURN.
+  ENDIF.
+
+  TRY.
+      DATA(lo_bcs) = cl_bcs=>create_persistent( ).
+      DATA(lo_document) = cl_document_bcs=>create_document(
+        i_type    = lv_body_type
+        i_text    = lt_body
+        i_subject = lv_subject ).
+
+      LOOP AT lt_attachments INTO ls_attachment.
+        DATA lv_att_size TYPE so_obj_len.
+        lv_att_size = xstrlen( cl_bcs_convert=>solix_to_xstring( ls_attachment-content ) ).
+        lo_document->add_attachment(
+          i_attachment_type    = ls_attachment-type
+          i_attachment_subject = ls_attachment-name
+          i_attachment_size    = lv_att_size
+          i_att_content_hex    = ls_attachment-content ).
+      ENDLOOP.
+
+      lo_bcs->set_document( lo_document ).
+
+      LOOP AT lt_recipients INTO ls_recipient.
+        DATA(lo_recipient) = cl_cam_address_bcs=>create_internet_address( ls_recipient-email_address ).
+        DATA: lv_copy TYPE abap_bool, lv_blind_copy TYPE abap_bool.
+        CLEAR: lv_copy, lv_blind_copy.
+        IF ls_recipient-recipient_type = 'B'. lv_copy = abap_true.
+        ELSEIF ls_recipient-recipient_type = 'C'. lv_blind_copy = abap_true.
+        ENDIF.
+        CALL METHOD lo_bcs->add_recipient
+          EXPORTING i_recipient = lo_recipient i_copy = lv_copy i_blind_copy = lv_blind_copy.
+      ENDLOOP.
+
+      IF p_vbeln IS NOT INITIAL.
+        DATA(lo_send_request) = lo_bcs->send_request.
+        DATA: ls_appl_object  TYPE borident.
+        ls_appl_object-objtype = 'BUS2032'.
+        ls_appl_object-objkey  = p_vbeln.
+        CALL METHOD lo_send_request->create_link
+          EXPORTING i_appl_object = ls_appl_object.
+      ENDIF.
+
+      IF lv_reply_to IS NOT INITIAL.
+        lo_bcs->set_reply_to( i_reply_to = cl_cam_address_bcs=>create_internet_address( lv_reply_to ) ).
+      ENDIF.
+      IF lv_priority IS NOT INITIAL.
+        lo_bcs->set_priority( i_priority = lv_priority ).
+      ENDIF.
+
+      IF lo_bcs->send( i_with_error_screen = 'X' ) = abap_true.
+        lv_success = abap_true.
+        COMMIT WORK AND WAIT.
+      ENDIF.
+
+    CATCH cx_bcs INTO DATA(lx_bcs).
+      MESSAGE lx_bcs->get_text( ) TYPE 'I' DISPLAY LIKE 'E'.
+      lv_success = abap_false.
+  ENDTRY.
+
+  IF lv_success = abap_true.
+    IF p_vbeln IS NOT INITIAL.
+      WRITE: / TEXT-009, p_vbeln.
+    ELSE.
+      WRITE: / TEXT-010.
+    ENDIF.
+  ELSE.
+    WRITE: / TEXT-011.
+  ENDIF.
+
+"----------------------------------------------------------------------
+" SEZIONE 4: SUBROUTINES
+"----------------------------------------------------------------------
+FORM f_prepara_allegati USING pt_attachments TYPE ty_t_attachment.
+  DATA: ls_attachment LIKE LINE OF pt_attachments.
+
+  TRY.
+      " 1. Allegato di testo semplice
+      DATA: lv_str_att1 TYPE string, lt_bin_att1 TYPE solix_tab.
+      lv_str_att1 = TEXT-007.
+      CALL METHOD cl_bcs_convert=>string_to_solix
+        EXPORTING iv_string = lv_str_att1
+        IMPORTING et_solix  = lt_bin_att1.
+
+      ls_attachment-name    = TEXT-008.
+      ls_attachment-type    = 'TXT'.
+      ls_attachment-content = lt_bin_att1.
+      APPEND ls_attachment TO pt_attachments.
+      CLEAR ls_attachment.
+
+      " 2. Allegato CSV generato dinamicamente
+      TYPES: BEGIN OF ty_s_report_data,
+               carrid TYPE s_carr_id,
+               connid TYPE s_conn_id,
+               fldate TYPE s_date,
+             END OF ty_s_report_data.
+      DATA: lt_report_data TYPE STANDARD TABLE OF ty_s_report_data,
+            lv_csv_string  TYPE string,
+            lt_csv_binary  TYPE solix_tab.
+
+      " Simula la lettura di dati per un report
+      SELECT carrid, connid, fldate FROM sflight
+        INTO TABLE @lt_report_data UP TO 10 ROWS.
+
+      " Converte la tabella interna in una stringa CSV
+      LOOP AT lt_report_data INTO DATA(ls_report_data).
+        lv_csv_string = lv_csv_string && |{ ls_report_data-carrid };{ ls_report_data-connid };{ ls_report_data-fldate }| && cl_abap_char_utilities=>cr_lf.
+      ENDLOOP.
+
+      CALL METHOD cl_bcs_convert=>string_to_solix
+        EXPORTING iv_string = lv_csv_string
+        IMPORTING et_solix  = lt_csv_binary.
+
+      ls_attachment-name    = 'report_dati.csv'.
+      ls_attachment-type    = 'CSV'.
+      ls_attachment-content = lt_csv_binary.
+      APPEND ls_attachment TO pt_attachments.
+
+    CATCH cx_bcs INTO DATA(lx_bcs).
+      MESSAGE lx_bcs->get_text( ) TYPE 'I' DISPLAY LIKE 'E'.
+  ENDTRY.
+
+ENDFORM.
 TYPES: ty_t_attachment TYPE STANDARD TABLE OF ty_s_attachment WITH EMPTY KEY.
 
 
