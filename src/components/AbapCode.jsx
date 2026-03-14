@@ -12,11 +12,14 @@ import React from 'react';
 const highlightAbapSyntax = (code) => {
   if (!code) return '';
 
-  // Pulisce il codice da eventuali escape HTML preesistenti per partire da una base pulita.
+  // Pulisce il codice da eventuali escape HTML preesistenti. 
+  // L'ordine è importante per gestire il double-escaping (es. &amp;lt; -> &lt; -> <)
   const unescapedCode = code
+    .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
-    .replace(/&amp;/g, '&');
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
 
   const lines = unescapedCode.split('\n');
 
@@ -111,7 +114,7 @@ const highlightAbapSyntax = (code) => {
   const highlightedLines = lines.map((line) => {
     // 1. Isola TUTTI i costrutti speciali (<...>, <>, ->, =>, @<...>) E gli operatori di comparazione
     const placeholders = [];
-    const specialTokensRegex = /=>|->|<>|<[^>]+>|@<[^>]+>|(?<!\w)([<>]=?)(?!\w)/g;
+    const specialTokensRegex = /=>|->|<>|<[^>]+>|@<[^>]+>|<\w+|(?<!\w)([<>]=?)(?!\w)/g;
     let tempLine = line.replace(specialTokensRegex, (match) => {
         placeholders.push({ original: match, isOperator: /^[<>]=?$/.test(match) });
         return `__SPECIAL_PLACEHOLDER_${placeholders.length - 1}__`;
@@ -141,8 +144,9 @@ const highlightAbapSyntax = (code) => {
         const p = placeholder.original;
         
         if (placeholder.isOperator) {
-            // Gestione operatori di comparazione
-            replacement = `<span style="color: #d4d4d4; font-weight: bold;">${p}</span>`;
+            // Gestione operatori di comparazione - ESCAPE RICHIESTO
+            const escapedOp = p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            replacement = `<span style="color: #d4d4d4; font-weight: bold;">${escapedOp}</span>`;
         } else {
             // Gestione costrutti ABAP speciali
             const escapedValue = p.replace(/</g, '&lt;').replace(/>/g, '&gt;');

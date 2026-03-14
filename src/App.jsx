@@ -173,7 +173,12 @@ function App() {
             subgroupsMap[moduleKey] = Array.from(subgroups).sort();
         });
 
-        const findTableFunc = (name) => name ? tables.allTables.find(t => t.name === name) : null;
+        const findTableFunc = (name) => {
+            if (!name) return null;
+            const found = tables.allTables.find(t => t.name === name);
+            if (found) return found;
+            return { name, description: 'Definizione non trovata o non ancora documentata.', primaryKeys: [], joins: [], module: 'N/D', subModule: 'N/D' };
+        };
         const findBapiFunc = (name) => {
             if (!name) return null;
             for (const moduleKey in bapis) { const found = bapis[moduleKey].find(b => b.name === name); if (found) return found; } return null;

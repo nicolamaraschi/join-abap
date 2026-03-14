@@ -7,24 +7,19 @@
   background-color: #f1f5f9; /* slate-100 */
 }
 
-/* FIX PRINCIPALE: Main view con padding per navbar fissa */
+/* FIX PRINCIPALE: Main view flessibile che occupa lo spazio rimanente */
 .main-view {
   display: flex;
   flex: 1;
-  min-height: 0; /* Permette il flex corretto */
-  padding-top: 64px; /* Spazio per la navbar fissa */
+  min-height: 0; /* Permette lo scroll interno */
+  overflow: hidden;
 }
 
-/* Navbar & Sub-Navbar Container - ORA FISSO */
+/* Navbar & Sub-Navbar Container - ORA USA STICKY IN NAVBAR.CSS */
 .navbar-container {
   background-color: white;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   flex-shrink: 0;
-  z-index: 1010; /* Alto, ma meno della searchbar se necessario */
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  z-index: 1000;
 }
 
 /* Navbar Principale */
@@ -110,15 +105,13 @@
   font-weight: 600;
 }
 
-/* FIX: Main Content Area - overflow solo quando necessario */
+/* FIX: Main Content Area - scroll indipendente */
 .main-content {
-  flex-grow: 1;
-  padding: 1rem;
+  flex: 1;
+  padding: 1.5rem;
   overflow-y: auto;
-  /* FIX: Assicura che non interferisca con la sidebar */
-  position: relative;
-  height: 100%;
-  box-sizing: border-box;
+  min-height: 0;
+  background-color: #f1f5f9;
 }
 
 /* FIX: Container per evitare conflitti layout */

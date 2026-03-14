@@ -69,37 +69,44 @@ const Navbar = ({
             </nav>
 
             {/* 2. BARRA DEI FILTRI: APPARE CONTESTUALMENTE */}
-            {/* AGGIORNA LA CONDIZIONE PER INCLUDERE SMARTFORMS E ADOBE FORMS */}
             {(viewMode === 'TABLES' || viewMode === 'BAPIS' || viewMode === 'BADIS') && (
                 <div className="filter-bar">
-                    <div className="filter-group">
-                        <label htmlFor="module-select">Modulo</label>
-                        <select
-                            id="module-select"
-                            value={currentModule}
-                            onChange={handleModuleChange}
-                            className="filter-select"
-                        >
+                    <div className="filter-section">
+                        <span className="filter-label">Modulo:</span>
+                        <div className="pill-container">
                             {(modules || []).map(moduleKey => (
-                                <option key={moduleKey} value={moduleKey}>
+                                <button
+                                    key={moduleKey}
+                                    className={`pill-button ${currentModule === moduleKey ? 'active' : ''}`}
+                                    onClick={() => onModuleSelect(moduleKey)}
+                                >
                                     {moduleNames[moduleKey] || moduleKey}
-                                </option>
+                                </button>
                             ))}
-                        </select>
+                        </div>
                     </div>
 
                     {/* Filtro per Sottogruppo (solo per le Tabelle e CDS Views) */}
-                    {(viewMode === 'TABLES' || viewMode === 'CDS') && subgroups && subgroups.length > 0 && (
-                        <div className="filter-group">
-                            <label htmlFor="subgroup-select">Sottogruppo</label>
-                            <select id="subgroup-select" value={selectedSubgroup} onChange={handleSubgroupChange} className="filter-select" disabled={currentModule === 'All'}>
-                                <option value="All">Tutti</option>
+                    {(viewMode === 'TABLES' || viewMode === 'CDS') && subgroups && subgroups.length > 0 && currentModule !== 'All' && (
+                        <div className="filter-section subgroup-row">
+                            <span className="filter-label">Sottogruppo:</span>
+                            <div className="pill-container">
+                                <button
+                                    className={`pill-button small ${selectedSubgroup === 'All' ? 'active' : ''}`}
+                                    onClick={() => onSubgroupSelect('All')}
+                                >
+                                    Tutti
+                                </button>
                                 {subgroups.map(subgroup => (
-                                    <option key={subgroup} value={subgroup}>
+                                    <button
+                                        key={subgroup}
+                                        className={`pill-button small ${selectedSubgroup === subgroup ? 'active' : ''}`}
+                                        onClick={() => onSubgroupSelect(subgroup)}
+                                    >
                                         {subgroup}
-                                    </option>
+                                    </button>
                                 ))}
-                            </select>
+                            </div>
                         </div>
                     )}
                 </div>

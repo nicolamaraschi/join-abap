@@ -2,7 +2,7 @@
 .sidebar {
   width: 320px;
   min-width: 320px;
-  height: calc(100vh - 64px);
+  height: 100%;
   background-color: #f8fafc;
   border-right: 1px solid #e2e8f0;
   display: flex;
@@ -11,11 +11,10 @@
   overflow-y: auto;
   overflow-x: hidden;
   transition: transform 0.3s ease;
-  z-index: 1000;
+  z-index: 10;
   box-sizing: border-box;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 64px;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+  position: relative;
 }
 
 .sidebar-content {

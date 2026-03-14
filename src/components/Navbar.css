@@ -1,60 +1,150 @@
-/* Contenitore barra filtri */
-.filter-bar {
-    display: flex;
-    gap: 1rem;
-    padding: 1rem;
-    background-color: #f9fafb;
-    border-bottom: 1px solid #e5e7eb;
-    flex-wrap: wrap;
-  }
-  
-  /* Gruppo singolo (select + label) */
-  .filter-group-aurora {
+/* src/components/Navbar.css */
+
+.navbar-container {
     display: flex;
     flex-direction: column;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
     position: relative;
-    min-width: 160px;
-    flex: 1;
-  }
-  
-  /* Dropdown */
-  .filter-select-aurora {
-    padding: 8px 12px;
-    font-size: 0.95rem;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    background-color: white;
-    color: #111827;
-    appearance: none;
-    transition: border 0.2s, box-shadow 0.2s;
-  }
-  
-  .filter-select-aurora:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
-  }
-  
-  /* Label sopra la select */
-  .filter-group-aurora label {
-    margin-bottom: 0.25rem;
-    font-size: 0.8rem;
+    z-index: 1000;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.navbar {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    gap: 2rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.navbar-brand {
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: #0f172a;
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-fill-color: transparent;
+    -webkit-text-fill-color: transparent;
+    white-space: nowrap;
+}
+
+.main-nav-filters {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 2px;
+}
+
+.main-nav-filters button {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+}
+
+.main-nav-filters button.active {
+    background-color: #eff6ff;
+    color: #2563eb;
+}
+
+.main-nav-filters button.inactive {
+    color: #64748b;
+}
+
+.main-nav-filters button.inactive:hover {
+    background-color: #f8fafc;
+    color: #0f172a;
+}
+
+/* Filter Bar Redesign */
+.filter-bar {
+    padding: 0.75rem 1.5rem;
+    background-color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.filter-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.filter-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    min-width: 80px;
+}
+
+.pill-container {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.pill-button {
+    padding: 0.4rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.813rem;
     font-weight: 500;
-    color: #374151;
-  }
-  
-  /* Disabilitato */
-  .filter-select-aurora:disabled {
-    background-color: #f3f4f6;
-    color: #9ca3af;
-    cursor: not-allowed;
-  }
-  
-  /* Responsive */
-  @media (max-width: 600px) {
-    .filter-bar {
-      flex-direction: column;
-      gap: 0.75rem;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.pill-button:hover {
+    border-color: #cbd5e1;
+    color: #1e293b;
+    background: #f1f5f9;
+}
+
+.pill-button.active {
+    background: #3b82f6;
+    border-color: #2563eb;
+    color: white;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.pill-button.small {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+}
+
+.subgroup-row {
+    padding-top: 0.5rem;
+    border-top: 1px dashed #e2e8f0;
+}
+
+/* Hide scrollbar for main-nav-filters */
+.main-nav-filters::-webkit-scrollbar {
+    height: 0px;
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
     }
-  }
-  
+    
+    .filter-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .filter-label {
+        min-width: auto;
+    }
+}

@@ -150,14 +150,14 @@ const MarkdownRenderer = ({ text }) => {
   };
 
   // Elaborazione principale
-  const parts = text.split(/(`abap[\s\S]*?`)/g);
+  const parts = text.split(/(```abap[\s\S]*?```)/gi);
 
   const renderedParts = parts.map((part, index) => {
-    if (part.startsWith('`abap')) {
-      const code = part.replace(/^`abap\n?|\n?```$/g, '');
+    if (part.toLowerCase().startsWith('```abap')) {
+      const code = part.replace(/^```abap\s*|```\s*$/gi, '');
       return (
         <div key={index} className="preset-code-container my-4">
-          <AbapCode code={code} />
+          <AbapCode code={code.trim()} />
         </div>
       );
     }
