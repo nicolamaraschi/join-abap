@@ -25,7 +25,7 @@ In ABAP, i tipi di dati di base sono predefiniti e utilizzati per dichiarare var
 * **XSTRING**: Stringa di byte di lunghezza variabile.
 
 ### Esempio di Dichiarazione dei Tipi Base
-\`abap
+\`\`\`abap
 DATA gv_intero TYPE i.
 DATA gv_prezzo TYPE f.
 DATA gv_testo TYPE string.
@@ -33,7 +33,7 @@ DATA gv_codice TYPE c LENGTH 10.
 DATA gv_data TYPE d.
 DATA gv_ora TYPE t.
 DATA gv_raw_data TYPE xstring.
-\`
+\`\`\`
 
 ---
 
@@ -43,20 +43,20 @@ DATA gv_raw_data TYPE xstring.
 La dichiarazione delle variabili in ABAP avviene utilizzando la parola chiave DATA. È buona pratica assegnare un nome mnemonico e specificare sempre il tipo di dato.
 
 ### 2.1. Sintassi di Base
-\`abap
+\`\`\`abap
 DATA nome_variabile TYPE tipo_dato.
-\`
+\`\`\`
 
 ### 2.2. Dichiarazione In Linea (ABAP 7.40+)
 È anche possibile dichiarare variabili in linea (inline declaration) a partire da ABAP 7.40, il che rende il codice più compatto e leggibile.
 
 **Esempio con inline declaration:**
-\`abap
+\`\`\`abap
 DATA(lo_oggetto) = new zcl_mia_classe( ).
-\`
+\`\`\`
 
 ### 2.3. Esempi Pratici di Dichiarazione
-\`abap
+\`\`\`abap
 " Dichiarazione classica
 DATA gv_contatore TYPE i.
 DATA gv_messaggio TYPE string.
@@ -76,7 +76,7 @@ DATA gt_utenti TYPE TABLE OF string.
 
 " Dichiarazione in linea (ABAP 7.40+)
 SELECT * FROM mara INTO TABLE @DATA(lt_materiali).
-\`
+\`\`\`
 
 ## Sezione 3: Strutture (Work Areas)
 
@@ -88,7 +88,7 @@ Una struttura è un gruppo di campi correlati, trattati come una singola unità.
 
 È una best practice definire prima un tipo di dato strutturato usando TYPES e poi dichiarare una variabile (work area) di quel tipo.
 
-\`abap
+\`\`\`abap
 " Definizione di un tipo per i dati anagrafici
 TYPES: BEGIN OF ty_s_anagrafica,
          id          TYPE i,
@@ -103,16 +103,16 @@ DATA ls_dati_utente TYPE ty_s_anagrafica.
 " Accesso e valorizzazione dei campi
 ls_dati_utente-nome = 'Mario'.
 ls_dati_utente-cognome = 'Rossi'.
-\`
+\`\`\`
 
 ### 3.2. Dichiarazione basata sul Dizionario Dati (SE11)
 
 Il modo più comune e robusto per dichiarare una struttura è basarsi su una tabella o struttura esistente nel Dizionario ABAP.
 
-\`abap
+\`\`\`abap
 " Dichiara una work area con la stessa struttura della tabella KNA1
 DATA ls_cliente TYPE kna1.
-\`
+\`\`\`
 
 ## Sezione 4: Tabelle Interne
 
@@ -128,7 +128,7 @@ Una tabella interna è un oggetto che contiene una collezione di righe con la st
 
 ### 4.2. Esempio di Dichiarazione e Uso
 
-\`abap
+\`\`\`abap
 " 1. Definizione di un tipo per la tabella interna
 TYPES: ty_t_anagrafica TYPE STANDARD TABLE OF ty_s_anagrafica WITH NON-UNIQUE KEY id.
 
@@ -147,13 +147,13 @@ APPEND ls_utente TO lt_elenco_utenti.
 LOOP AT lt_elenco_utenti INTO ls_utente.
   WRITE: / ls_utente-id, ls_utente-nome.
 ENDLOOP.
-\`
+\`\`\`
 
 ### 4.3. Regole di Loop con Field-Symbol
 
 L'uso di ASSIGNING con un field-symbol è più performante perché evita di copiare i dati in una work area. **Regola di ambiente**: Non usare il field-symbol nella clausola WHERE di un LOOP. Il filtro deve essere fatto con IF o CHECK all'interno del loop.
 
-\`abap
+\`\`\`abap
 FIELD-SYMBOLS: <ls_utente> TYPE ty_s_anagrafica.
 
 " Sintassi ERRATA ❌
@@ -164,7 +164,7 @@ LOOP AT lt_elenco_utenti ASSIGNING <ls_utente>.
   CHECK <ls_utente>-id > 10. " Oppure IF...
   " ... La logica qui viene eseguita solo per le righe che soddisfano la condizione
 ENDLOOP.
-\`
+\`\`\`
 
 
 ## Sezione 5: Selezione Dati con Open SQL
@@ -182,7 +182,7 @@ La selezione dei dati dal database deve seguire regole di sintassi molto rigide 
 
 ### 5.2. Esempi di Sintassi
 
-\`abap
+\`\`\`abap
 " Sintassi ERRATA ❌
 SELECT campo1 campo2 
   UP TO 10 ROWS             "ERRORE: UP TO DEVE STARE SOTTO INTO TABLE
@@ -197,65 +197,65 @@ SELECT campo1,
   WHERE campo_filtro = 'VALORE'
   INTO TABLE @DATA(lt_tabella) 
     UP TO 10 ROWS.           " UP TO segue INTO TABLE
-\`
+\`\`\`
 
 ## Operazioni su Database
 
 ### SELECT - Selezione Dati
 Utilizzata per leggere dati dalle tabelle del database.
 
-\`abap
+\`\`\`abap
 SELECT * FROM mara INTO TABLE gt_materiali
   WHERE matnr IN s_matnr.
 
 " Selezione con campi specifici
 SELECT matnr, maktx FROM mara INTO TABLE gt_materiali
   WHERE spras = 'IT'.
-\`
+\`\`\`
 
 ### INSERT - Inserimento Dati
 Inserisce nuovi record nelle tabelle del database.
 
-\`abap
+\`\`\`abap
 INSERT ztabella FROM gs_record.
 
 " Inserimento da tabella interna
 INSERT ztabella FROM TABLE gt_records.
-\`
+\`\`\`
 
 ### UPDATE - Aggiornamento Dati
 Modifica record esistenti nel database.
 
-\`abap
+\`\`\`abap
 UPDATE ztabella SET campo1 = 'valore'
   WHERE id = gv_id.
 
 " Aggiornamento da struttura
 UPDATE ztabella FROM gs_record.
-\`
+\`\`\`
 
 ### DELETE - Cancellazione Dati
 Rimuove record dal database.
 
-\`abap
+\`\`\`abap
 DELETE FROM ztabella WHERE id = gv_id.
 
 " Cancellazione da tabella interna
 DELETE ztabella FROM TABLE gt_records.
-\`
+\`\`\`
 
 ### MODIFY - Inserimento/Aggiornamento
 Inserisce o aggiorna record basandosi sulla chiave primaria.
 
-\`abap
+\`\`\`abap
 MODIFY ztabella FROM gs_record.
-\`
+\`\`\`
 
 
 ### 5.2.1. Lettura con Funzioni Aggregate
 L'esempio che seguirà determina il numero totale dei record nella tabella spfli, come pure il valore più alto e il più basso del campo distanza tra l'aeroporto di partenza e quello di arrivo. Questo tipo di SELECT fa uso di funzioni che vengono denominate aggregate. Queste funzioni sono: MIN (minimo), MAX (massimo), COUNT (conta), AVG (media), SUM (somma, ma solo per campi numerici). A differenza delle altre SELECT, in questa non occorre assolutamente mettere il parametro ENDSELECT.
 
-\`abap
+\`\`\`abap
 REPORT z_aggregate_example.
 
 TABLES: spfli.
@@ -274,11 +274,11 @@ START-OF-SELECTION.
   WRITE: / 'Distanza Massima:', max_distance,
          / 'Distanza Minima:', min_distance,
          / 'Numero di Voli:', counter.
-\`
+\`\`\`
 
 ### 5.3. Esempio di Sintassi con JOIN
 
-\`abap
+\`\`\`abap
 " Questo esempio mostra come unire più tabelle seguendo le regole.
 " I nomi sono generici per illustrare la struttura.
 
@@ -291,7 +291,7 @@ SELECT t1~campo_chiave,
  INNER JOIN tabella3 AS t3 ON t1~altra_chiave = t3~altra_chiave
  WHERE t1~campo_filtro = 'A'
   INTO CORRESPONDING FIELDS OF TABLE @DATA(lt_risultato).
-\`
+\`\`\`
 
 ### 5.4. Best Practice per la Selezione Dati
 
@@ -310,16 +310,16 @@ FOR ALL ENTRIES è utile quando:
 - Si vogliono evitare prodotti cartesiani indesiderati
 
 **Sintassi di base:**
-\`abap
+\`\`\`abap
 SELECT campo1, campo2
   FROM tabella2
   FOR ALL ENTRIES IN lt_tabella_driver
   WHERE campo_chiave = lt_tabella_driver-campo_chiave
   INTO TABLE lt_risultato.
-\`
+\`\`\`
 
 ### 5.5.2. Esempio Pratico con FOR ALL ENTRIES
-\`abap
+\`\`\`abap
 " Prima: Selezione tabella driver
 SELECT vbeln, kunnr
   FROM vbak
@@ -335,12 +335,12 @@ IF lt_ordini IS NOT INITIAL.
     WHERE vbeln = lt_ordini-vbeln
     INTO TABLE @DATA(lt_posizioni).
 ENDIF.
-\`
+\`\`\`
 
 ### 5.5.3. Regole Critiche per FOR ALL ENTRIES
 
 **⚠️ CONTROLLO OBBLIGATORIO:**
-\`abap
+\`\`\`abap
 " ❌ ERRORE - Senza controllo
 SELECT campo FROM tabella
   FOR ALL ENTRIES IN lt_driver
@@ -355,7 +355,7 @@ IF lt_driver IS NOT INITIAL.
     WHERE chiave = lt_driver-chiave
     INTO TABLE lt_result.
 ENDIF.
-\`
+\`\`\`
 
 **Regole aggiuntive:**
 - Non usare DISTINCT con FOR ALL ENTRIES
@@ -375,7 +375,7 @@ ENDIF.
 | **Controlli** | Nessuno richiesto | Controllo tabella vuota obbligatorio |
 
 ### 5.6.2. Quando Scegliere JOIN
-\`abap
+\`\`\`abap
 " ✅ Usa JOIN quando:
 " - Relazioni dirette tra tabelle
 " - Serve tutti i dati da tutte le tabelle
@@ -390,10 +390,10 @@ SELECT v~vbeln,
   INNER JOIN vbap AS p ON v~vbeln = p~vbeln
   WHERE v~audat >= '20240101'
  INTO CORRESPONDING FIELDS OF TABLE @DATA(lt_ordini_completi).
-\`
+\`\`\`
 
 ### 5.6.3. Quando Scegliere FOR ALL ENTRIES
-\`abap
+\`\`\`abap
 " ✅ Usa FOR ALL ENTRIES quando:
 " - Logica di filtro complessa sulla tabella driver
 " - Non servono tutti i campi da tutte le tabelle
@@ -416,12 +416,12 @@ IF lt_ordini_filtrati IS NOT INITIAL.
     WHERE kunnr = lt_ordini_filtrati-kunnr
     INTO TABLE @DATA(lt_clienti).
 ENDIF.
-\`
+\`\`\`
 
 ## 5.7. Ottimizzazione delle Query
 
 ### 5.7.1. Indici Database
-\`abap
+\`\`\`abap
 " ✅ OTTIMIZZATO - Usa campi dell'indice primario o secondario
 SELECT vbeln, audat, kunnr
   FROM vbak
@@ -433,10 +433,10 @@ SELECT vbeln, audat, kunnr
   FROM vbak
   WHERE bstnk = 'ABC123'     " Campo senza indice
   INTO TABLE @DATA(lt_ordini_lenti).
-\`
+\`\`\`
 
 ### 5.7.2. Limitazione Record
-\`abap
+\`\`\`abap
 " Usa UP TO per limitare i record estratti
 SELECT vbeln, audat, kunnr
   FROM vbak
@@ -455,10 +455,10 @@ SELECT vbeln, audat, kunnr
   INTO CORRESPONDING FIELDS OF TABLE@DATA(lt_pagina)
   OFFSET @lv_offset ROWS
   FETCH NEXT @lv_limit ROWS ONLY.
-\`
+\`\`\`
 
 ### 5.7.3. Proiezione Campi
-\`abap
+\`\`\`abap
 " ✅ CORRETTO - Solo campi necessari
 SELECT vbeln, audat
   FROM vbak
@@ -470,12 +470,12 @@ SELECT *
   FROM vbak
   WHERE kunnr = '1000'
   INTO CORRESPONDING FIELDS OF TABLE @DATA(lt_tutto).  " Spreco di risorse
-\`
+\`\`\`
 
 ## 5.8. Gestione Errori nelle SELECT
 
 ### 5.8.1. Controllo SY-SUBRC
-\`abap
+\`\`\`abap
 SELECT SINGLE vbeln, audat, kunnr
   FROM vbak
   WHERE vbeln = '1000000001'
@@ -488,10 +488,10 @@ ELSE.
   " Record non trovato
   MESSAGE 'Ordine non esistente' TYPE 'E'.
 ENDIF.
-\`
+\`\`\`
 
 ### 5.8.2. Controllo Tabelle Vuote
-\`abap
+\`\`\`abap
 SELECT vbeln, audat, kunnr
   FROM vbak
   WHERE audat >= '20240101'
@@ -505,11 +505,11 @@ IF sy-subrc = 0 AND lines( lt_ordini ) > 0.
 ELSE.
   MESSAGE 'Nessun ordine trovato per il periodo' TYPE 'I'.
 ENDIF.
-\`
+\`\`\`
 
 ## 5.9. Esempio Completo: Query Complessa Multi-Tabella
 
-\`abap
+\`\`\`abap
 " Definizione struttura risultato
 TYPES: BEGIN OF ty_ordine_dettaglio,
          numero_ordine    TYPE vbak-vbeln,
@@ -568,7 +568,7 @@ IF sy-subrc = 0.
 ELSE.
   MESSAGE 'Nessun dato trovato per i criteri specificati' TYPE 'I'.
 ENDIF.
-\`
+\`\`\`
 
 ## 5.10. Checklist Best Practice per le SELECT
 
@@ -601,7 +601,7 @@ L'ambiente di sviluppo supporta la programmazione dinamica tramite RTTI (Run-Tim
 
 È possibile creare oggetti dato (variabili, strutture, tabelle) la cui struttura è definita a runtime.
 
-\`abap
+\`\`\`abap
 DATA: lv_nome_tabella TYPE string,
       lr_tabella_dati TYPE REF TO data.
 FIELD-SYMBOLS: <lt_tabella_dinamica> TYPE STANDARD TABLE.
@@ -620,13 +620,13 @@ SELECT *
   FROM (lv_nome_tabella)
   INTO TABLE @<lt_tabella_dinamica>
     UP TO 20 ROWS.
-\`
+\`\`\`
 
 ### 6.2. Accesso Dinamico a Componenti
 
 È possibile accedere ai campi di una struttura dinamicamente, senza conoscerne il nome a compile-time, usando i field-symbols.
 
-\`abap
+\`\`\`abap
 FIELD-SYMBOLS: <ls_struttura>    TYPE any,
                <lv_valore_campo> TYPE any.
 DATA: lv_nome_campo TYPE string.
@@ -639,13 +639,13 @@ IF sy-subrc = 0.
   " Ora <lv_valore_campo> punta al valore del campo richiesto
   WRITE: / <lv_valore_campo>.
 ENDIF.
-\`
+\`\`\`
 
 ### 6.3. WHERE Dinamica in una SELECT
 
 La clausola WHERE può essere costruita dinamicamente in una tabella interna di stringhe.
 
-\`abap
+\`\`\`abap
 DATA: lt_condizioni_where TYPE TABLE OF string,
       lv_condizione       TYPE string.
 
@@ -659,7 +659,7 @@ SELECT campo1, campo2
   FROM nome_tabella
   WHERE (lt_condizioni_where) " Le parentesi sono obbligatorie
   INTO TABLE @DATA(lt_dati).
-\`
+\`\`\`
 
 -----
 ## Sezione 7: Schermata di Selezione (Selection-Screen)
@@ -673,7 +673,7 @@ La SELECTION-SCREEN è l'interfaccia standard di un report ABAP, che permette al
 
 Un PARAMETER definisce un singolo campo di input.
 
-\`abap
+\`\`\`abap
 " Input per un singolo valore, obbligatorio
 PARAMETERS p_bukrs TYPE bukrs OBLIGATORY.
 
@@ -692,13 +692,13 @@ PARAMETERS: p_rad1 RADIOBUTTON GROUP grp1,
 
 Un SELECT-OPTIONS definisce un intervallo di selezione complesso (da-a, valori singoli, esclusioni) per un campo.
 
-\`abap
+\`\`\`abap
 " Dichiara la tabella del dizionario per poter usare FOR
 TABLES: kna1.
 
 " Crea un intervallo di selezione per il codice cliente
 SELECT-OPTIONS so_kunnr FOR kna1-kunnr.
-\`
+\`\`\`
 
 Il SELECT-OPTIONS crea una tabella interna (con testata) con i campi SIGN, OPTION, LOW e HIGH, che può essere usata direttamente nella clausola WHERE di una SELECT.
 
@@ -706,7 +706,7 @@ Il SELECT-OPTIONS crea una tabella interna (con testata) con i campi SIGN, OPTIO
 
 È possibile organizzare la schermata per renderla più leggibile.
 
-\`abap
+\`\`\`abap
 SELECTION-SCREEN BEGIN OF BLOCK blocco1 WITH FRAME TITLE TEXT-001.
   PARAMETERS p_campo1 TYPE c LENGTH 10.
 SELECTION-SCREEN END OF BLOCK blocco1.
@@ -718,7 +718,7 @@ SELECTION-SCREEN END OF LINE.
 
 " Pulsante sulla barra dell'applicazione
 SELECTION-SCREEN PUSHBUTTON /10(20) btn_proc USER-COMMAND ucomm_proc.
-\`
+\`\`\`
 
 -----
 
@@ -744,16 +744,16 @@ Visualizza un messaggio all'utente in una finestra di dialogo o nella status bar
 
 <!-- end list -->
 
-\`abap
+\`\`\`abap
 MESSAGE 'Operazione completata con successo.' TYPE 'S'.
 MESSAGE 'Dati non validi, correggere.' TYPE 'E'.
-\`
+\`\`\`
 
 ### 8.3. Messaggi con Variabili e Transazioni
 
 È possibile inserire fino a 4 variabili in un messaggio usando WITH. I messaggi dovrebbero essere definiti nella transazione SE91 (Message Class).
 
-\`abap
+\`\`\`abap
 " Esempio di messaggio da una classe di messaggi 'ZMSG' numero 001
 " con testo: "Documento &1 per la società &2 non trovato."
 MESSAGE e001(zmsg) WITH '100001' '1000'.
@@ -762,7 +762,7 @@ MESSAGE e001(zmsg) WITH '100001' '1000'.
 " SET PARAMETER ID 'BES' FIELD lv_ebeln.
 " CALL TRANSACTION 'ME23N' AND SKIP FIRST SCREEN.
 " Questo pattern è spesso usato dopo un messaggio informativo.
-\`
+\`\`\`
 
 ### 8.4. Gestione di sy-subrc
 
@@ -773,7 +773,7 @@ Dopo la maggior parte delle istruzioni (chiamate a FUNCTION, SELECT, READ TABLE,
 
 <!-- end list -->
 
-\`abap
+\`\`\`abap
 READ TABLE lt_elenco_utenti WITH KEY id = 10 INTO ls_utente.
 IF sy-subrc = 0.
   " Riga trovata, procedi con l'elaborazione
@@ -781,7 +781,7 @@ ELSE.
   " Riga non trovata, gestisci l'errore
   MESSAGE 'Utente con ID 10 non trovato.' TYPE 'E'.
 ENDIF.
-\`
+\`\`\`
 
 -----
 
@@ -803,7 +803,7 @@ Un report eseguibile deve essere suddiviso in file INCLUDE per separare le diver
 
 ## Le FORM sono blocchi di codice riutilizzabili all'interno di un programma.
 
-\`abap
+\`\`\`abap
 " Chiamata al sottoprogramma
 PERFORM f_calcola_totale
   USING
@@ -823,11 +823,11 @@ FORM f_calcola_totale
   cv_totale = iv_valore1 + iv_valore2.
 
 ENDFORM.
-\`
+\`\`\`
 
 ## Definizione di un sottoprogramma
 
-\`abap
+\`\`\`abap
 FORM nome_sottoprogramma
   [USING parametri_input] "VALORI SOLO LETTURA
   [CHANGING parametri_input_output] " VALORI IN LETTURA E SCRITTURA
@@ -836,24 +836,24 @@ FORM nome_sottoprogramma
   " Logica del sottoprogramma
   
 ENDFORM.
-\`
+\`\`\`
 
 
 ## Chiamata di un sottoprogramma
 
-\`abap
+\`\`\`abap
 PERFORM nome_sottoprogramma
   [USING valori_input] "VALORI SOLO LETTURA
   [CHANGING valori_input_output] " VALORI IN LETTURA E SCRITTURA
   [TABLES tabelle].
-\`
+\`\`\`
 
 
 ## Tipi di passaggio parametri
 ## 1. USING - Parametri di input LETTURA NON SCRITTURA
 ## I parametri USING vengono passati per val LETTURA E SCRITTURA
 
-\`abap
+\`\`\`abap
 " Esempio completo
 DATA: lv_numero1 TYPE i VALUE 10,
       lv_numero2 TYPE i VALUE 20,
@@ -877,12 +877,12 @@ FORM calcola_somma
   " iv_num1 e iv_num2 sono di sola lettura
   
 ENDFORM.
-\`
+\`\`\`
 
 ## 2. CHANGING - Parametri di input/output (pass by reference)
 ## I parametri CHANGING vengono passati per riferimento e possono essere sia letti che modificati all'interno della FORM.
 
-\`abap
+\`\`\`abap
 DATA: lv_valore TYPE i VALUE 100.
 
 " Il valore verrà modificato dalla FORM
@@ -898,12 +898,12 @@ FORM raddoppia_valore
   " cv_valore può essere sia letto che modificato
   
 ENDFORM.
-\`
+\`\`\`
 
 ## 3. TABLES - Parametri per tabelle interne
 ## Il parametro TABLES viene utilizzato per passare tabelle interne al sottoprogramma.
 
-\`abap
+\`\`\`abap
 " Definizione di una struttura e tabella
 TYPES: BEGIN OF ty_prodotto,
          id    TYPE i,
@@ -945,13 +945,13 @@ FORM elabora_prodotti
   ENDLOOP.
   
 ENDFORM.
-\`
+\`\`\`
 ### 9.3. PERFORM Dinamica
 
 È possibile chiamare una FORM il cui nome è definito a runtime in una variabile.
 **Regola di ambiente**: La sintassi deve essere esplicita con IN PROGRAM.
 
-\`abap
+\`\`\`abap
 DATA: lv_nome_form TYPE string,
       lv_programma TYPE sy-repid.
 
@@ -965,7 +965,7 @@ PERFORM (lv_nome_form) IN PROGRAM (lv_programma).
 "   "#EC CALLED
 "   WRITE: / 'Chiamata dinamica eseguita'.
 " ENDFORM.
-\`
+\`\`\`
 
 -----
 
@@ -979,7 +979,7 @@ Questi costrutti dirigono il flusso di esecuzione del programma.
 
 Il costrutto di base per le decisioni.
 
-\`abap
+\`\`\`abap
 IF lv_valore > 100.
   WRITE: / 'Valore alto'.
 ELSEIF lv_valore > 50.
@@ -987,13 +987,13 @@ ELSEIF lv_valore > 50.
 ELSE.
   WRITE: / 'Valore basso'.
 ENDIF.
-\`
+\`\`\`
 
 ### 10.2. CASE
 
 Utile quando si deve valutare una singola variabile contro più valori possibili.
 
-\`abap
+\`\`\`abap
 CASE lv_tipo_documento.
   WHEN 'A'.
     PERFORM f_gestisci_ordine.
@@ -1002,7 +1002,7 @@ CASE lv_tipo_documento.
   WHEN OTHERS.
     MESSAGE 'Tipo documento non valido.' TYPE 'E'.
 ENDCASE.
-\`
+\`\`\`
 
 ### 10.3. Operatori Condizionali (Supporto Misto)
 
@@ -1013,7 +1013,7 @@ L'ambiente ha un supporto misto per la sintassi moderna.
 
 <!-- end list -->
 
-\`abap
+\`\`\`abap
 " Esempio con COND (supportato)
 lv_descrizione_stato = COND string( WHEN lv_stato = 'A' THEN 'Attivo'
                                      WHEN lv_stato = 'C' THEN 'Chiuso'
@@ -1022,7 +1022,7 @@ lv_descrizione_stato = COND string( WHEN lv_stato = 'A' THEN 'Attivo'
 " Esempio con CONCATENATE (obbligatorio al posto dei template)
 CONCATENATE 'Il cliente' ls_cliente-name1 'vive a' ls_cliente-ort01
   INTO lv_messaggio SEPARATED BY space.
-\`
+\`\`\`
 
 
 # Guida Completa alle Keyword ABAP
@@ -1032,16 +1032,16 @@ CONCATENATE 'Il cliente' ls_cliente-name1 'vive a' ls_cliente-ort01
 ### DATA - Dichiarazione di Variabili
 Utilizzata per dichiarare variabili locali o globali nel programma.
 
-\`abap
+\`\`\`abap
 DATA: gv_nome TYPE string,
       gv_eta TYPE i,
       gv_prezzo TYPE p DECIMALS 2.
-\`
+\`\`\`
 
 ### TYPES - Definizione di Tipi Personalizzati (RIGA)
 Permette di definire tipi di dati personalizzati per riutilizzarli nel programma.
 
-\`abap
+\`\`\`abap
 TYPES: BEGIN OF ty_cliente,
          id TYPE i,
          nome TYPE string,
@@ -1049,11 +1049,11 @@ TYPES: BEGIN OF ty_cliente,
        END OF ty_cliente.
 
 DATA: ls_cliente TYPE ty_cliente.
-\`
+\`\`\`
 
 ### TYPE STANDARD TABLE OF- Definizione PRPRIO UNA TABELLA INTERNA
 
-\`abap
+\`\`\`abap
 " --- PASSO 1: Definire il MODELLO per un singolo dato (una struttura) ---
 " TYPES: È l'istruzione per creare un NUOVO TIPO di dato.
 "        Qui creiamo un "modello" chiamato 'ty_s_prodotto' che raggruppa
@@ -1077,32 +1077,32 @@ TYPES ty_t_prodotti TYPE STANDARD TABLE OF ty_s_prodotto.
 "       'lt_catalogo_prodotti' è la nostra tabella, creata usando il
 "       modello di tabella 'ty_t_prodotti' definito prima.
 DATA lt_catalogo_prodotti TYPE ty_t_prodotti.
-\`
+\`\`\`
 
 ### CONSTANTS - Dichiarazione di Costanti
 Definisce valori costanti che non possono essere modificati durante l'esecuzione.
 
-\`abap
+\`\`\`abap
 CONSTANTS: gc_max_righe TYPE i VALUE 100,
           gc_stato_attivo TYPE c VALUE 'A'.
-\`
+\`\`\`
 
 ### FIELD-SYMBOLS - Puntatori Dinamici
 Utilizzati per accedere dinamicamente ai dati senza copiarli.
 
-\`abap
+\`\`\`abap
 FIELD-SYMBOLS: <fs_riga> TYPE any,
                <fs_campo> TYPE any.
 
 ASSIGN gv_variabile TO <fs_riga>.
-\`
+\`\`\`
 
 ## Strutture di Controllo
 
 ### IF/ELSE/ENDIF - Condizioni
 Struttura condizionale per eseguire codice basato su condizioni.
 
-\`abap
+\`\`\`abap
 IF gv_eta >= 18.
   WRITE: 'Maggiorenne'.
 ELSEIF gv_eta >= 13.
@@ -1110,179 +1110,179 @@ ELSEIF gv_eta >= 13.
 ELSE.
   WRITE: 'Minorenne'.
 ENDIF.
-\`
+\`\`\`
 
 Ecco tutti gli operatori di relazione legati all'istruzione di controllo IF in ABAP:
 #### Operatori di confronto:
 
 * **EQ (Equal)** - uguale a
-\`abap
+\`\`\`abap
 IF status EQ 'A'.
   WRITE: 'Stato Attivo'.
 ENDIF.
-\`
+\`\`\`
 * **NE (Not Equal)** - diverso da
-\`abap
+\`\`\`abap
 IF status NE 'I'.
   WRITE: 'Stato non Inattivo'.
 ENDIF.
-\`
+\`\`\`
 * **GT (Greater Than)** - maggiore di
-\`abap
+\`\`\`abap
 IF contatore GT 10.
   WRITE: 'Superato il limite'.
 ENDIF.
-\`
+\`\`\`
 * **GE (Greater or Equal)** - maggiore di o uguale a
-\`abap
+\`\`\`abap
 IF punteggio GE 100.
   WRITE: 'Punteggio massimo raggiunto'.
 ENDIF.
-\`
+\`\`\`
 * **LT (Less Than)** - minore di
-\`abap
+\`\`\`abap
 IF livello LT 5.
   WRITE: 'Livello base'.
 ENDIF.
-\`
+\`\`\`
 * **LE (Less or Equal)** - minore di o uguale a
-\`abap
+\`\`\`abap
 IF tentativi LE 3.
   WRITE: 'Hai ancora tentativi'.
 ENDIF.
-\`
+\`\`\`
 
 #### Operatori di range:
 
 * **BETWEEN** - compreso tra due valori (f1 AND f2)
-\`abap
+\`\`\`abap
 IF numero BETWEEN 1 AND 100.
   WRITE: 'Numero nel range'.
 ENDIF.
-\`
+\`\`\`
 
 #### Operatori per stringhe:
 
 * **CO (Contains Only)** - contiene solo i caratteri specificati
-\`abap
+\`\`\`abap
 IF stringa CO 'ABCDE'.
   WRITE: 'La stringa contiene solo caratteri da A a E'.
 ENDIF.
-\`
+\`\`\`
 * **CN (Contains Not only)** - non contiene solo i caratteri specificati
-\`abap
+\`\`\`abap
 IF stringa CN '0123456789'.
   WRITE: 'La stringa non è puramente numerica'.
 ENDIF.
-\`
+\`\`\`
 * **CA (Contains Any)** - contiene almeno uno dei caratteri specificati
-\`abap
+\`\`\`abap
 IF stringa CA '!?#'.
   WRITE: 'La stringa contiene caratteri speciali'.
 ENDIF.
-\`
+\`\`\`
 * **NA (Not Any)** - non contiene nessuno dei caratteri specificati
-\`abap
+\`\`\`abap
 IF stringa NA ' '.
   WRITE: 'La stringa non contiene spazi'.
 ENDIF.
-\`
+\`\`\`
 * **CS (Contains String)** - contiene la stringa specificata
-\`abap
+\`\`\`abap
 IF testo CS 'SAP'.
   WRITE: 'Trovata la parola SAP'.
 ENDIF.
-\`
+\`\`\`
 * **NS (Not String)** - non contiene la stringa specificata
-\`abap
+\`\`\`abap
 IF testo NS 'obsoleto'.
   WRITE: 'Il testo è aggiornato'.
 ENDIF.
-\`
+\`\`\`
 * **CP (Contains Pattern)** - corrisponde al pattern (con * e +)
-\`abap
+\`\`\`abap
 IF codice_postale CP '#####'.
   WRITE: 'Formato CAP valido'.
 ENDIF.
-\`
+\`\`\`
 * **NP (No Pattern)** - non corrisponde al pattern
-\`abap
+\`\`\`abap
 IF telefono NP '+##-##########'.
   WRITE: 'Formato telefono non valido'.
 ENDIF.
-\`
+\`\`\`
 
 #### Operatori per valori iniziali:
 
 * **IS INITIAL** - è vuoto/iniziale
-\`abap
+\`\`\`abap
 IF variabile IS INITIAL.
   WRITE: 'La variabile non è stata valorizzata'.
 ENDIF.
-\`
+\`\`\`
 * **IS NOT INITIAL** - non è vuoto/iniziale
-\`abap
+\`\`\`abap
 IF tabella IS NOT INITIAL.
   WRITE: 'La tabella contiene dati'.
 ENDIF.
-\`
+\`\`\`
 
 #### Operatori per valori NULL:
 
 * **IS NULL** - è nullo (per riferimenti oggetti)
-\`abap
+\`\`\`abap
 IF oggetto IS NULL.
   WRITE: 'Oggetto non istanziato'.
 ENDIF.
-\`
+\`\`\`
 * **IS NOT NULL** - non è nullo
-\`abap
+\`\`\`abap
 IF oggetto IS NOT NULL.
   WRITE: 'Oggetto istanziato'.
 ENDIF.
-\`
+\`\`\`
 
 #### Operatori per classi/interfacce:
 
 * **IS INSTANCE OF** - è un'istanza della classe/interfaccia
-\`abap
+\`\`\`abap
 IF lo_oggetto IS INSTANCE OF zcl_mia_classe.
   WRITE: 'L\'oggetto è una istanza della classe ZCL_MIA_CLASSE'.
 ENDIF.
-\`
+\`\`\`
 * **IS NOT INSTANCE OF** - non è un'istanza della classe/interfaccia
-\`abap
+\`\`\`abap
 IF lo_oggetto IS NOT INSTANCE OF zif_mia_interfaccia.
   WRITE: 'L\'oggetto non implementa l\'interfaccia ZIF_MIA_INTERFACCIA'.
 ENDIF.
-\`
+\`\`\`
 
 #### Operatori logici per combinare condizioni:
 
 * **AND** - e logico
-\`abap
+\`\`\`abap
 IF status EQ 'A' AND tipo EQ 'X'.
   WRITE: 'Condizione complessa verificata'.
 ENDIF.
-\`
+\`\`\`
 * **OR** - o logico
-\`abap
+\`\`\`abap
 IF priorita EQ 1 OR urgenza EQ 'ALTA'.
   WRITE: 'Elemento prioritario'.
 ENDIF.
-\`
+\`\`\`
 * **NOT** - negazione logica
-\`abap
+\`\`\`abap
 IF NOT ( status EQ 'C' ).
   WRITE: 'Lo stato non è Chiuso'.
 ENDIF.
-\`
+\`\`\`
 
 
 ### CASE/WHEN/ENDCASE - Selezione Multipla
 Struttura per gestire multiple condizioni basate su un singolo valore.
 
-\`abap
+\`\`\`abap
 CASE gv_stato.
   WHEN 'A'.
     WRITE: 'Attivo'.
@@ -1291,12 +1291,12 @@ CASE gv_stato.
   WHEN OTHERS.
     WRITE: 'Stato sconosciuto'.
 ENDCASE.
-\`
+\`\`\`
 
 ### LOOP/ENDLOOP - Cicli
 Utilizzato per iterare su tabelle interne o eseguire cicli.
 
-\`abap
+\`\`\`abap
 LOOP AT gt_clienti INTO gs_cliente.
   WRITE: gs_cliente-nome.
 ENDLOOP.
@@ -1305,124 +1305,124 @@ ENDLOOP.
 LOOP AT gt_clienti INTO gs_cliente WHERE eta > 18.
   WRITE: gs_cliente-nome.
 ENDLOOP.
-\`
+\`\`\`
 
 ### WHILE/ENDWHILE - Ciclo Condizionale
 Esegue un blocco di codice finché una condizione rimane vera.
 
-\`abap
+\`\`\`abap
 WHILE gv_contatore < 10.
   WRITE: gv_contatore.
   gv_contatore = gv_contatore + 1.
 ENDWHILE.
-\`
+\`\`\`
 
 ### DO/ENDDO - Ciclo Determinato
 Esegue un blocco di codice un numero specifico di volte.
 
-\`abap
+\`\`\`abap
 DO 5 TIMES.
   WRITE: 'Iterazione', sy-index.
 ENDDO.
-\`
+\`\`\`
 
 ## Operazioni su Tabelle Interne
 
 ### APPEND - Aggiunta Righe
 Aggiunge una nuova riga alla fine di una tabella interna.
 
-\`abap
+\`\`\`abap
 gs_cliente-id = 1.
 gs_cliente-nome = 'Mario Rossi'.
 APPEND gs_cliente TO gt_clienti.
-\`
+\`\`\`
 
 ### CLEAR - Pulizia Variabili
 Pulisce il contenuto di variabili o work area.
 
-\`abap
+\`\`\`abap
 CLEAR: gs_cliente, gv_contatore.
-\`
+\`\`\`
 
 ### REFRESH - Pulizia Tabelle
 Rimuove tutte le righe da una tabella interna.
 
-\`abap
+\`\`\`abap
 REFRESH gt_clienti.
-\`
+\`\`\`
 
 ### READ TABLE - Lettura Righe
 Legge una riga specifica da una tabella interna.
 
 #### Lettura Standard
-\`abap
+\`\`\`abap
 READ TABLE gt_clienti INTO gs_cliente WITH KEY id = 1.
 IF sy-subrc = 0.
   WRITE: gs_cliente-nome.
 ENDIF.
-\`
+\`\`\`
 
 #### Lettura con Binary Search (Tabella Ordinata)
-\`abap
+\`\`\`abap
 " Più veloce per tabelle grandi già ordinate
 SORT gt_clienti BY nome.
 READ TABLE gt_clienti INTO gs_cliente WITH KEY nome = 'Mario' BINARY SEARCH.
-\`
+\`\`\`
 
 #### Lettura con Field-Symbol (Più Efficiente)
-\`abap
+\`\`\`abap
 READ TABLE gt_clienti ASSIGNING <fs_cliente> WITH KEY id = 1.
 IF sy-subrc = 0.
   <fs_cliente>-eta = <fs_cliente>-eta + 1.  " Modifica diretta
 ENDIF.
-\`
+\`\`\`
 
 #### Lettura con Reference
-\`abap
+\`\`\`abap
 READ TABLE gt_clienti REFERENCE INTO lr_cliente WITH KEY id = 1.
 IF sy-subrc = 0.
   lr_cliente->eta = lr_cliente->eta + 1.
 ENDIF.
-\`
+\`\`\`
 
 #### Lettura Selettiva di Campi (TRANSPORTING)
-\`abap
+\`\`\`abap
 " Legge solo i campi specificati per migliore performance
 READ TABLE gt_clienti INTO gs_cliente WITH KEY id = 1 
      TRANSPORTING nome eta.
-\`
+\`\`\`
 
 #### Lettura per Indice
-\`abap
+\`\`\`abap
 READ TABLE gt_clienti INTO gs_cliente INDEX 1.
-\`
+\`\`\`
 
 ### SORT - Ordinamento
 Ordina una tabella interna per uno o più campi.
 
 #### Ordinamento Base
-\`abap
+\`\`\`abap
 SORT gt_clienti BY nome ASCENDING eta DESCENDING.
-\`
+\`\`\`
 
 #### Ordinamento con Criteri Multipli
-\`abap
+\`\`\`abap
 SORT gt_clienti BY citta ASCENDING 
                    nome ASCENDING 
                    eta DESCENDING.
-\`
+\`\`\`
 
 #### Ordinamento Stabile
-\`abap
+\`\`\`abap
 " Mantiene l'ordine originale per elementi uguali
 SORT gt_clienti STABLE BY nome.
-\`
+\`\`\`
 
 ### COLLECT - Raccolta con Somma
 Raccoglie righe con chiave uguale sommando i campi numerici.
 
 #### Utilizzo Base
-\`abap
+\`\`\`abap
 gs_totale-reparto = 'IT'.
 gs_totale-importo = 1000.
 COLLECT gs_totale INTO gt_totali.
@@ -1430,102 +1430,102 @@ COLLECT gs_totale INTO gt_totali.
 gs_totale-reparto = 'IT'.    " Stessa chiave
 gs_totale-importo = 500.     " Verrà sommato: 1000 + 500 = 1500
 COLLECT gs_totale INTO gt_totali.
-\`
+\`\`\`
 
 #### Esempio Pratico con Loop
-\`abap
+\`\`\`abap
 LOOP AT gt_vendite INTO gs_vendita.
   gs_riepilogo-cliente = gs_vendita-cliente.
   gs_riepilogo-totale = gs_vendita-importo.
   COLLECT gs_riepilogo INTO gt_riepilogo.
 ENDLOOP.
-\`
+\`\`\`
 
 ### MODIFY - Modifica Righe
 Modifica righe esistenti in una tabella interna.
 
 #### Modifica per Indice
-\`abap
+\`\`\`abap
 gs_cliente-nome = 'Nuovo Nome'.
 MODIFY gt_clienti FROM gs_cliente INDEX 1.
-\`
+\`\`\`
 
 #### Modifica con Condizione WHERE
-\`abap
+\`\`\`abap
 gs_cliente-attivo = 'X'.
 MODIFY gt_clienti FROM gs_cliente WHERE eta > 65.
-\`
+\`\`\`
 
 #### Modifica con Field-Symbol
-\`abap
+\`\`\`abap
 LOOP AT gt_clienti ASSIGNING <fs_cliente>.
   <fs_cliente>-eta = <fs_cliente>-eta + 1.
   MODIFY gt_clienti FROM <fs_cliente> INDEX sy-tabix.
 ENDLOOP.
-\`
+\`\`\`
 
 ### DELETE - Cancellazione Righe
 Rimuove righe da una tabella interna.
 
 #### Cancellazione per Indice
-\`abap
+\`\`\`abap
 DELETE gt_clienti INDEX 1.
-\`
+\`\`\`
 
 #### Cancellazione con Condizione WHERE
-\`abap
+\`\`\`abap
 DELETE gt_clienti WHERE eta > 65 AND attivo = ' '.
-\`
+\`\`\`
 
 #### Rimozione Duplicati Adiacenti
-\`abap
+\`\`\`abap
 SORT gt_clienti BY nome.
 DELETE ADJACENT DUPLICATES FROM gt_clienti COMPARING nome.
-\`
+\`\`\`
 
 #### Rimozione Duplicati per Tutti i Campi
-\`abap
+\`\`\`abap
 DELETE ADJACENT DUPLICATES FROM gt_clienti.
-\`
+\`\`\`
 
 ### INSERT - Inserimento Righe
 Inserisce righe in posizioni specifiche.
 
 #### Inserimento Singola Riga
-\`abap
+\`\`\`abap
 INSERT gs_cliente INTO gt_clienti INDEX 1.
-\`
+\`\`\`
 
 #### Inserimento Multiple Righe
-\`abap
+\`\`\`abap
 INSERT LINES OF gt_nuovi_clienti INTO gt_clienti INDEX 1.
-\`
+\`\`\`
 
 ### APPEND - Aggiunta Righe
 Aggiunge righe alla fine della tabella.
 
 #### Aggiunta Singola
-\`abap
+\`\`\`abap
 APPEND gs_cliente TO gt_clienti.
-\`
+\`\`\`
 
 #### Aggiunta Multiple
-\`abap
+\`\`\`abap
 APPEND LINES OF gt_altri_clienti TO gt_clienti.
-\`
+\`\`\`
 
 ### LOOP - Iterazione Avanzata
 Cicli con controlli e condizioni.
 
 #### Loop con Condizione WHERE
-\`abap
+\`\`\`abap
 LOOP AT gt_clienti INTO gs_cliente WHERE eta > 18 AND citta = 'Milano'.
   WRITE: / gs_cliente-nome, gs_cliente-eta.
 ENDLOOP.
-\`
+\`\`\`
 
 #### Loop con Controllo Indice
-\`abap
+\`\`\`abap
 LOOP AT gt_clienti INTO gs_cliente.
   IF sy-tabix = 1.
     WRITE: / 'Primo cliente:', gs_cliente-nome.
@@ -1533,61 +1533,61 @@ LOOP AT gt_clienti INTO gs_cliente.
     WRITE: / 'Ultimo cliente:', gs_cliente-nome.
   ENDIF.
 ENDLOOP.
-\`
+\`\`\`
 
 #### Loop da Indice a Indice
-\`abap
+\`\`\`abap
 LOOP AT gt_clienti INTO gs_cliente FROM 5 TO 10.
   WRITE: / gs_cliente-nome.
 ENDLOOP.
-\`
+\`\`\`
 
 ### DESCRIBE TABLE - Informazioni Tabella
 Ottiene informazioni sulla struttura della tabella.
 
 #### Conteggio Righe
-\`abap
+\`\`\`abap
 DESCRIBE TABLE gt_clienti LINES lv_lines.
 WRITE: / 'Numero righe:', lv_lines.
-\`
+\`\`\`
 
 #### Informazioni Complete
-\`abap
+\`\`\`abap
 DESCRIBE TABLE gt_clienti LINES lv_lines KIND lv_kind.
 " lv_kind: 'T' = Standard Table, 'S' = Sorted Table, 'H' = Hashed Table
-\`
+\`\`\`
 
 ### CLEAR vs REFRESH vs FREE
 Differenti modi per pulire le tabelle.
 
 #### CLEAR - Pulisce Header Line
-\`abap
+\`\`\`abap
 CLEAR gt_clienti.      " Pulisce solo la work area (se esiste)
 CLEAR gs_cliente.      " Pulisce la struttura
-\`
+\`\`\`
 
 #### REFRESH - Pulisce Contenuto Tabella
-\`abap
+\`\`\`abap
 REFRESH gt_clienti.    " Rimuove tutte le righe, mantiene memoria allocata
-\`
+\`\`\`
 
 #### FREE - Libera Memoria
-\`abap
+\`\`\`abap
 FREE gt_clienti.       " Rimuove righe e libera completamente la memoria
-\`
+\`\`\`
 
 ### Operazioni Set-Oriented (Performance Ottimale)
 Operazioni che agiscono sull'intera tabella contemporaneamente.
 
 #### Operazioni Condizionali Multiple
-\`abap
+\`\`\`abap
 " Invece di loop, usa operazioni dirette
 DELETE gt_clienti WHERE eta < 18 OR eta > 65.
 MODIFY gt_clienti FROM gs_default WHERE nome IS INITIAL.
-\`
+\`\`\`
 
 #### Confronto Performance
-\`abap
+\`\`\`abap
 " ❌ Lento - Loop individuale
 LOOP AT gt_clienti INTO gs_cliente.
   IF gs_cliente-eta > 65.
@@ -1597,89 +1597,89 @@ ENDLOOP.
 
 " ✅ Veloce - Operazione set-oriented
 DELETE gt_clienti WHERE eta > 65.
-\`
+\`\`\`
 
 ### FOR - Espressioni di Costruzione Tabelle
 Iteratore per costruire tabelle basato su altre tabelle o range, simile ai list comprehensions.
 
-\`abap
+\`\`\`abap
 DATA(gt_nomi) = VALUE string_table( FOR ls_cliente IN gt_clienti 
                                    WHERE ( eta > 18 )
                                    ( ls_cliente-nome ) ).
-\`
+\`\`\`
 
 
 ### FOR - Espressioni di Costruzione Tabelle
 Iteratore per costruire tabelle basato su altre tabelle o range, simile ai list comprehensions.
 
-\`abap
+\`\`\`abap
 DATA(gt_nomi) = VALUE string_table( FOR ls_cliente IN gt_clienti 
                                     WHERE ( eta > 18 )
                                     ( ls_cliente-nome ) ).
-\`
+\`\`\`
 
 ### REDUCE - Aggregazioni
 Operatore per calcolare un singolo valore aggregato iterando su una tabella (somme, conteggi, concatenazioni).
 
-\`abap
+\`\`\`abap
 DATA(lv_totale) = REDUCE i( INIT sum = 0 
                            FOR ls_ordine IN gt_ordini 
                            NEXT sum = sum + ls_ordine-importo ).
-\`
+\`\`\`
 
 ### FILTER - Filtraggio Tabelle
 Costruisce una nuova tabella contenente solo le righe che soddisfano una condizione specifica.
 
-\`abap
+\`\`\`abap
 DATA(gt_adulti) = FILTER #( gt_clienti WHERE eta > 18 ).
-\`
+\`\`\`
 
 ### VALUE #( ) - Costruttori di Tabella
 Sintassi moderna per inizializzare tabelle interne con valori specifici in modo dichiarativo.
 
-\`abap
+\`\`\`abap
 DATA(gt_colori) = VALUE string_table( ( 'Rosso' ) ( 'Verde' ) ( 'Blu' ) ).
-\`
+\`\`\`
 
 ### COND - Operatore Ternario
 Espressione condizionale inline che restituisce un valore basato su una condizione (equivalente a if-then-else compatto).
 
-\`abap
+\`\`\`abap
 DATA(lv_stato) = COND string( WHEN lv_eta >= 18 THEN 'Adulto' ELSE 'Minore' ).
-\`
+\`\`\`
 
 ### CORRESPONDING - Mapping Automatico
 Copia automaticamente campi con nomi corrispondenti tra strutture diverse, facilitando il mapping dei dati.
 
-\`abap
+\`\`\`abap
 gs_output = CORRESPONDING #( gs_input MAPPING nuovo_campo = vecchio_campo ).
-\`
+\`\`\`
 
 ## Sottoprogrammi e Funzioni
 
 ### FORM/ENDFORM - Subroutine
 Definisce sottoprogrammi riutilizzabili.
 
-\`abap
+\`\`\`abap
 FORM calcola_totale USING p_prezzo TYPE p
                          p_quantita TYPE i
                    CHANGING p_totale TYPE p.
   p_totale = p_prezzo * p_quantita.
 ENDFORM.
-\`
+\`\`\`
 
 ### PERFORM - Chiamata Subroutine
 Esegue una subroutine precedentemente definita.
 
-\`abap
+\`\`\`abap
 PERFORM calcola_totale USING gv_prezzo gv_quantita
                       CHANGING gv_totale.
-\`
+\`\`\`
 
 ### FUNCTION/ENDFUNCTION - Moduli Funzione
 Definisce moduli funzione riutilizzabili.
 
-\`abap
+\`\`\`abap
 FUNCTION z_calcola_sconto.
   IMPORTING  " IMPORTING: definisce i parametri di INPUT della funzione
           iv_prezzo TYPE p
@@ -1689,12 +1689,12 @@ FUNCTION z_calcola_sconto.
   
   rv_sconto = iv_prezzo * iv_percentuale / 100.
 ENDFUNCTION.
-\`
+\`\`\`
 
 ### CALL FUNCTION - Chiamata Funzione
 Chiama un modulo funzione.
 
-\`abap
+\`\`\`abap
 CALL FUNCTION 'Z_CALCOLA_SCONTO'
 
   " EXPORTING: Invia dati (variabili, strutture, tabelle) in SOLA LETTURA dal programma alla funzione.
@@ -1724,14 +1724,14 @@ CALL FUNCTION 'Z_CALCOLA_SCONTO'
 " sy-subrc = 0 significa che la chiamata è andata a buon fine.
 " sy-subrc = 1, 2, 3... significa che si è verificato l'errore corrispondente.
 
-\`
+\`\`\`
 
 ## Programmazione Orientata agli Oggetti
 
 ### CLASS/ENDCLASS - Definizione Classe
 Definisce una classe con attributi e metodi.
 
-\`abap
+\`\`\`abap
 " CLASS ... DEFINITION: Inizia la definizione (il "progetto") di una nuova classe.
 " Una classe è un modello per creare oggetti, raggruppando dati (attributi) e funzionalità (metodi).
 CLASS zcl_cliente DEFINITION.
@@ -1782,12 +1782,12 @@ CLASS zcl_cliente DEFINITION.
 
 ENDCLASS. " ENDCLASS: Termina la definizione della classe.
 
-\`
+\`\`\`
 
 ### METHOD/ENDMETHOD - Definizione Metodo
 Definisce l'implementazione di un metodo.
 
-\`abap
+\`\`\`abap
 " CLASS ... IMPLEMENTATION: Inizia il blocco di codice che contiene la logica effettiva dei metodi dichiarati nella DEFINITION.
 CLASS zcl_cliente IMPLEMENTATION.
 
@@ -1815,12 +1815,12 @@ CLASS zcl_cliente IMPLEMENTATION.
 
 ENDCLASS. " ENDCLASS: Termina l'implementazione della classe.
 
-\`
+\`\`\`
 
 ### CREATE OBJECT - Creazione Istanza
 Crea una nuova istanza di una classe.
 
-\`abap
+\`\`\`abap
 CREATE OBJECT go_cliente
   EXPORTING
     iv_nome = 'Mario Rossi'.
@@ -1844,14 +1844,14 @@ lv_nome_cliente = go_cliente->get_nome( ).
 
 " A questo punto, lv_nome_cliente contiene 'Mario Rossi'.
 WRITE: / 'Nome del cliente creato:', lv_nome_cliente.
-\`
+\`\`\`
 
 ## Gestione Errori
 
 ### TRY/CATCH/ENDTRY - Gestione Eccezioni
 Gestisce le eccezioni in modo strutturato.
 
-\`abap
+\`\`\`abap
 TRY.
     " Codice che può generare eccezioni
     gv_risultato = 10 / gv_divisore.
@@ -1860,103 +1860,103 @@ TRY.
   CATCH cx_root INTO DATA(lo_error).
     MESSAGE lo_error->get_text( ) TYPE 'E'.
 ENDTRY.
-\`
+\`\`\`
 
 ### RAISE - Sollevamento Eccezioni
 Solleva un'eccezione personalizzata.
 
-\`abap
+\`\`\`abap
 IF gv_valore < 0.
   RAISE EXCEPTION TYPE zcx_valore_negativo.
 ENDIF.
-\`
+\`\`\`
 
 ## Operazioni su Stringhe
 
 ### CONCATENATE - Concatenazione
 Unisce più stringhe in una sola.
 
-\`abap
+\`\`\`abap
 CONCATENATE gv_nome gv_cognome INTO gv_nome_completo
   SEPARATED BY space.
-\`
+\`\`\`
 
 ### SPLIT - Divisione Stringhe
 Divide una stringa in parti basandosi su un separatore.
 
-\`abap
+\`\`\`abap
 SPLIT gv_nome_completo AT space INTO gv_nome gv_cognome.
-\`
+\`\`\`
 
 ### REPLACE - Sostituzione
 Sostituisce parti di una stringa con nuovo testo.
 
-\`abap
+\`\`\`abap
 REPLACE ALL OCCURRENCES OF 'vecchio' IN gv_testo WITH 'nuovo'.
-\`
+\`\`\`
 
 ### FIND - Ricerca
 Cerca una sottostringa all'interno di una stringa.
 
-\`abap
+\`\`\`abap
 FIND 'ABAP' IN gv_testo.
 IF sy-subrc = 0.
   WRITE: 'Testo trovato'.
 ENDIF.
-\`
+\`\`\`
 
 ## Operazioni Matematiche
 
 ### ADD - Addizione
 Aggiunge un valore a una variabile.
 
-\`abap
+\`\`\`abap
 ADD 10 TO gv_totale.
 " Equivalente a: gv_totale = gv_totale + 10.
-\`
+\`\`\`
 
 ### SUBTRACT - Sottrazione
 Sottrae un valore da una variabile.
 
-\`abap
+\`\`\`abap
 SUBTRACT 5 FROM gv_totale.
 " Equivalente a: gv_totale = gv_totale - 5.
-\`
+\`\`\`
 
 ### MULTIPLY - Moltiplicazione
 Moltiplica una variabile per un valore.
 
-\`abap
+\`\`\`abap
 MULTIPLY gv_prezzo BY gv_quantita.
 " Equivalente a: gv_prezzo = gv_prezzo * gv_quantita.
-\`
+\`\`\`
 
 ### DIVIDE - Divisione
 Divide una variabile per un valore.
 
-\`abap
+\`\`\`abap
 DIVIDE gv_totale BY gv_contatore.
 " Equivalente a: gv_totale = gv_totale / gv_contatore.
-\`
+\`\`\`
 
 ## Input/Output
 
 ### WRITE - Scrittura Output
 Scrive dati nella lista di output.
 
-\`abap
+\`\`\`abap
 WRITE: 'Nome:', gv_nome,
        'Età:', gv_eta.
-\`
+\`\`\`
 
 ### MESSAGE - Messaggi
 Mostra messaggi informativi, di avvertimento o di errore.
 
-\`abap
+\`\`\`abap
 MESSAGE 'Operazione completata' TYPE 'S'.
 MESSAGE 'Attenzione: valore alto' TYPE 'W'.
 MESSAGE 'Errore nella validazione' TYPE 'E'.
-\`
+\`\`\`
 
 
 ## Controllo del Flusso
@@ -1964,125 +1964,125 @@ MESSAGE 'Errore nella validazione' TYPE 'E'.
 ### EXIT - Uscita
 Esce dal blocco di codice corrente.
 
-\`abap
+\`\`\`abap
 LOOP AT gt_clienti INTO gs_cliente.
   IF gs_cliente-eta < 18.
     EXIT.  " Esce dal loop
   ENDIF.
 ENDLOOP.
-\`
+\`\`\`
 
 ### CONTINUE - Continua
 Salta alla prossima iterazione del ciclo.
 
-\`abap
+\`\`\`abap
 LOOP AT gt_clienti INTO gs_cliente.
   IF gs_cliente-stato = 'I'.
     CONTINUE.  " Salta questa iterazione
   ENDIF.
   " Elabora solo clienti attivi
 ENDLOOP.
-\`
+\`\`\`
 
 ### RETURN - Ritorno
 Termina l'esecuzione del sottoprogramma corrente.
 
-\`abap
+\`\`\`abap
 FORM elabora_cliente.
   IF gs_cliente IS INITIAL.
     RETURN.  " Esce dalla subroutine
   ENDIF.
   " Elabora il cliente
 ENDFORM.
-\`
+\`\`\`
 
 ## Transazioni e Commit
 
 ### COMMIT WORK - Conferma Transazione
 Conferma permanentemente le modifiche al database.
 
-\`abap
+\`\`\`abap
 INSERT ztabella FROM gs_record.
 COMMIT WORK.
-\`
+\`\`\`
 
 ### ROLLBACK WORK - Annulla Transazione
 Annulla tutte le modifiche non confermate.
 
-\`abap
+\`\`\`abap
 INSERT ztabella FROM gs_record.
 IF sy-subrc <> 0.
   ROLLBACK WORK.
 ENDIF.
-\`
+\`\`\`
 
 ## Tipi di Dati Predefiniti
 
 ### STRING - Stringa Variabile
 Tipo di dato per stringhe di lunghezza variabile.
 
-\`abap
+\`\`\`abap
 DATA: gv_testo TYPE string.
 gv_testo = 'Questa è una stringa di lunghezza variabile'.
-\`
+\`\`\`
 
 ### I - Intero
 Tipo di dato per numeri interi.
 
-\`abap
+\`\`\`abap
 DATA: gv_numero TYPE i.
 gv_numero = 42.
-\`
+\`\`\`
 
 ### F - Floating Point
 Tipo di dato per numeri in virgola mobile.
 
-\`abap
+\`\`\`abap
 DATA: gv_decimale TYPE f.
 gv_decimale = '3.14159'.
-\`
+\`\`\`
 
 ### C - Carattere
 Tipo di dato per stringhe di lunghezza fissa.
 
-\`abap
+\`\`\`abap
 DATA: gv_codice TYPE c LENGTH 10.
 gv_codice = 'ABC123'.
-\`
+\`\`\`
 
 ### D - Data
 Tipo di dato per date nel formato YYYYMMDD.
 
-\`abap
+\`\`\`abap
 DATA: gv_data TYPE d.
 gv_data = sy-datum.
-\`
+\`\`\`
 
 ### T - Tempo
 Tipo di dato per orari nel formato HHMMSS.
 
-\`abap
+\`\`\`abap
 DATA: gv_ora TYPE t.
 gv_ora = sy-uzeit.
-\`
+\`\`\`
 
 
 
 ### TABLES - Dichiarazione Tabelle Database
 Dichiara una work area per una tabella del database, permettendo l'accesso diretto ai suoi campi.
 
-\`abap
+\`\`\`abap
 TABLES: mara, marc, makt.
 
 " Ora si possono usare direttamente i campi
 mara-matnr = 'MAT001'.
 SELECT SINGLE * FROM mara WHERE matnr = mara-matnr.
-\`
+\`\`\`
 
 ### STATICS - Variabili Statiche
 Dichiara variabili che mantengono il loro valore tra le chiamate del sottoprogramma.
 
-\`abap
+\`\`\`abap
 FORM conta_chiamate.
  STATICS: gv_contatore TYPE i.
  gv_contatore = gv_contatore + 1.
@@ -2121,12 +2121,12 @@ START-OF-SELECTION.
  PERFORM gestione_cache USING 'CACHE_ITEM_1' CHANGING lv_risultato.  " Cache inizializzata + Trovato
  PERFORM gestione_cache USING 'CACHE_ITEM_2' CHANGING lv_risultato.  " Solo: Trovato
  PERFORM gestione_cache USING 'NON_ESISTE' CHANGING lv_risultato.    " Non trovato
-\`
+\`\`\`
 
 ### RANGES - Definizione Range
 Crea tabelle di selezione per condizioni multiple simili a SELECT-OPTIONS.
 
-\`abap
+\`\`\`abap
 " Definizione del range
 RANGES: r_matnr FOR mara-matnr.
 
@@ -2165,63 +2165,63 @@ SELECT * FROM mara INTO TABLE gt_materiali
          ( matnr BETWEEN 'MAT100' AND 'MAT200' ) )
    AND matnr <> 'MAT999'
    AND matnr NOT LIKE 'TEMP%'.
-\`
+\`\`\`
 
 ### WORK - Area di Lavoro
 Definisce un'area di lavoro per operazioni temporanee.
 
-\`abap
+\`\`\`abap
 WORK: wa_cliente LIKE LINE OF gt_clienti.
 READ TABLE gt_clienti INTO wa_cliente INDEX 1.
-\`
+\`\`\`
 
 ## Istruzioni di Controllo del Programma
 
 ### INITIALIZATION - Inizializzazione
 Evento eseguito all'avvio del programma, prima della schermata di selezione.
 
-\`abap
+\`\`\`abap
 INITIALIZATION.
   p_werks = '1000'.
   p_datum = sy-datum.
   MESSAGE 'Programma inizializzato' TYPE 'I'.
-\`
+\`\`\`
 
 ### START-OF-SELECTION - Inizio Selezione
 Evento principale di elaborazione del programma.
 
-\`abap
+\`\`\`abap
 START-OF-SELECTION.
   PERFORM elabora_dati.
   PERFORM crea_output.
-\`
+\`\`\`
 
 ### END-OF-SELECTION - Fine Selezione
 Evento eseguito alla fine dell'elaborazione principale.
 
-\`abap
+\`\`\`abap
 END-OF-SELECTION.
   WRITE: 'Elaborazione completata'.
   WRITE: 'Totale record elaborati:', gv_contatore.
-\`
+\`\`\`
 
 ### TOP-OF-PAGE - Intestazione Pagina
 Evento eseguito all'inizio di ogni pagina di output.
 
-\`abap
+\`\`\`abap
 TOP-OF-PAGE.
   WRITE: 'Report Materiali'.
   WRITE: 'Data:', sy-datum.
   ULINE.
-\`
+\`\`\`
 
 ### END-OF-PAGE - Fine Pagina
 Evento eseguito alla fine di ogni pagina di output.
 
-\`abap
+\`\`\`abap
 END-OF-PAGE.
   WRITE: 'Pagina:', sy-pagno.
-\`
+\`\`\`
 
 Hai perfettamente ragione, chiedo scusa.
 
@@ -2247,7 +2247,7 @@ Prima di definire gli elementi, è cruciale rispettare queste regole di base per
 
 Definisce un campo di input per un singolo valore.
 
-\`abap
+\`\`\`abap
 " Prerequisito per la sintassi FOR
 TABLES: t001w.
 
@@ -2266,13 +2266,13 @@ PARAMETERS: p_rad1 RADIOBUTTON GROUP grp1,
 
 " Parametro personalizzato con tipo e lunghezza espliciti
 PARAMETERS p_custom TYPE c LENGTH 20.
-\`
+\`\`\`
 
 ### SELECT-OPTIONS - Intervalli di Selezione
 
 Definisce un range di valori (da-a) per filtrare i dati.
 
-\`abap
+\`\`\`abap
 " Prerequisito
 TABLES: mara.
 
@@ -2284,13 +2284,13 @@ SELECT-OPTIONS so_mtart FOR mara-matnr NO-EXTENSION.
 
 " Permette solo l'inserimento di valori singoli (nasconde il campo "a")
 SELECT-OPTIONS so_erdat FOR mara-erdat NO INTERVALS.
-\`
+\`\`\`
 
 ### SELECTION-SCREEN - Organizzazione del Layout
 
 Configura la struttura visiva della schermata.
 
-\`abap
+\`\`\`abap
 " Esempio di layout con blocchi, linee, commenti e pulsante
 SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE text-001.
   PARAMETERS p_bukrs TYPE bukrs OBLIGATORY.
@@ -2307,13 +2307,13 @@ SELECTION-SCREEN ULINE. " Aggiunge una linea orizzontale
 
 " Sintassi corretta per un pulsante
 SELECTION-SCREEN PUSHBUTTON /10(20) btn_exec USER-COMMAND exec.
-\`
+\`\`\`
 
 ### Gestione degli Eventi e Validazione
 
 La logica della schermata si gestisce con eventi specifici.
 
-\`abap
+\`\`\`abap
 " Evento principale per validazioni incrociate
 AT SELECTION-SCREEN.
   IF p_werks IS INITIAL AND so_matnr IS INITIAL.
@@ -2329,7 +2329,7 @@ AT SELECTION-SCREEN ON p_bukrs.
   IF sy-subrc <> 0.
     MESSAGE "La società inserita non è valida." TYPE "E".
   ENDIF.
-\`
+\`\`\`
 
 ### Gestire la Visualizzazione Condizionale (MODIF ID)
 
@@ -2341,7 +2341,7 @@ Per far apparire una parte della schermata solo al verificarsi di una condizione
 
 Definisci la checkbox che funge da interruttore e assegna un MODIF ID al blocco da controllare.
 
-\`abap
+\`\`\`abap
 " La checkbox che controlla il blocco.
 " USER-COMMAND forza un refresh della schermata quando viene cliccata.
 PARAMETERS p_show AS CHECKBOX USER-COMMAND show.
@@ -2351,13 +2351,13 @@ SELECTION-SCREEN BEGIN OF BLOCK b2 WITH FRAME TITLE text-002 MODIF ID SEC.
   PARAMETERS p_param1 TYPE c LENGTH 10.
   PARAMETERS p_param2 TYPE i.
 SELECTION-SCREEN END OF BLOCK b2.
-\`
+\`\`\`
 
 #### Passaggio 2: Implementare la Logica di Visualizzazione
 
 Usa l'evento AT SELECTION-SCREEN OUTPUT per inserire la logica che controlla la visibilità.
 
-\`abap
+\`\`\`abap
 AT SELECTION-SCREEN OUTPUT.
   " Cicla su tutti gli elementi della schermata.
   LOOP AT SCREEN.
@@ -2369,13 +2369,13 @@ AT SELECTION-SCREEN OUTPUT.
       MODIFY SCREEN.
     ENDIF.
   ENDLOOP.
-\`
+\`\`\`
 
 ### Esempio Completo
 
 Mette insieme tutti i concetti in una schermata funzionale e sintatticamente corretta.
 
-\`abap
+\`\`\`abap
 REPORT z_sel_screen_demo.
 
 TABLES: t001, mara.
@@ -2411,249 +2411,249 @@ AT SELECTION-SCREEN OUTPUT.
       MODIFY SCREEN.
     ENDIF.
   ENDLOOP.
-\`
+\`\`\`
 ## Operazioni su Dati
 
 ### MOVE - Spostamento Dati
 Copia il contenuto di una variabile in un'altra.
 
-\`abap
+\`\`\`abap
 MOVE gv_nome TO gv_nome_copia.
 " Equivalente a: gv_nome_copia = gv_nome.
 
 MOVE-CORRESPONDING gs_cliente TO gs_fornitore.
-\`
+\`\`\`
 
 ### ASSIGN - Assegnazione Dinamica
 Assegna dinamicamente un campo a un field-symbol.
 
-\`abap
+\`\`\`abap
 FIELD-SYMBOLS: <fs_campo> TYPE any.
 ASSIGN gv_variabile TO <fs_campo>.
 IF <fs_campo> IS ASSIGNED.
   <fs_campo> = 'Nuovo valore'.
 ENDIF.
-\`
+\`\`\`
 
 ### UNASSIGN - Rimozione Assegnazione
 Rimuove l'assegnazione di un field-symbol.
 
-\`abap
+\`\`\`abap
 UNASSIGN <fs_campo>.
-\`
+\`\`\`
 
 ### PACK - Compattazione
 Converte un numero in formato packed.
 
-\`abap
+\`\`\`abap
 DATA: gv_numero TYPE n LENGTH 10,
       gv_packed TYPE p LENGTH 5.
 gv_numero = '1234567890'.
 PACK gv_numero TO gv_packed.
-\`
+\`\`\`
 
 ### UNPACK - Decompattazione
 Converte un numero dal formato packed.
 
-\`abap
+\`\`\`abap
 DATA: gv_numero TYPE n LENGTH 10,
       gv_packed TYPE p LENGTH 5.
 UNPACK gv_packed TO gv_numero.
-\`
+\`\`\`
 
 ## Operazioni su Stringhe Avanzate
 
 ### OVERLAY - Sovrapposizione
 Sovrappone caratteri di una stringa su un'altra.
 
-\`abap
+\`\`\`abap
 DATA: gv_stringa1 TYPE string VALUE 'A*C*E',
       gv_stringa2 TYPE string VALUE '*B*D*'.
 OVERLAY gv_stringa1 WITH gv_stringa2.
 " Risultato: 'ABCDE'
-\`
+\`\`\`
 
 ### SHIFT - Spostamento Caratteri
 Sposta i caratteri di una stringa verso sinistra o destra.
 
-\`abap
+\`\`\`abap
 DATA: gv_testo TYPE string VALUE '  ABAP  '.
 SHIFT gv_testo LEFT DELETING LEADING space.
 " Risultato: 'ABAP  '
 SHIFT gv_testo RIGHT BY 2 PLACES.
 " Risultato: '  ABAP'
-\`
+\`\`\`
 
 ### TRANSLATE - Traduzione Caratteri
 Converte caratteri in maiuscolo o minuscolo.
 
-\`abap
+\`\`\`abap
 DATA: gv_testo TYPE string VALUE 'Hello World'.
 TRANSLATE gv_testo TO UPPER CASE.
 " Risultato: 'HELLO WORLD'
 TRANSLATE gv_testo TO LOWER CASE.
 " Risultato: 'hello world'
-\`
+\`\`\`
 
 ### CONDENSE - Compattazione Spazi
 Rimuove spazi multipli e spazi iniziali/finali.
 
-\`abap
+\`\`\`abap
 DATA: gv_testo TYPE string VALUE '  Hello   World  '.
 CONDENSE gv_testo.
 " Risultato: 'Hello World'
 CONDENSE gv_testo NO-GAPS.
 " Risultato: 'HelloWorld'
-\`
+\`\`\`
 
 ## Controllo Flusso Avanzato
 
 ### SKIP - Salto Righe
 Salta un numero specificato di righe nell'output.
 
-\`abap
+\`\`\`abap
 WRITE: 'Prima riga'.
 SKIP 2.
 WRITE: 'Riga dopo due spazi'.
-\`
+\`\`\`
 
 ### NEW-LINE - Nuova Riga
 Forza una nuova riga nell'output.
 
-\`abap
+\`\`\`abap
 WRITE: 'Testo sulla prima riga'.
 NEW-LINE.
 WRITE: 'Testo sulla seconda riga'.
-\`
+\`\`\`
 
 ### NEW-PAGE - Nuova Pagina
 Forza una nuova pagina nell'output.
 
-\`abap
+\`\`\`abap
 WRITE: 'Contenuto prima pagina'.
 NEW-PAGE.
 WRITE: 'Contenuto seconda pagina'.
-\`
+\`\`\`
 
 ### ULINE - Linea di Sottolineatura
 Disegna una linea di sottolineatura nell'output.
 
-\`abap
+\`\`\`abap
 WRITE: 'Intestazione'.
 ULINE.
 WRITE: 'Contenuto sotto la linea'.
-\`
+\`\`\`
 
 ### RESERVE - Riserva Righe
 Riserva un numero di righe nella pagina corrente.
 
-\`abap
+\`\`\`abap
 RESERVE 5 LINES.
 WRITE: 'Questo testo avrà 5 righe riservate'.
-\`
+\`\`\`
 
 ## Operazioni Database Avanzate
 
 ### FETCH - Recupero Cursore
 Recupera righe da un cursore aperto.
 
-\`abap
+\`\`\`abap
 DATA: gt_materiali TYPE TABLE OF mara.
 SELECT * FROM mara INTO TABLE gt_materiali
   PACKAGE SIZE 100.
-\`
+\`\`\`
 
 ### OPEN CURSOR - Apertura Cursore
 Apre un cursore per leggere dati in blocchi.
 
-\`abap
+\`\`\`abap
 DATA: cursor TYPE cursor.
 OPEN CURSOR cursor FOR SELECT * FROM mara.
-\`
+\`\`\`
 
 ### CLOSE CURSOR - Chiusura Cursore
 Chiude un cursore precedentemente aperto.
 
-\`abap
+\`\`\`abap
 CLOSE CURSOR cursor.
-\`
+\`\`\`
 
 ### EXPORT - Esportazione Memoria
 Esporta dati in memoria cluster.
 
-\`abap
+\`\`\`abap
 EXPORT gt_clienti TO MEMORY ID 'CLIENTI'.
-\`
+\`\`\`
 
 ### IMPORT - Importazione Memoria
 Importa dati dalla memoria cluster.
 
-\`abap
+\`\`\`abap
 IMPORT gt_clienti FROM MEMORY ID 'CLIENTI'.
-\`
+\`\`\`
 
 ### FREE MEMORY - Liberazione Memoria
 Libera la memoria cluster.
 
-\`abap
+\`\`\`abap
 FREE MEMORY ID 'CLIENTI'.
-\`
+\`\`\`
 
 ## Gestione Transazioni
 
 ### SUBMIT - Esecuzione Programma
 Esegue un altro programma ABAP.
 
-\`abap
+\`\`\`abap
 SUBMIT zprogram
   WITH p_matnr = 'MAT001'
   WITH s_werks IN r_werks
   AND RETURN.
-\`
+\`\`\`
 
 ### LEAVE - Uscita Programma
 Esce dal programma corrente.
 
-\`abap
+\`\`\`abap
 LEAVE PROGRAM.
 " Oppure per tornare a una transazione
 LEAVE TO TRANSACTION 'SE80'.
-\`
+\`\`\`
 
 ### SET PARAMETER - Impostazione Parametri
 Imposta parametri SAP persistenti.
 
-\`abap
+\`\`\`abap
 SET PARAMETER ID 'MAT' FIELD gv_matnr.
-\`
+\`\`\`
 
 ### GET PARAMETER - Recupero Parametri
 Recupera parametri SAP precedentemente impostati.
 
-\`abap
+\`\`\`abap
 GET PARAMETER ID 'MAT' FIELD gv_matnr.
-\`
+\`\`\`
 
 ## Gestione Autorizzazioni
 
 ### AUTHORITY-CHECK - Controllo Autorizzazioni
 Verifica le autorizzazioni dell'utente.
 
-\`abap
+\`\`\`abap
 AUTHORITY-CHECK OBJECT 'M_MATE_WRK'
   ID 'ACTVT' FIELD '03'
   ID 'WERKS' FIELD p_werks.
 IF sy-subrc <> 0.
   MESSAGE 'Non autorizzato' TYPE 'E'.
 ENDIF.
-\`
+\`\`\`
 
 ## Operazioni su File
 
 ### Apertura di un File
 Per aprire un file si usa l'istruzione OPEN DATASET seguita dal nome del file.
 Vediamo un esempio:
-\`abap
+\`\`\`abap
 PARAMETERS filename(128) DEFAULT '/usr/tmp/testfile.dat'
            LOWER CASE.
 DATA msg_text(50).
@@ -2663,40 +2663,40 @@ OPEN DATASET filename FOR OUTPUT IN TEXT MODE
 IF sy-subrc NE 0.
   WRITE: 'File cannot be opened for reason:', msg_text.
 ENDIF.
-\`
+\`\`\`
 Qui, l'utente finale deve immettere il nome del file nella schermata di selezione che si presenta sul video, per mezzo dell'istruzione PARAMETERS, il cui attributo LOWER CASE indica che deve essere scritto con caratteri minuscoli. Il comando OPEN DATASET crea questo file se è inesistente, altrimenti il contenuto del file verrà sovrascritto dai nuovi dati.
 Se vogliamo solamente aggiungere nuovi dati ad un file già esistente, occorrerà aprirlo con il comando OPEN DATASET seguito da FOR APPENDING di modo che i nuovi dati verranno aggiunti a quelli già presenti nel file.
 L'opzione IN TEXT MODE dice al sistema che i dati sul file sono linee di testo, in contrapposizione a questo c'è il BINARY MODE, che viene usato anche quello principalmente per i dati binari e non per le righe di testo. Per i dati trasferiti in modalità testo, ogni record termina con un carattere di fine riga.
 
 ### Trasferimento dati ad un File
 A questo punto i dati vengono inviati al file tramite l'istruzione TRANSFER.
-\`abap
+\`\`\`abap
 LOOP AT all_customers.
   TRANSFER all_customers-name TO filename.
 ENDLOOP.
-\`
+\`\`\`
 In questo modo tutti i nomi dei clienti verranno trasferiti dalla tabella "all_customers" nel file il cui nome è contenuto nella variabile filename.
 Un possibile problema è che durante il trasferimento può accadere che non ci sia sufficiente spazio sul disco dove è stato dichiarato il file.
 È anche possibile trasferire tutti i campi all'interno del file in un unico trasferimento:
-\`abap
+\`\`\`abap
 LOOP AT all_customers.
   TRANSFER all_customers TO filename.
 ENDLOOP.
-\`
+\`\`\`
 A questo punto tutti i campi della tabella vengono trasferiti nel file e il programma che leggerà questo file dovrà sapere come interpretare i records.
 Di default tutti i records vengono scritti con la concatenazione dei rispettivi campi.
 
 ### Chiusura di un File
 Anche se il sistema chiude automaticamente tutti i file alla fine del programma, per una buona programmazione è consigliabile chiudere esplicitamente i files all'interno del programma. Questo viene fatto con l'istruzione:
-\`abap
+\`\`\`abap
 CLOSE DATASET filename.
-\`
+\`\`\`
 Questa istruzione chiude il file e assicura che tutti i buffer interni vengano svuotati dopo ogni operazione di transfer o prima della chiusura del file.
 L'istruzione DELETE DATASET elimina il file dal sistema, per cancellare completamente il file.
 
 ### Lettura di un File
 Fino ad ora abbiamo solo visto come si scrive su un file, ora vediamo come leggere il contenuto di un file o più files. Si usa l'istruzione READ DATASET, come si vede nell'esempio che segue:
-\`abap
+\`\`\`abap
 PARAMETERS filename(40) 
            DEFAULT '/usr/tmp/testfile.dat'.
 DATA msg_text(50).
@@ -2720,12 +2720,12 @@ ENDDO.
 LOOP AT all_customer_names.
   WRITE all_customer_names.
 ENDLOOP.
-\`
+\`\`\`
 In questo esempio il file viene aperto per l'operazione di lettura (FOR INPUT). Fare attenzione che il file debba essere aperto FOR INPUT. Il sistema restituirà un codice di ritorno diverso da zero se il file non viene trovato.
 Il contenuto del file, invece, viene letto con tutti i nomi dei clienti e li carica su di una tabella interna. Viene usato un ciclo di DO. Poiché non sappiamo in anticipo quanti record sono presenti nel file, onde evitare di rimanere bloccati dal ciclo, dobbiamo testare il campo di sistema sy-subrc dopo ogni lettura: se il valore è diverso da zero vuol dire che non ci sono più record sotto il file e quindi si deve uscire dal ciclo. A questo punto segue un secondo ciclo di LOOP per stampare il contenuto della tabella interna che rappresenta il file.
 Per utilizzare il programma più velocemente, utilizzare il tasto F4 dalla videata dell'Object Browser, e cercare la directory desiderata nella PARAMETERS.
 La modifica da fare al programma è cambiare il tipo del record:
-\`abap
+\`\`\`abap
 DATA all_customers LIKE customers OCCURS 100
      WITH HEADER LINE.
 
@@ -2734,7 +2734,7 @@ IF sy-subrc NE 0.
   EXIT.
 ENDIF.
 APPEND all_customers.
-\`
+\`\`\`
 In questo modo possiamo leggere e memorizzare tutti i campi del record customer.
 
 # System Fields ABAP/4 - Campi di Sistema
@@ -2832,92 +2832,92 @@ Di seguito sono riportati i principali system fields dell'ABAP/4:
 ### LOAD-OF-PROGRAM - Caricamento Programma
 Evento eseguito al caricamento del programma in memoria.
 
-\`abap
+\`\`\`abap
 LOAD-OF-PROGRAM.
   " Inizializzazioni globali
   PERFORM init_global_data.
-\`
+\`\`\`
 
 ### HIDE - Nascondi Valori
 Nasconde valori per l'interactive reporting.
 
-\`abap
+\`\`\`abap
 LOOP AT gt_clienti INTO gs_cliente.
   WRITE: gs_cliente-id, gs_cliente-nome.
   HIDE: gs_cliente-id.
 ENDLOOP.
-\`
+\`\`\`
 
 ### GET - Recupero Valori Nascosti
 Recupera valori precedentemente nascosti.
 
-\`abap
+\`\`\`abap
 AT LINE-SELECTION.
   GET gs_cliente-id.
   " Elabora il cliente selezionato
-\`
+\`\`\`
 
 ## Operazioni Speciali
 
 ### GENERATE - Generazione Dinamica
 Genera programmi o subroutine dinamicamente.
 
-\`abap
+\`\`\`abap
 DATA: gt_source TYPE TABLE OF string.
 APPEND 'WRITE: ''Hello Dynamic World''.' TO gt_source.
 GENERATE SUBROUTINE POOL gt_source NAME gv_program.
-\`
+\`\`\`
 
 ### SYNTAX-CHECK - Controllo Sintassi
 Verifica la sintassi di codice generato dinamicamente.
 
-\`abap
+\`\`\`abap
 SYNTAX-CHECK FOR gt_source.
 IF sy-subrc = 0.
   WRITE: 'Sintassi corretta'.
 ENDIF.
-\`
+\`\`\`
 
 ### DESCRIBE - Descrizione Oggetti
 Ottiene informazioni su variabili e strutture.
 
-\`abap
+\`\`\`abap
 DATA: gv_tipo TYPE c,
       gv_lunghezza TYPE i.
 DESCRIBE FIELD gv_campo TYPE gv_tipo LENGTH gv_lunghezza.
-\`
+\`\`\`
 
 ### CHECKSUM - Calcolo Checksum
 Calcola il checksum di una stringa.
 
-\`abap
+\`\`\`abap
 DATA: gv_checksum TYPE i.
 CHECKSUM gv_testo INTO gv_checksum.
-\`
+\`\`\`
 
 ## Gestione Eccezioni Classiche
 
 ### CATCH SYSTEM-EXCEPTIONS - Cattura Eccezioni Sistema
 Cattura eccezioni di sistema nel codice legacy.
 
-\`abap
+\`\`\`abap
 CATCH SYSTEM-EXCEPTIONS arithmetic_errors = 4.
   gv_risultato = gv_numero1 / gv_numero2.
 ENDCATCH.
 IF sy-subrc = 4.
   WRITE: 'Errore aritmetico'.
 ENDIF.
-\`
+\`\`\`
 
 ### REJECT - Rifiuto Record
 Rifiuta un record durante l'elaborazione di eventi.
 
-\`abap
+\`\`\`abap
 GET mara.
 IF mara-mtart = 'OBSOLETE'.
   REJECT.
 ENDIF.
-\`
+\`\`\`
 
 Questa documentazione copre tutte le keyword ABAP che erano state omesse dalla prima versione, fornendo per ciascuna una spiegazione dettagliata e esempi pratici di utilizzo.
 

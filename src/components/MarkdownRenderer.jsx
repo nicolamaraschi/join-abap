@@ -150,14 +150,20 @@ const MarkdownRenderer = ({ text }) => {
   };
 
   // Elaborazione principale
-  const parts = text.split(/(```abap[\s\S]*?```)/gi);
+  // Splittiamo il testo in base ai blocchi di codice (```)
+  const parts = text.split(/(```[\s\S]*?```)/gi);
 
   const renderedParts = parts.map((part, index) => {
-    if (part.toLowerCase().startsWith('```abap')) {
-      const code = part.replace(/^```abap\s*|```\s*$/gi, '');
+    // Se è un blocco di codice
+    if (part.startsWith('```')) {
+      // Estrai il linguaggio e il codice
+      const match = part.match(/^```(\w+)?\n?([\s\S]*?)```$/i);
+      const language = (match && match[1]) ? match[1].toLowerCase() : 'text'; // Default to 'text' if no language specified
+      const code = (match && match[2]) ? match[2].trim() : part.replace(/^```(\w+)?\n?|```$/gi, '').trim();
+      
       return (
-        <div key={index} className="preset-code-container my-4">
-          <AbapCode code={code.trim()} />
+        <div key={index} style={{ margin: '1.5rem 0' }}>
+          <AbapCode code={code} language={language} />
         </div>
       );
     }
@@ -166,24 +172,26 @@ const MarkdownRenderer = ({ text }) => {
       return null;
     }
 
-    let html = processTables(part);
+    // Per il testo normale, applichiamo le regole Markdown
+    let html = part;
 
+    // 1. Processare le tabelle (PRIMA dell'escape, perché processTables genera HTML)
     // Salva tabelle temporaneamente
     const processedTables = [];
+    html = processTables(html); // This processes raw markdown for tables
     html = html.replace(/<table[\s\S]*?<\/table>/g, (match) => {
       processedTables.push(match);
       return `__TABLE_PLACEHOLDER_${processedTables.length - 1}__`;
     });
 
-    // Escape HTML per sicurezza
+    // 2. Escape HTML iniziale (fondamentale farlo subito per il resto del markdown)
     html = html
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
 
-    // Processare elementi Markdown (ORDINE IMPORTANTE)
+    // 3. Processare Titoli e Intestazioni
     html = html
-      // Titoli e sezioni con ID univoci
       .replace(/^(Guida Tecnica.*)/gm, (match, title) => `<h1 id="${createSlug(title)}" class="text-3xl font-bold mb-6 text-gray-900 border-b-2 border-blue-500 pb-3">${title}</h1>`)
       .replace(/^# Guida al (.+)/gm, (match, title) => `<h1 id="${createSlug(title)}" class="text-3xl font-bold mb-6 text-gray-900 border-b-2 border-blue-500 pb-3">Guida al ${title}</h1>`)
       .replace(/^Sezione \d+: (.*)/gm, (match, title) => `<h2 id="${createSlug(title)}" class="text-2xl font-semibold mt-8 mb-4 pb-2 border-b border-gray-300 text-gray-800">${title}</h2>`)
@@ -191,48 +199,50 @@ const MarkdownRenderer = ({ text }) => {
       .replace(/^#### (.+)/gm, (match, title) => `<h3 id="${createSlug(title)}" class="text-xl font-semibold mt-6 mb-3 text-gray-800 flex items-center"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm mr-2">📋</span>${title}</h3>`)
       .replace(/^### (.+)/gm, (match, title) => `<h3 id="${createSlug(title)}" class="text-xl font-semibold mt-6 mb-3 text-gray-800">${title}</h3>`)
       .replace(/^## (.+)/gm, (match, title) => `<h2 id="${createSlug(title)}" class="text-2xl font-semibold mt-8 mb-4 pb-2 border-b border-gray-300 text-gray-800">${title}</h2>`)
-      .replace(/^# (.+)/gm, (match, title) => `<h1 id="${createSlug(title)}" class="text-3xl font-bold mb-6 text-gray-900 border-b-2 border-blue-500 pb-3">${title}</h1>`)
-      
-      // Separatori con stile migliorato
-      .replace(/^====+$/gm, '<hr class="my-8 border-t-2 border-blue-300 relative"><div class="absolute left-1/2 top-0 transform -translate-x-1/2 -translate-y-1/2 bg-white px-4 text-blue-600 font-semibold text-sm">•••</div>')
+      .replace(/^# (.+)/gm, (match, title) => `<h1 id="${createSlug(title)}" class="text-3xl font-bold mb-6 text-gray-900 border-b-2 border-blue-500 pb-3">${title}</h1>`);
+
+    // 4. Processare Separatori
+    html = html
+      .replace(/^====+$/gm, '<hr class="my-8 border-t-2 border-blue-300 shadow-sm"/>')
       .replace(/^----+$/gm, '<hr class="my-6 border-t border-gray-300"/>')
-      .replace(/^---$/gm, '<hr class="my-4 border-t border-gray-200"/>')
-      
-      // Codice inline e testo formattato (MIGLIORATO per documentazione tecnica)
+      .replace(/^---$/gm, '<hr class="my-4 border-t border-gray-200"/>');
+
+    // 5. Codice inline e testo formattato (MIGLIORATO per documentazione tecnica)
+    html = html
       .replace(/`([^`]+)`/g, (match, code) => {
-        // Ripristina i field symbols ABAP prima del processing
-        const restoredCode = code.replace(/&lt;/g, '<').replace(/>/g, '>');
+        // Ripristina i caratteri speciali nel codice inline per l'analisi,
+        // ma il valore 'code' passato al tag <code> sarà già escapato.
+        const restoredCode = code.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
         
-        // Stile speciale per field symbols ABAP
+        // Stili speciali per ABAP
         if (restoredCode.match(/^<[^>]+>$/)) {
-          return `<code class="bg-purple-100 text-purple-900 px-2 py-1 rounded text-sm font-mono font-semibold border border-purple-200">${restoredCode}</code>`;
+          return `<code class="bg-purple-100 text-purple-900 px-2 py-1 rounded text-sm font-mono font-semibold border border-purple-200">${code}</code>`;
         }
-        // Stile speciale per variabili ABAP e codici funzione
         if (restoredCode.match(/^[A-Z][A-Z0-9_]*$/) || restoredCode.match(/^gv_|^lv_|^gs_|^gt_/i)) {
-          return `<code class="bg-blue-100 text-blue-900 px-2 py-1 rounded text-sm font-mono font-semibold border border-blue-200">${restoredCode}</code>`;
+          return `<code class="bg-blue-100 text-blue-900 px-2 py-1 rounded text-sm font-mono font-semibold border border-blue-200">${code}</code>`;
         }
-        // Stile per transazioni SAP
         if (restoredCode.match(/^[A-Z]{2}\d{2}$|^SE\d{2}$/)) {
-          return `<code class="bg-green-100 text-green-900 px-2 py-1 rounded text-sm font-mono font-semibold border border-green-200">${restoredCode}</code>`;
+          return `<code class="bg-green-100 text-green-900 px-2 py-1 rounded text-sm font-mono font-semibold border border-green-200">${code}</code>`;
         }
-        // Per il codice generico, usiamo la variabile 'code' originale, che contiene già la versione sicura (&gt;).
         return `<code class="bg-slate-200 text-slate-800 px-2 py-1 rounded text-sm font-mono">${code}</code>`;
       })
       .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-gray-900">$1</strong>')
       .replace(/\*([^*]+)\*/g, '<em class="italic text-gray-700">$1</em>')
-      .replace(/~~([^~]+)~~/g, '<del class="line-through text-gray-500">$1</del>')
-      
-      // Pattern speciali per documentazione ABAP
-      .replace(/(\*\*Obiettivo:\*\*)/g, '<div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 my-4"><strong class="text-yellow-800">🎯 Obiettivo:</strong>')
-      .replace(/(\*\*Ricorda sempre)/g, '</div><div class="bg-red-50 border-l-4 border-red-400 p-3 my-4"><strong class="text-red-800">⚠️ Ricorda sempre')
-      .replace(/(\*\*Azione Cruciale:\*\*)/g, '<strong class="bg-orange-100 text-orange-800 px-2 py-1 rounded border border-orange-300">🔥 Azione Cruciale:</strong>');
+      .replace(/~~([^~]+)~~/g, '<del class="line-through text-gray-500">$1</del>');
 
-    // Applica nuove funzionalità
-    html = processCodeBlocks(html);
+    // 6. Altri elementi (Liste, Citazioni, Link, Paragrafi)
     html = processBlockquotes(html);
     html = processLists(html);
     html = processLinks(html);
+    // processCodeBlocks is no longer needed for triple backticks, inline code is handled above.
+    // html = processCodeBlocks(html); 
     html = processParagraphs(html);
+
+    // 7. Pattern speciali (assicurati che non vengano doppiamente escapati se contengono HTML)
+    html = html
+      .replace(/(\*\*Obiettivo:\*\*)/g, '<div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 my-4"><strong class="text-yellow-800">🎯 Obiettivo:</strong>')
+      .replace(/(\*\*Ricorda sempre)/g, '</div><div class="bg-red-50 border-l-4 border-red-400 p-3 my-4"><strong class="text-red-800">⚠️ Ricorda sempre')
+      .replace(/(\*\*Azione Cruciale:\*\*)/g, '<strong class="bg-orange-100 text-orange-800 px-2 py-1 rounded border border-orange-300">🔥 Azione Cruciale:</strong>');
 
     // Ripristina tabelle
     processedTables.forEach((tableHtml, i) => {
@@ -244,7 +254,6 @@ const MarkdownRenderer = ({ text }) => {
         key={index} 
         className="markdown-content"
         style={{ 
-          /*whiteSpace: 'pre-line', */
           lineHeight: '1.7',
           wordWrap: 'break-word'
         }} 

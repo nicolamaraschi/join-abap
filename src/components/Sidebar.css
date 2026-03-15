@@ -362,3 +362,48 @@
   scroll-padding-bottom: 6rem !important;
   scroll-behavior: smooth;
 }
+
+/* CDS View Selector - Premium Toggle */
+.cds-view-selector {
+  display: flex;
+  background-color: #f1f5f9;
+  padding: 0.25rem;
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.cds-view-selector button {
+  flex: 1;
+  padding: 0.625rem 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #64748b;
+  background: none;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.cds-view-selector button.active {
+  background-color: #ffffff;
+  color: #2563eb;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.cds-view-selector button:not(.active):hover {
+  color: #1e293b;
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 768px) {
+  .cds-view-selector {
+    padding: 0.125rem;
+  }
+  .cds-view-selector button {
+    padding: 0.75rem 0.25rem;
+    font-size: 0.875rem;
+  }
+}

@@ -4,9 +4,9 @@ import MarkdownRenderer from './MarkdownRenderer.jsx';
 const AbapDocDetailsView = ({ doc }) => {
     if (!doc) return null;
 
-    // Stile per aggiungere spazio in alto per la navbar e la search bar fissa
+    // Rimosso il padding fisso orribile, ora il layout è gestito correttamente
     const viewStyle = {
-        paddingTop: '144px', // 64px (Navbar) + 80px (SearchBar)
+        padding: '2rem',
     };
 
     // Se il contenuto è una stringa (e ha il flag), usa il renderer Markdown.

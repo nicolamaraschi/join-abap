@@ -15,6 +15,7 @@ import AdobeformDetailsView from './AdobeformDetailsView.jsx';
 
 const MainContent = ({
     viewMode,
+    onViewModeSelect,
     selectedTable,
     selectedBapi,
     selectedCds,
@@ -35,54 +36,54 @@ const MainContent = ({
             case 'TABLES':
                 return selectedTable
                     ? <TableDetailsView table={selectedTable} onSelectTable={onSelectTable} />
-                    : <WelcomeView allTables={allTables} />;
+                    : <WelcomeView allTables={allTables} onSelectMode={onViewModeSelect} />;
             case 'BAPIS':
                 return selectedBapi
                     ? <BapiDetailsView bapi={selectedBapi} />
-                    : <WelcomeView isBapiMode={true} allTables={allTables} />;
+                    : <WelcomeView isBapiMode={true} allTables={allTables} onSelectMode={onViewModeSelect} />;
             case 'PRESETS':
                 return selectedPreset
                     ? <PresetDetailsView preset={selectedPreset} />
-                    : <WelcomeView isPresetMode={true} />;
+                    : <WelcomeView isPresetMode={true} onSelectMode={onViewModeSelect} />;
             case 'FIORI_PRESETS':
                 return selectedFioriPreset
                     ? <PresetDetailsView preset={selectedFioriPreset} />
-                    : <WelcomeView isPresetMode={true} />;
+                    : <WelcomeView isPresetMode={true} onSelectMode={onViewModeSelect} />;
             case 'CDS':
                 if (cdsSubMode === 'docs') {
                     return selectedCds
                         ? <CdsDocumentationView cdsDoc={selectedCds} />
-                        : <WelcomeView isCdsMode={true} />;
+                        : <WelcomeView isCdsMode={true} onSelectMode={onViewModeSelect} />;
                 } else if (cdsSubMode === 'presets') {
                     return selectedCdsPreset
                         ? <PresetDetailsView preset={selectedCdsPreset} />
-                        : <WelcomeView isCdsPresetMode={true} />;
+                        : <WelcomeView isCdsPresetMode={true} onSelectMode={onViewModeSelect} />;
                 }
-                return <WelcomeView />;
+                return <WelcomeView onSelectMode={onViewModeSelect} />;
             case 'ABAP_DOC':
                 if (selectedAbapDoc) {
                     return <AbapDocDetailsView doc={selectedAbapDoc} />;
                 } else if (window.location.pathname.includes('/sap-abap-guide/')) {
                     return <SapAbapGuideDetailsView />;
                 } else {
-                    return <WelcomeView isAbapDocMode={true} />;
+                    return <WelcomeView isAbapDocMode={true} onSelectMode={onViewModeSelect} />;
                 }
             case 'BADIS':
                 return selectedBadi
                     ? <BadiDetailsView badi={selectedBadi} />
-                    : <WelcomeView isBadiMode={true} />;
+                    : <WelcomeView isBadiMode={true} onSelectMode={onViewModeSelect} />;
             case 'SMARTFORMS':
                 return selectedSmartform
                     ? <SmartformDetailsView smartform={selectedSmartform} />
-                    : <WelcomeView isSmartformMode={true} />;
+                    : <WelcomeView isSmartformMode={true} onSelectMode={onViewModeSelect} />;
             case 'ADOBEFORMS':
                 return selectedAdobeform
                     ? <AdobeformDetailsView adobeform={selectedAdobeform} />
-                    : <WelcomeView isAdobeformMode={true} />;
+                    : <WelcomeView isAdobeformMode={true} onSelectMode={onViewModeSelect} />;
             case 'TRANSACTIONS':
                 return <ReportView data={transactionData} />;
             default:
-                return <WelcomeView allTables={allTables} />;
+                return <WelcomeView allTables={allTables} onSelectMode={onViewModeSelect} />;
         }
     };
     return (<main className="main-content">{renderContent()}</main>);

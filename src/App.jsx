@@ -263,6 +263,18 @@ function App() {
         }
     };
 
+    const handleTableSelect = (tableName) => {
+        if (!tableName) return;
+        setSelectedItemName(tableName);
+        
+        // Sincronizza il modulo della sidebar se necessario
+        const table = tableData.find(tableName);
+        if (table && table.module && table.module !== currentModule) {
+            setCurrentModule(table.module);
+            setSelectedSubgroup('All');
+        }
+    };
+
     const handleModuleSelect = (module) => {
         setCurrentModule(module);
         setSelectedItemName(null);
@@ -454,6 +466,7 @@ function App() {
                 />
                 <MainContent
                     viewMode={viewMode}
+                    onViewModeSelect={handleViewModeSelect}
                     selectedTable={selectedTable}
                     selectedBapi={selectedBapi}
                     selectedCds={selectedCds}
@@ -467,7 +480,7 @@ function App() {
                     transactionData={staticTransactionData}
                     allTables={tableData.all}
                     cdsSubMode={cdsSubMode}
-                    onSelectTable={setSelectedItemName}
+                    onSelectTable={handleTableSelect}
                 />
             </div>
         </div>

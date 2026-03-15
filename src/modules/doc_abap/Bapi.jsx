@@ -1,5 +1,5 @@
-
 export const content = `
+\`\`\`abap
 REPORT z_stress_test_compilatore.
 
 "**********************************************************************
@@ -932,4 +932,5 @@ FORM f_testa_material_savedata.
     MESSAGE 'Commit effettuato per BAPI_MATERIAL_SAVEDATA.' TYPE 'I'.
   ENDIF.
 ENDFORM.
+\`\`\`
 `;

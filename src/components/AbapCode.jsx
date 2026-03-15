@@ -222,20 +222,22 @@ const AbapCode = ({ code }) => {
   // Stile del pulsante copy
   const copyButtonStyle = {
     position: 'absolute',
-    top: '8px',
-    right: '8px',
-    backgroundColor: copied ? '#4CAF50' : '#333',
+    top: '12px',
+    right: '12px',
+    backgroundColor: copied ? '#059669' : '#1e293b',
     color: '#fff',
-    border: 'none',
-    borderRadius: '4px',
-    padding: '6px 10px',
+    border: '1px solid #475569',
+    borderRadius: '6px',
+    padding: '8px 12px',
     cursor: 'pointer',
-    fontSize: '12px',
+    fontSize: '13px',
+    fontWeight: '500',
     display: 'flex',
     alignItems: 'center',
-    gap: '4px',
-    transition: 'all 0.2s ease',
-    zIndex: 1,
+    gap: '6px',
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+    zIndex: 10,
+    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
   };
 
   // Stile del contenitore <pre> per un aspetto professionale (dark theme)
@@ -276,12 +278,14 @@ const AbapCode = ({ code }) => {
         title={copied ? 'Copiato!' : 'Copia codice'}
         onMouseEnter={(e) => {
           if (!copied) {
-            e.target.style.backgroundColor = '#444';
+            e.target.style.backgroundColor = '#334155';
+            e.target.style.borderColor = '#64748b';
           }
         }}
         onMouseLeave={(e) => {
           if (!copied) {
-            e.target.style.backgroundColor = '#333';
+            e.target.style.backgroundColor = '#1e293b';
+            e.target.style.borderColor = '#475569';
           }
         }}
       >
@@ -289,7 +293,10 @@ const AbapCode = ({ code }) => {
         {copied ? 'Copiato!' : 'Copy'}
       </button>
       <pre style={preStyle}>
-        <code dangerouslySetInnerHTML={{ __html: highlightedCodeHtml }} />
+        <code 
+          style={{ background: 'transparent', padding: 0 }} 
+          dangerouslySetInnerHTML={{ __html: highlightedCodeHtml }} 
+        />
       </pre>
     </div>
   );
