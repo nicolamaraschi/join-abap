@@ -274,78 +274,153 @@
   background-color: #dbeafe; /* blue-100 */
 }
 
-/* Stili per la Vista Report/Transazioni */
+/* Stili per la Vista Report/Transazioni - Premium Update */
+.details-view .view-selector {
+  display: flex;
+  gap: 0.5rem;
+  background-color: #f1f5f9;
+  padding: 0.375rem;
+  border-radius: 0.75rem;
+  margin-bottom: 2rem;
+  border: 1px solid #e2e8f0;
+  width: fit-content;
+}
+
+.details-view .view-selector button {
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.details-view .view-selector button.active {
+  background-color: #ffffff;
+  color: #2563eb;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
 .report-content {
   max-width: 100%;
 }
+
 .report-introduction {
-  background-color: #eff6ff;
-  border: 1px solid #dbeafe;
-  padding: 1.5rem;
-  border-radius: 0.75rem;
-  margin-bottom: 2rem;
-}
-.report-introduction h1 {
-  font-size: 2rem;
-  color: #1d4ed8;
-  margin-top: 0;
-}
-.module-section {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 1px solid #bfdbfe;
+  padding: 2rem;
+  border-radius: 1rem;
   margin-bottom: 2.5rem;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.05);
 }
+
+.report-introduction h1 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #1e40af;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  letter-spacing: -0.025em;
+}
+
+.module-section {
+  margin-bottom: 4rem;
+  padding: 1rem;
+  transition: background-color 0.3s ease;
+  border-radius: 12px;
+}
+
 .module-section > h2 {
   font-size: 1.75rem;
-  font-weight: 700;
-  color: #1e293b;
-  border-bottom: 2px solid #93c5fd;
-  padding-bottom: 0.5rem;
-  margin-bottom: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+  border-left: 5px solid #3b82f6;
+  padding-left: 1rem;
+  margin-bottom: 1.5rem;
 }
+
 .module-context {
   font-style: italic;
   color: #475569;
   background-color: #f8fafc;
-  border-left: 4px solid #d1d5db;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
+  border-left: 4px solid #cbd5e1;
+  padding: 1.25rem;
+  margin-bottom: 2rem;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
+
 .submodule-section > h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1e3a8a;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1d4ed8;
+  margin-top: 2.5rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
+
+.submodule-section > h3::before {
+  content: '→';
+  color: #3b82f6;
+  font-weight: 400;
+}
+
 .table-container {
   overflow-x: auto;
   width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border: 1px solid #e2e8f0;
 }
+
 .report-content table {
   width: 100%;
-  min-width: 600px;
-  border-collapse: collapse;
-  margin-bottom: 2rem;
-  font-size: 0.875rem;
+  min-width: 700px;
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: white;
 }
+
 .report-content th, .report-content td {
-  border: 1px solid #e2e8f0;
-  padding: 0.75rem;
+  padding: 1rem;
   text-align: left;
-  vertical-align: top;
+  border-bottom: 1px solid #f1f5f9;
 }
+
 .report-content th {
-  background-color: #f1f5f9;
+  background-color: #f8fafc;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.report-content tr:last-child td {
+  border-bottom: none;
+}
+
+.report-content tr {
+  transition: all 0.2s ease;
+}
+
+.report-content tr:hover {
+  background-color: #f0f7ff !important;
+}
+
+.report-content td strong {
+  color: #2563eb;
   font-weight: 600;
 }
-.report-content tr:nth-child(even) {
-  background-color: #f8fafc;
-}
-.report-content td:first-child {
-  min-width: 200px;
-}
-.report-content td:last-child {
-  min-width: 300px;
-}
+
 
 /* Media Queries per Responsive Design */
 @media (max-width: 1024px) {

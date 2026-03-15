@@ -114,6 +114,26 @@ function App() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedSubgroup, setSelectedSubgroup] = useState('All');
     const [cdsSubMode, setCdsSubMode] = useState('docs');
+    const [transactionSubMode, setTransactionSubMode] = useState('fiori');
+
+    const handleTransactionSelect = (tx) => {
+        if (!tx) return;
+        setTransactionSubMode(tx.transactionDetails.type);
+        // Piccolo delay per permettere al DOM di aggiornarsi se il tab cambia
+        setTimeout(() => {
+            const element = document.getElementById(`section-${tx.transactionDetails.type}-${tx.originalModuleId}`);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // Opzionale: aggiungi un feedback visivo (flash) alla sezione
+                element.style.transition = 'background-color 0.5s';
+                const originalBg = element.style.backgroundColor;
+                element.style.backgroundColor = '#f0f9ff';
+                setTimeout(() => {
+                    element.style.backgroundColor = originalBg;
+                }, 1000);
+            }
+        }, 100);
+    };
 
     const {
         tableData,
@@ -462,6 +482,7 @@ function App() {
                     cdsSubMode={cdsSubMode}
                     onCdsSubModeChange={setCdsSubMode}
                     onSelectItem={setSelectedItemName}
+                    onTransactionSelect={handleTransactionSelect}
                     selectedItemName={selectedItemName}
                 />
                 <MainContent
@@ -479,8 +500,10 @@ function App() {
                     selectedAdobeform={selectedAdobeform}
                     transactionData={staticTransactionData}
                     allTables={tableData.all}
-                    cdsSubMode={cdsSubMode}
                     onSelectTable={handleTableSelect}
+                    cdsSubMode={cdsSubMode}
+                    transactionSubMode={transactionSubMode}
+                    setTransactionSubMode={setTransactionSubMode}
                 />
             </div>
         </div>

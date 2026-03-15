@@ -1,17 +1,11 @@
 import React from 'react';
 
-const TransactionNavList = ({ modules }) => {
+const TransactionNavList = ({ modules, onSelect }) => {
 
-    const handleNavigation = (e, transactionId) => {
+    const handleNavigation = (e, transaction) => {
         e.preventDefault();
-        // Trova l'elemento della sezione a cui navigare
-        const element = document.getElementById(`transaction-section-${transactionId}`);
-        if (element) {
-            // Usa il metodo moderno e affidabile per scorrere fino all'elemento
-            element.scrollIntoView({
-                behavior: "smooth",
-                block: "start"
-            });
+        if (onSelect) {
+            onSelect(transaction);
         }
     };
 
@@ -26,7 +20,7 @@ const TransactionNavList = ({ modules }) => {
                 <li key={transaction.id}>
                     <a 
                         href={`#transaction-section-${transaction.id}`} 
-                        onClick={(e) => handleNavigation(e, transaction.id)}
+                        onClick={(e) => handleNavigation(e, transaction)}
                         className="transaction-nav-link"
                     >
                         {transaction.name}

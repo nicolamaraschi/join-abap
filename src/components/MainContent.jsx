@@ -30,6 +30,8 @@ const MainContent = ({
     allTables,
     onSelectTable,
     cdsSubMode, // Aggiunto
+    transactionSubMode,
+    setTransactionSubMode,
 }) => {
     const renderContent = () => {
         switch (viewMode) {
@@ -81,7 +83,7 @@ const MainContent = ({
                     ? <AdobeformDetailsView adobeform={selectedAdobeform} />
                     : <WelcomeView isAdobeformMode={true} onSelectMode={onViewModeSelect} />;
             case 'TRANSACTIONS':
-                return <ReportView data={transactionData} />;
+                return <ReportView data={transactionData} activeView={transactionSubMode} onViewChange={setTransactionSubMode} />;
             default:
                 return <WelcomeView allTables={allTables} onSelectMode={onViewModeSelect} />;
         }

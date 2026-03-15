@@ -93,10 +93,14 @@ const MarkdownRenderer = ({ text }) => {
   // Funzione per processare link (NUOVA FUNZIONALITÀ)
   const processLinks = (content) => {
     // Link con testo [text](url)
-    content = content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 hover:text-blue-800 underline" target="_blank" rel="noopener noreferrer">$1</a>');
+    content = content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
+      const isInternal = url.startsWith('#');
+      const target = isInternal ? '' : 'target="_blank" rel="noopener noreferrer"';
+      return `<a href="${url}" class="text-blue-600 hover:text-blue-800 underline" ${target}>${text}</a>`;
+    });
     
     // Link automatici
-    content = content.replace(/(https?:\/\/[^\s<>"]+)/g, '<a href="$1" class="text-blue-600 hover:text-blue-800 underline" target="_blank" rel="noopener noreferrer">$1</a>');
+    content = content.replace(/(?<!["'])(https?:\/\/[^\s<>"]+)/g, '<a href="$1" class="text-blue-600 hover:text-blue-800 underline" target="_blank" rel="noopener noreferrer">$1</a>');
     
     return content;
   };

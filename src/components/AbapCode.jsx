@@ -224,20 +224,21 @@ const AbapCode = ({ code }) => {
     position: 'absolute',
     top: '12px',
     right: '12px',
-    backgroundColor: copied ? '#059669' : '#1e293b',
+    backgroundColor: copied ? '#059669' : 'rgba(30, 41, 59, 0.8)',
     color: '#fff',
-    border: '1px solid #475569',
+    border: '1px solid rgba(71, 85, 105, 0.5)',
     borderRadius: '6px',
-    padding: '8px 12px',
+    padding: '6px 12px',
     cursor: 'pointer',
-    fontSize: '13px',
-    fontWeight: '500',
+    fontSize: '12px',
+    fontWeight: '600',
     display: 'flex',
     alignItems: 'center',
-    gap: '6px',
+    gap: '8px',
     transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
     zIndex: 10,
-    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+    backdropFilter: 'blur(4px)',
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
   };
 
   // Stile del contenitore <pre> per un aspetto professionale (dark theme)

@@ -31,6 +31,7 @@ const Sidebar = ({
   selectedItemName, // Aggiunto
   cdsSubMode, // Aggiunto
   onCdsSubModeChange, // Aggiunto
+  onTransactionSelect, // Aggiunto
 }) => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -102,7 +103,7 @@ const Sidebar = ({
       case 'ADOBEFORMS':
         return <AdobeformList adobeforms={adobeforms} onSelectAdobeform={onSelectItem} selectedAdobeform={selectedItemName} />;
       case 'TRANSACTIONS':
-        return <TransactionNavList modules={transactionModules} />;
+        return <TransactionNavList modules={transactionModules} onSelect={onTransactionSelect} />;
       default:
         return null;
     }

@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './ReportView.css';
 
-const ReportView = ({ data }) => {
-    const [view, setView] = useState('fiori'); // 'fiori', 'gui' o 'abap'
+const ReportView = ({ data, activeView = 'fiori', onViewChange }) => {
+    
+    const view = activeView;
+    const setView = onViewChange;
 
     // Controllo di sicurezza per assicurarsi che i dati e le loro proprietà esistano
     if (!data || !data.fiori || !data.gui) {
@@ -16,7 +18,7 @@ const ReportView = ({ data }) => {
                 <p>{data.fiori.introduction.content}</p>
             </div>
             {data.fiori.modules.map(module => (
-                <section key={`fiori-${module.id}`} id={`module-section-${module.id}`} className="module-section">
+                <section key={`fiori-${module.id}`} id={`section-fiori-${module.id}`} className="module-section">
                     <h2>{module.name}</h2>
                     <p className="module-context">{module.context}</p>
                     {module.submodules.map(submodule => (
@@ -69,7 +71,7 @@ const ReportView = ({ data }) => {
                 ))}
             </div>
             {data.gui.modules.map(module => (
-                <section key={`gui-${module.id}`} id={`module-section-${module.id}`} className="module-section">
+                <section key={`gui-${module.id}`} id={`section-gui-${module.id}`} className="module-section">
                     <h2>{module.name}</h2>
                     <p className="module-context">{module.introduction}</p>
                      <div className="table-container">
@@ -106,7 +108,7 @@ const ReportView = ({ data }) => {
                 <p>{data.abap.introduction.content}</p>
             </div>
             {data.abap.modules.map(module => (
-                <section key={`abap-${module.id}`} id={`module-section-${module.id}`} className="module-section">
+                <section key={`abap-${module.id}`} id={`section-abap-${module.id}`} className="module-section">
                     <h2>{module.name}</h2>
                     <p className="module-context">{module.introduction}</p>
                     <div className="table-container">
