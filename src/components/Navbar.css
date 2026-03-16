@@ -13,9 +13,46 @@
 .navbar {
     display: flex;
     align-items: center;
-    padding: 0.75rem 1.5rem;
-    gap: 2rem;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    gap: 1rem;
     border-bottom: 1px solid #f1f5f9;
+}
+
+.navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: #475569;
+    padding: 0.5rem;
+    cursor: pointer;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s;
+}
+
+.menu-toggle:hover {
+    background-color: #f1f5f9;
+}
+
+.nav-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: #475569;
+    padding: 0.5rem;
+    cursor: pointer;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s;
+}
+
+.nav-menu-toggle:hover {
+    background-color: #f1f5f9;
 }
 
 .navbar-brand {
@@ -39,9 +76,9 @@
 }
 
 .main-nav-filters button {
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 0.85rem;
     border-radius: 6px;
-    font-size: 0.875rem;
+    font-size: 0.813rem;
     font-weight: 600;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
@@ -133,9 +170,65 @@
 
 @media (max-width: 768px) {
     .navbar {
+        padding: 0.5rem 0.75rem;
+    }
+
+    .menu-toggle, .nav-menu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+
+    .desktop-only {
+        display: none !important;
+    }
+
+    .main-nav-filters {
+        display: none !important;
+    }
+    
+    .filter-bar {
+        padding: 0.5rem 0.75rem;
+        background-color: #ffffff;
+    }
+
+    .filter-section {
         flex-direction: column;
         align-items: flex-start;
-        gap: 1rem;
+        gap: 0.35rem;
+    }
+    
+    .filter-label {
+        min-width: auto;
+        font-size: 0.65rem;
+        color: #94a3b8;
+    }
+
+    .pill-container {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 0.4rem;
+        width: 100%;
+        padding-bottom: 4px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .pill-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    .pill-container {
+        gap: 0.35rem;
+    }
+
+    .pill-button {
+        padding: 0.35rem 0.75rem;
+        font-size: 0.75rem;
     }
     
     .filter-section {

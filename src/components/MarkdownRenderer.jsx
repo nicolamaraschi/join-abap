@@ -270,7 +270,7 @@ const MarkdownRenderer = ({ text }) => {
     <div className="markdown-renderer max-w-none">
       <style jsx>{`
         .markdown-content h1, .markdown-content h2, .markdown-content h3 {
-          scroll-margin-top: 2rem;
+          scroll-margin-top: 6rem;
         }
         
         .markdown-content code {

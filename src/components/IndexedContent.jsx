@@ -14,7 +14,7 @@ const IndexedContent = ({ text }) => {
     
     const headings = [];
     const lines = text.split('\n');
-    const headingRegex = /^(##|###)\s(.+)/;
+    const headingRegex = /^(#|##|###)\s(.+)/;
 
     const createSlug = (text) => {
       return text
@@ -51,15 +51,9 @@ const IndexedContent = ({ text }) => {
   const handleResultClick = (id) => {
     const element = document.getElementById(id);
     if (element) {
-      const offset = 100; // Offset per la barra sticky
-      const bodyRect = document.body.getBoundingClientRect().top;
-      const elementRect = element.getBoundingClientRect().top;
-      const elementPosition = elementRect - bodyRect;
-      const offsetPosition = elementPosition - offset;
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
       });
     }
     setSearchQuery('');

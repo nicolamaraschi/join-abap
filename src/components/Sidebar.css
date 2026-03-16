@@ -212,70 +212,154 @@
     width: 85%;
     max-width: 320px;
     height: 100vh;
-    max-height: none;
     border-right: none;
-    border-bottom: none;
     transform: translateX(-100%);
     background-color: #ffffff;
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+    z-index: 2000;
   }
 
-  .sidebar.open {
-    transform: translateX(0);
-  }
-
-  .sidebar.closed {
-    transform: translateX(-100%);
-  }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar.closed { transform: translateX(-100%); }
 
   .sidebar-content {
-    padding: 1rem;
-    /* FIX MOBILE: Padding bottom molto generoso */
-    padding-bottom: 10rem !important; /* Ancora più spazio su mobile */
+    padding: 0 !important; /* Gestito dai componenti interni */
+    padding-bottom: 10rem !important;
   }
 
-  /* FIX MOBILE: Spazio extra per l'ultimo elemento */
-  .sidebar-content .table-list:last-child {
-    margin-bottom: 6rem !important;
+  .close-btn {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: #f1f5f9;
+    border: none;
+    font-size: 1.25rem;
+    color: #475569;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 2100;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
 
-  /* FIX MOBILE: Elemento invisibile più grande */
-  .sidebar-content::after {
-    height: 8rem;
+  /* PREMIUM MOBILE NAVIGATION SECTOR */
+  .mobile-mode-selector {
+    margin: 0;
+    padding: 1.5rem 1rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 1.5rem;
   }
 
-  .search-input {
-    padding: 0.875rem 0.875rem 0.875rem 2.5rem;
-    font-size: 1rem;
+  .sidebar-section-title {
+    display: flex !important;
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #64748b;
+    letter-spacing: 0.15em;
+    margin-bottom: 1rem;
+    align-items: center;
+    gap: 0.5rem;
+    text-transform: uppercase;
   }
 
-  .table-list-item {
-    padding: 1rem 0.75rem;
+  .sidebar-section-title::after {
+    content: '';
+    height: 1px;
+    background: #e2e8f0;
+    flex: 1;
   }
 
-  .table-name {
-    font-size: 1rem;
+  .mode-pills-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
   }
 
-  .table-description {
-    font-size: 0.875rem;
+  .mode-pill {
+    appearance: none;
+    -webkit-appearance: none;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.85rem;
+    padding: 0.75rem 0.4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    min-height: 72px;
   }
+
+  .mode-pill span {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #475569;
+  }
+
+  .mode-pill svg {
+    width: 1.35rem !important;
+    height: 1.35rem !important;
+    color: #94a3b8;
+    display: block;
+  }
+
+  .mode-pill.active {
+    background: #ffffff;
+    border: 2px solid #2563eb;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+  }
+
+  .mode-pill.active span { color: #2563eb; }
+  .mode-pill.active svg { color: #2563eb; }
+  
+  .mode-pill:active { transform: scale(0.96); }
+
+  /* Ajustments for lists following the selector */
+  .sidebar-content > .search-container {
+    padding: 0 1rem;
+  }
+  
+  .sidebar-content > .sidebar-section-title:not(.mobile-mode-selector *) {
+    padding: 0 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .table-list, .bapi-list, .preset-list, .transaction-list {
+    padding: 0 1rem;
+  }
+
+  .cds-view-selector {
+    margin: 0 1rem 1.5rem 1rem;
+  }
+}
+
+.mobile-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 1999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.mobile-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* TABLET */
 @media (min-width: 769px) and (max-width: 1024px) {
-  .sidebar {
-    width: 280px;
-    min-width: 280px;
-  }
-
-  .sidebar-content {
-    padding-bottom: 7rem !important;
-  }
-
-  .sidebar-content .table-list:last-child {
-    margin-bottom: 3rem !important;
-  }
+  .sidebar { width: 280px; min-width: 280px; }
 }
 
 /* DESKTOP */
@@ -284,83 +368,15 @@
     position: relative;
     transform: none !important;
     flex-shrink: 0;
+    z-index: 10;
   }
+  .sidebar-section-title { display: none; }
+  .mobile-mode-selector { display: none; }
 }
 
 /* DESKTOP LARGE */
 @media (min-width: 1200px) {
-  .sidebar {
-    width: 360px;
-    min-width: 360px;
-  }
-  
-  .sidebar-content {
-    padding: 1.5rem;
-    padding-bottom: 8rem !important;
-  }
-}
-
-/* States */
-.sidebar.loading .table-list-item {
-  opacity: 0.6;
-  pointer-events: none;
-}
-
-.sidebar.loading::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 24px;
-  height: 24px;
-  margin: -12px 0 0 -12px;
-  border: 2px solid #e2e8f0;
-  border-top-color: #3b82f6;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Empty state */
-.sidebar-empty {
-  text-align: center;
-  padding: 2rem 1rem;
-  color: #64748b;
-  font-size: 0.875rem;
-}
-
-.sidebar-empty-icon {
-  width: 48px;
-  height: 48px;
-  margin: 0 auto 1rem;
-  opacity: 0.5;
-}
-
-/* RIMOSSO il gradiente ::after che causava problemi */
-/* Era questo che nascondeva gli elementi finali */
-
-/* FIX ALTERNATIVO: Classe helper per debug */
-.sidebar-debug {
-  border: 2px solid red !important;
-}
-
-.sidebar-debug .sidebar-content {
-  border: 2px solid blue !important;
-}
-
-.sidebar-debug .table-list:last-child {
-  border: 2px solid green !important;
-}
-
-/* FIX: Classe per forzare scroll completo */
-.sidebar-force-scroll {
-  scroll-padding-bottom: 6rem !important;
-  scroll-behavior: smooth;
+  .sidebar { width: 360px; min-width: 360px; }
 }
 
 /* CDS View Selector - Premium Toggle */
@@ -384,13 +400,12 @@
   border-radius: 0.5rem;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  white-space: nowrap;
 }
 
 .cds-view-selector button.active {
   background-color: #ffffff;
   color: #2563eb;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .cds-view-selector button:not(.active):hover {

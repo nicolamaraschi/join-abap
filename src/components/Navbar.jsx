@@ -10,7 +10,9 @@ const Navbar = ({
     onModuleSelect,
     subgroups,
     selectedSubgroup,
-    onSubgroupSelect
+    onSubgroupSelect,
+    isSidebarOpen,
+    onToggleSidebar
 }) => {
 
     // Gestisce il cambio del modulo dal menu a tendina
@@ -27,10 +29,26 @@ const Navbar = ({
         <header className="navbar-container">
             {/* 1. BARRA PRINCIPALE: SEMPRE VISIBILE */}
             <nav className="navbar">
-                <div className="navbar-brand">
-                    SAP Explorer
+                <div className="navbar-left">
+                    <button 
+                        className={`menu-toggle ${isSidebarOpen ? 'active' : ''}`} 
+                        onClick={onToggleSidebar} 
+                        aria-label="Toggle Sidebar"
+                    >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            {isSidebarOpen ? (
+                                <path d="M18 6L6 18M6 6l12 12" /> // Icona X
+                            ) : (
+                                <path d="M4 6h16M4 12h16M4 18h16" /> // Icona Hamburger
+                            )}
+                        </svg>
+                    </button>
+                    <div className="navbar-brand">
+                        SAP Explorer
+                    </div>
                 </div>
-                <div className="main-nav-filters">
+
+                <div className="main-nav-filters desktop-only">
                     <button onClick={() => onViewModeSelect('TABLES')} className={viewMode === 'TABLES' ? 'active' : 'inactive'}>
                         Tabelle
                     </button>
@@ -50,12 +68,11 @@ const Navbar = ({
                         ABAP Doc
                     </button>
                     <button
-                        className={`nav-button ${viewMode === 'BADIS' ? 'active' : ''}`}
+                        className={`nav-button ${viewMode === 'BADIS' ? 'active' : 'inactive'}`}
                         onClick={() => onViewModeSelect('BADIS')}
                     >
                         BADI
                     </button>
-                    {/* NUOVI PULSANTI PER SMARTFORMS E ADOBE FORMS */}
                     <button onClick={() => onViewModeSelect('SMARTFORMS')} className={viewMode === 'SMARTFORMS' ? 'active' : 'inactive'}>
                         Smartforms
                     </button>

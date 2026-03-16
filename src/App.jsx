@@ -115,6 +115,7 @@ function App() {
     const [selectedSubgroup, setSelectedSubgroup] = useState('All');
     const [cdsSubMode, setCdsSubMode] = useState('docs');
     const [transactionSubMode, setTransactionSubMode] = useState('fiori');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const handleTransactionSelect = (tx) => {
         if (!tx) return;
@@ -462,10 +463,13 @@ function App() {
                 }
                 selectedSubgroup={selectedSubgroup}
                 onSubgroupSelect={setSelectedSubgroup}
+                isSidebarOpen={isSidebarOpen}
+                onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
             />
             <div className="main-view">
                 <Sidebar
                     viewMode={viewMode}
+                    onViewModeSelect={handleViewModeSelect}
                     searchTerm={searchTerm}
                     onSearchChange={setSearchTerm}
                     tables={filteredTables}
@@ -481,9 +485,17 @@ function App() {
                     transactionModules={filteredTransactions}
                     cdsSubMode={cdsSubMode}
                     onCdsSubModeChange={setCdsSubMode}
-                    onSelectItem={setSelectedItemName}
-                    onTransactionSelect={handleTransactionSelect}
+                    onSelectItem={(name) => {
+                        setSelectedItemName(name);
+                        setIsSidebarOpen(false); // Close sidebar on selection mobile
+                    }}
+                    onTransactionSelect={(tx) => {
+                        handleTransactionSelect(tx);
+                        setIsSidebarOpen(false); // Close sidebar on selection mobile
+                    }}
                     selectedItemName={selectedItemName}
+                    isOpen={isSidebarOpen}
+                    onClose={() => setIsSidebarOpen(false)}
                 />
                 <MainContent
                     viewMode={viewMode}
