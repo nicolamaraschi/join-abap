@@ -159,15 +159,30 @@ const MarkdownRenderer = ({ text }) => {
 
   const renderedParts = parts.map((part, index) => {
     // Se è un blocco di codice
-    if (part.startsWith('```')) {
-      // Estrai il linguaggio e il codice
-      const match = part.match(/^```(\w+)?\n?([\s\S]*?)```$/i);
-      const language = (match && match[1]) ? match[1].toLowerCase() : 'text'; // Default to 'text' if no language specified
-      const code = (match && match[2]) ? match[2].trim() : part.replace(/^```(\w+)?\n?|```$/gi, '').trim();
+    if (part.trim().startsWith('```')) {
+      // Estrai il linguaggio e il codice in modo più robusto
+      const trimmedPart = part.trim();
+      const match = trimmedPart.match(/^```(\w+)?\n?([\s\S]*?)```$/i);
+      
+      let language = 'text';
+      let code = '';
+      
+      if (match) {
+        language = match[1] ? match[1].toLowerCase() : 'text';
+        code = match[2];
+      } else {
+        // Fallback: prova a rimuovere solo i delimitatori
+        code = trimmedPart.replace(/^```(\w+)?\n?|```$/gi, '');
+        // Tenta di indovinare la lingua se è rimasta nel codice pulito (succede se c'era \r\n)
+        if (code.startsWith('abap\n') || code.startsWith('abap\r\n')) {
+          language = 'abap';
+          code = code.replace(/^abap\r?\n/, '');
+        }
+      }
       
       return (
         <div key={index} style={{ margin: '1.5rem 0' }}>
-          <AbapCode code={code} language={language} />
+          <AbapCode code={code.trim()} language={language} />
         </div>
       );
     }
@@ -178,6 +193,9 @@ const MarkdownRenderer = ({ text }) => {
 
     // Per il testo normale, applichiamo le regole Markdown
     let html = part;
+
+    // 0. Rimuovere commenti HTML (es. <!-- end list -->)
+    html = html.replace(/<!--[\s\S]*?-->/g, '');
 
     // 1. Processare le tabelle (PRIMA dell'escape, perché processTables genera HTML)
     // Salva tabelle temporaneamente

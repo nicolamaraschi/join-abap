@@ -1,5 +1,3 @@
-import IndexedContent from '../../components/IndexedContent.jsx';
-
 export const content = `
 # Guida SAP ABAP - Tipi di Dati e Dichiarazioni
 ==============================================
@@ -686,7 +684,7 @@ PARAMETERS p_test AS CHECKBOX.
 " Radio button
 PARAMETERS: p_rad1 RADIOBUTTON GROUP grp1,
             p_rad2 RADIOBUTTON GROUP grp1 DEFAULT 'X'.
-  \`
+\`\`\`
 
 ### 7.2. SELECT-OPTIONS
 
@@ -742,7 +740,7 @@ Visualizza un messaggio all'utente in una finestra di dialogo o nella status bar
   * **'A' (Abort)**: Messaggio di interruzione. L'elaborazione termina e si torna alla schermata iniziale.
   * **'X' (eXit/Dump)**: Genera un short dump. Da usare solo per debug in situazioni eccezionali.
 
-<!-- end list -->
+
 
 \`\`\`abap
 MESSAGE 'Operazione completata con successo.' TYPE 'S'.
@@ -771,7 +769,7 @@ Dopo la maggior parte delle istruzioni (chiamate a FUNCTION, SELECT, READ TABLE,
   * **sy-subrc = 0**: L'operazione è andata a buon fine.
   * **sy-subrc <> 0** (di solito 4 o 8): L'operazione non è andata a buon fine o non ha trovato risultati.
 
-<!-- end list -->
+
 
 \`\`\`abap
 READ TABLE lt_elenco_utenti WITH KEY id = 10 INTO ls_utente.
@@ -1011,7 +1009,7 @@ L'ambiente ha un supporto misto per la sintassi moderna.
   * **COND e SWITCH**: Sono supportati e possono essere usati per assegnazioni condizionali compatte.
   * **String Templates (|...| o &&)**: **NON supportati**. Usare CONCATENATE.
 
-<!-- end list -->
+
 
 \`\`\`abap
 " Esempio con COND (supportato)
@@ -2222,12 +2220,6 @@ Evento eseguito alla fine di ogni pagina di output.
 END-OF-PAGE.
   WRITE: 'Pagina:', sy-pagno.
 \`\`\`
-
-Hai perfettamente ragione, chiedo scusa.
-
-Ho usato gli apici singoli ( ) per i caratteri nell'ultimo esempio, contrariamente alla tua istruzione. È un'abitudine della sintassi standard di ABAP, ma non rispetta la tua regola specifica.
-
-Ecco la documentazione completa, riscritta per seguire **alla lettera** la tua formattazione, usando esclusivamente i doppi apici (" ") per le stringhe e i caratteri.
 
 -----
 
