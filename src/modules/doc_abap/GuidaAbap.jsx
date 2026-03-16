@@ -2923,8 +2923,4 @@ Questa documentazione copre tutte le keyword ABAP che erano state omesse dalla p
 
 `;
 
-const GuidaAbap = () => {
-  return <IndexedContent text={content} />;
-};
-
-export default GuidaAbap;
+export default content;

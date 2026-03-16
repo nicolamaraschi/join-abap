@@ -198,8 +198,8 @@ const MarkdownRenderer = ({ text }) => {
     html = html
       .replace(/^(Guida Tecnica.*)/gm, (match, title) => `<h1 id="${createSlug(title)}" class="text-3xl font-bold mb-6 text-gray-900 border-b-2 border-blue-500 pb-3">${title}</h1>`)
       .replace(/^# Guida al (.+)/gm, (match, title) => `<h1 id="${createSlug(title)}" class="text-3xl font-bold mb-6 text-gray-900 border-b-2 border-blue-500 pb-3">Guida al ${title}</h1>`)
-      .replace(/^Sezione \d+: (.*)/gm, (match, title) => `<h2 id="${createSlug(title)}" class="text-2xl font-semibold mt-8 mb-4 pb-2 border-b border-gray-300 text-gray-800">${title}</h2>`)
-      .replace(/^### Fase \d+: (.+)/gm, (match, title) => `<h2 id="${createSlug(title)}" class="text-2xl font-semibold mt-8 mb-4 pb-2 border-b border-blue-200 text-blue-800 bg-blue-50 px-4 py-2 rounded-t-lg">Fase: ${title}</h2>`)
+      .replace(/^Sezione \d+: (.*)/gm, (match, title) => `<h2 id="${createSlug(match)}" class="text-2xl font-semibold mt-8 mb-4 pb-2 border-b border-gray-300 text-gray-800">${title}</h2>`)
+      .replace(/^### Fase \d+: (.+)/gm, (match, title) => `<h2 id="${createSlug(match.replace(/^###\s*/, ''))}" class="text-2xl font-semibold mt-8 mb-4 pb-2 border-b border-blue-200 text-blue-800 bg-blue-50 px-4 py-2 rounded-t-lg">Fase: ${title}</h2>`)
       .replace(/^#### (.+)/gm, (match, title) => `<h3 id="${createSlug(title)}" class="text-xl font-semibold mt-6 mb-3 text-gray-800 flex items-center"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm mr-2">📋</span>${title}</h3>`)
       .replace(/^### (.+)/gm, (match, title) => `<h3 id="${createSlug(title)}" class="text-xl font-semibold mt-6 mb-3 text-gray-800">${title}</h3>`)
       .replace(/^## (.+)/gm, (match, title) => `<h2 id="${createSlug(title)}" class="text-2xl font-semibold mt-8 mb-4 pb-2 border-b border-gray-300 text-gray-800">${title}</h2>`)

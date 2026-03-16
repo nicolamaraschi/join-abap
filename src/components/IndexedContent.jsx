@@ -13,9 +13,6 @@ const IndexedContent = ({ text }) => {
     if (!text) return [];
     
     const headings = [];
-    const lines = text.split('\n');
-    const headingRegex = /^(#|##|###)\s(.+)/;
-
     const createSlug = (text) => {
       return text
         .toLowerCase()
@@ -25,15 +22,27 @@ const IndexedContent = ({ text }) => {
         .replace(/-+/g, '-');
     };
 
-    for (const line of lines) {
-      const match = line.match(headingRegex);
-      if (match) {
-        const level = match[1].length;
-        const title = match[2].trim();
-        const id = createSlug(title);
-        headings.push({ level, title, id });
+    // Splittiamo il testo in base ai blocchi di codice (```) come fa MarkdownRenderer
+    // per evitare di indicizzare falsi titoli all'interno del codice.
+    const parts = text.split(/(```[\s\S]*?```)/gi);
+    const headingRegex = /^(#|##|###|####)\s(.+)/;
+
+    parts.forEach(part => {
+      // Ignora i blocchi di codice
+      if (part.startsWith('```')) return;
+
+      const lines = part.split('\n');
+      for (const line of lines) {
+        const match = line.match(headingRegex);
+        if (match) {
+          const level = match[1].length;
+          const title = match[2].trim();
+          const id = createSlug(title);
+          headings.push({ level, title, id });
+        }
       }
-    }
+    });
+
     return headings;
   }, [text]);
 
@@ -192,9 +201,19 @@ const IndexedContent = ({ text }) => {
           transition: all 0.2s ease;
         }
 
+        .level-1 {
+          border-bottom: 1px solid #f1f5f9;
+          margin-bottom: 0.25rem;
+          grid-column: 1 / -1;
+        }
         .level-3 {
           padding-left: 1.25rem;
           border-left: 1px solid #f1f5f9;
+        }
+        .level-4 {
+          padding-left: 2.25rem;
+          border-left: 1px solid #f1f5f9;
+          font-style: italic;
         }
 
         .toc-link {

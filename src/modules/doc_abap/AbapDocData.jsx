@@ -7,13 +7,14 @@ import { content as docAbapEvolutionContent } from './DocAbapEvolution.jsx';
 import { content as compilerIssuesContent } from './CompilerIssues.jsx';
 import { content as docdympro } from './Dynpro.jsx';
 import { content as docbabi} from './Bapi.jsx';
-import GuidaAbap from './GuidaAbap.jsx';
+import { content as guidaAbapContent } from './GuidaAbap.jsx';
 
 export const abapDocData = [
   {
     id: 'GUIDA_ABAP_MARKDOWN',
     title: 'Guida Introduttiva ABAP',
-    content: <GuidaAbap />,
+    content: guidaAbapContent,
+    isMarkdown: true
   },
   {
     id: 'COMPILER_ISSUES',

@@ -1,5 +1,5 @@
 import React from 'react';
-import MarkdownRenderer from './MarkdownRenderer.jsx';
+import IndexedContent from './IndexedContent.jsx';
 
 const AbapDocDetailsView = ({ doc }) => {
     if (!doc) return null;
@@ -13,9 +13,7 @@ const AbapDocDetailsView = ({ doc }) => {
     if (typeof doc.content === 'string' && doc.isMarkdown) {
         return (
             <div className="details-view" style={viewStyle}>
-                <div className="report-content prose" style={{ maxWidth: '100%' }}>
-                    <MarkdownRenderer text={doc.content} />
-                </div>
+                <IndexedContent text={doc.content} />
             </div>
         );
     }
