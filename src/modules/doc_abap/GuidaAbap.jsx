@@ -433,26 +433,69 @@ SELECT vbeln, audat, kunnr
   INTO TABLE @DATA(lt_ordini_lenti).
 \`\`\`
 
-### 5.7.2. Limitazione Record
+### 5.7.2. Limitazione Record e Paginazione
 \`\`\`abap
-" Usa UP TO per limitare i record estratti
-SELECT vbeln, audat, kunnr
+" ======================================================================
+" ESEMPIO 1: Limitare i record estratti
+" ======================================================================
+" NOTA PER LO STUDENTE: Nel nostro ambiente ABAP ibrido (Pre-7.51), la regola 
+" fondamentale per le SELECT è che la clausola INTO deve essere sempre posizionata 
+" alla FINE dell'istruzione SQL. Se si utilizza UP TO n ROWS, questa deve 
+" seguire immediatamente la clausola INTO. 
+" Inoltre, per garantire la massima compatibilità, prediligiamo la dichiarazione 
+" esplicita delle tabelle interne anziché l'inline data declaration (@DATA).
+
+DATA: lt_ordini TYPE STANDARD TABLE OF vbak.
+
+SELECT vbeln, 
+       audat, 
+       kunnr
   FROM vbak
   WHERE audat >= '20240101'
-  INTO CORRESPONDING FIELDS OF TABLE @DATA(lt_ordini)
-  UP TO 1000 ROWS.
+  INTO CORRESPONDING FIELDS OF TABLE @lt_ordini
+  UP TO 1000 ROWS. " Corretto: UP TO segue sempre la clausola INTO
 
-" Per paginazione
+
+" ======================================================================
+" ESEMPIO 2: Gestione della Paginazione (Simulata)
+" ======================================================================
+" NOTA PER LO STUDENTE: Le clausole native OFFSET e FETCH NEXT sono 
+" state introdotte solo da ABAP 7.51 in poi. Essendo il nostro ambiente 
+" basato su un core precedente, l'uso di tali comandi genererà un errore di sintassi.
+" Per paginare i risultati, dobbiamo estrarre i dati in memoria e processarli 
+" tramite le logiche native delle tabelle interne (es. LOOP AT ... FROM).
+
+DATA: lt_tutti_ordini TYPE STANDARD TABLE OF vbak,
+      lt_pagina       TYPE STANDARD TABLE OF vbak.
+
 DATA: lv_offset TYPE i VALUE 0,
-      lv_limit  TYPE i VALUE 100.
+      lv_limit  TYPE i VALUE 100,
+      lv_indice TYPE i.
 
-SELECT vbeln, audat, kunnr
+" 1. Estrazione del set di dati dal database
+SELECT vbeln, 
+       audat, 
+       kunnr
   FROM vbak
   WHERE audat >= '20240101'
   ORDER BY vbeln
-  INTO CORRESPONDING FIELDS OF TABLE@DATA(lt_pagina)
-  OFFSET @lv_offset ROWS
-  FETCH NEXT @lv_limit ROWS ONLY.
+  INTO CORRESPONDING FIELDS OF TABLE @lt_tutti_ordini.
+
+" 2. Estrapolazione manuale della pagina desiderata
+" Calcoliamo l'indice di partenza (l'offset SQL parte da 0, l'indice ABAP parte da 1)
+lv_indice = lv_offset + 1. 
+
+" Clicliamo la tabella partendo dall'indice calcolato
+LOOP AT lt_tutti_ordini INTO DATA(ls_ordine) FROM lv_indice.
+  
+  " Quando la nostra tabella 'pagina' raggiunge il limite desiderato, interrompiamo il loop
+  IF lines( lt_pagina ) >= lv_limit.
+    EXIT.
+  ENDIF.
+  
+  APPEND ls_ordine TO lt_pagina.
+
+ENDLOOP.
 \`\`\`
 
 ### 5.7.3. Proiezione Campi
@@ -1021,6 +1064,252 @@ lv_descrizione_stato = COND string( WHEN lv_stato = 'A' THEN 'Attivo'
 CONCATENATE 'Il cliente' ls_cliente-name1 'vive a' ls_cliente-ort01
   INTO lv_messaggio SEPARATED BY space.
 \`\`\`
+
+-----
+
+## Sezione 11: Costrutti Moderni e Tecniche Utili
+
+-----
+
+Questa sezione raccoglie istruzioni molto usate nella pratica quotidiana: lettura moderna delle tabelle interne, gestione dinamica dei dati, conversioni inline e piccoli strumenti utili per codice più compatto e leggibile.
+
+### 11.1. Control Break Statements (Eventi su Tabelle Interne)
+
+Servono per intercettare il cambio di gruppo durante un \`LOOP\` su tabella interna. **Regola d'oro:** prima di usare \`AT NEW\` o \`AT END OF\`, la tabella deve essere ordinata con \`SORT\` sugli stessi campi di raggruppamento.
+
+\`\`\`abap
+" Ordiniamo la tabella prima di usare gli eventi AT
+SORT gt_ordini BY kunnr vbeln.
+
+LOOP AT gt_ordini INTO DATA(ls_ordine).
+  " Scatta solo quando cambia il valore del cliente (KUNNR)
+  AT NEW kunnr.
+    WRITE: / 'Inizio ordini per il cliente:', ls_ordine-kunnr.
+  ENDAT.
+
+  " Scatta per ogni riga
+  WRITE: / ls_ordine-vbeln, ls_ordine-netwr.
+
+  " Scatta all'ultima riga del gruppo cliente
+  " SUM somma in automatico i campi numerici del gruppo
+  AT END OF kunnr.
+    SUM.
+    WRITE: / 'Totale cliente:', ls_ordine-netwr.
+  ENDAT.
+ENDLOOP.
+\`\`\`
+
+### 11.2. Table Expressions (Lettura Tabelle stile 7.40+)
+
+Le table expressions sono la forma moderna della classica \`READ TABLE\`. Rendono il codice più compatto, ma bisogna gestire il caso in cui la riga non esista.
+
+\`\`\`abap
+" Lettura per indice
+" Se l'indice non esiste può scattare CX_SY_ITAB_LINE_NOT_FOUND
+DATA(ls_prima_riga) = gt_tabella[ 1 ].
+
+" Lettura per chiave con OPTIONAL: evita il dump se il record non esiste
+DATA(ls_riga_cercata) = VALUE #( gt_tabella[ id = '001' ] OPTIONAL ).
+
+IF ls_riga_cercata IS NOT INITIAL.
+  " Record trovato
+ENDIF.
+
+" Lettura diretta di un singolo campo
+DATA(lv_nome) = VALUE #( gt_tabella[ id = '002' ]-nome OPTIONAL ).
+\`\`\`
+
+### 11.3. Field-Symbols Dinamici e Data References
+
+Sono indispensabili quando la struttura dei dati non è nota a compile-time oppure quando si vuole lavorare per riferimento senza copiare i valori.
+
+\`\`\`abap
+FIELD-SYMBOLS: <fs_valore> TYPE any.
+
+" Assegnazione dinamica di un componente di una struttura
+ASSIGN COMPONENT 'NOME_CAMPO' OF STRUCTURE gs_struttura TO <fs_valore>.
+IF sy-subrc = 0.
+  <fs_valore> = 'Nuovo Valore'. " Modifica diretta del campo
+ENDIF.
+
+" Data Reference: crea un riferimento alla struttura
+DATA dref TYPE REF TO data.
+GET REFERENCE OF gs_struttura INTO dref.
+
+" Dereferenziazione: accesso al dato puntato
+ASSIGN dref->* TO FIELD-SYMBOL(<fs_str_intera>).
+\`\`\`
+
+### 11.4. Conversioni di Tipo Forzate (CONV)
+
+\`CONV\` permette di forzare una conversione inline senza creare variabili temporanee. È molto utile quando un metodo o una funzione si aspetta un tipo diverso da quello disponibile.
+
+\`\`\`abap
+DATA lv_intero TYPE i VALUE 123.
+
+" Conversione inline da intero a stringa
+CALL METHOD lo_oggetto->fai_qualcosa
+  EXPORTING
+    iv_testo = CONV string( lv_intero ).
+\`\`\`
+
+### 11.5. Funzioni Integrate (Built-in Functions)
+
+Le built-in functions permettono di manipolare stringhe e numeri direttamente nelle espressioni, senza passare sempre da istruzioni separate.
+
+\`\`\`abap
+DATA(lv_testo) = '  abap developer  '.
+
+" Funzioni stringa
+DATA(lv_maiuscolo) = to_upper( lv_testo ).   " '  ABAP DEVELOPER  '
+DATA(lv_pulito)    = condense( lv_testo ).   " Rimuove spazi superflui
+DATA(lv_lunghezza) = strlen( lv_pulito ).    " Calcola la lunghezza
+
+" Funzioni matematiche
+DATA(lv_assoluto)    = abs( -50 ).           " Ritorna 50
+DATA(lv_arrotondato) = ceil( '10.2' ).       " Arrotonda per eccesso a 11
+\`\`\`
+
+### 11.6. Calcoli con Date e Timestamp
+
+ABAP consente sia aritmetica base sulle date sia gestione precisa del timestamp con conversione nel fuso orario dell'utente.
+
+\`\`\`abap
+" Aritmetica base sulle date
+DATA(lv_domani)      = sy-datum + 1.
+DATA(lv_mese_scorso) = sy-datum - 30.
+
+" Timestamp tecnico
+DATA lv_timestamp TYPE timestamp.
+GET TIME STAMP FIELD lv_timestamp.
+
+" Conversione del timestamp nel fuso orario utente
+CONVERT TIME STAMP lv_timestamp TIME ZONE sy-zonlo
+        INTO DATE DATA(lv_data) TIME DATA(lv_ora).
+\`\`\`
+
+### 11.7. Macro (MACROS)
+
+Le macro sono frammenti di codice riutilizzabili nello stesso programma. Sono rapide da scrivere, ma vanno usate con moderazione perché sono meno leggibili e meno sicure di \`FORM\` o metodi OO.
+
+\`\`\`abap
+" Definizione della macro
+DEFINE m_calcola_sconto.
+  &1 = &2 - ( &2 * &3 / 100 ).
+END-OF-DEFINITION.
+
+DATA: lv_prezzo_fin   TYPE p DECIMALS 2,
+      lv_prezzo_iniz  TYPE p DECIMALS 2 VALUE 100,
+      lv_sconto       TYPE i VALUE 20.
+
+" Chiamata della macro
+m_calcola_sconto lv_prezzo_fin lv_prezzo_iniz lv_sconto.
+" lv_prezzo_fin diventa 80
+\`\`\`
+
+### 11.8. Gestione Testi e Multilingua (Text Symbols)
+
+I testi mostrati all'utente non dovrebbero essere hardcoded nel codice. La scelta corretta è usare i text symbols, così il programma resta traducibile e più facile da mantenere.
+
+\`\`\`abap
+" Sbagliato: testo hardcoded
+* WRITE: / 'Errore di sistema'.
+
+" Corretto: text symbol definito nel programma, per esempio TEXT-E01
+WRITE: / TEXT-e01.
+
+" Se il sistema supporta i string template
+MESSAGE |{ TEXT-e01 }: { lv_dettaglio }| TYPE 'I'.
+\`\`\`
+
+Se lavori in un ambiente più restrittivo, puoi ottenere lo stesso risultato con \`CONCATENATE\` prima della \`MESSAGE\`.
+
+-----
+
+## Sezione 12: Locks, Update Task e Background Processing
+
+-----
+
+Questi tre concetti sono fondamentali in scenari aziendali reali: proteggere i dati da modifiche concorrenti, garantire aggiornamenti coerenti su più tabelle e distinguere l'esecuzione online da quella schedulata in background.
+
+### 12.1. Gestione dei Lock (Oggetti di Blocco / SM12)
+
+SAP è un sistema multi-utente. Prima di modificare dati condivisi, conviene bloccare l'oggetto di business per evitare aggiornamenti simultanei sullo stesso record.
+
+\`\`\`abap
+" Esempio generico di lock su un ordine di vendita
+" ENQUEUE = blocco, DEQUEUE = sblocco
+
+CALL FUNCTION 'ENQUEUE_EVVBAKE'
+  EXPORTING
+    mode_vbak      = 'E'        " E = Exclusive lock
+    vbeln          = '0000012345'
+  EXCEPTIONS
+    foreign_lock   = 1
+    system_failure = 2
+    OTHERS         = 3.
+
+IF sy-subrc = 1.
+  MESSAGE 'L''ordine è attualmente in uso da un altro utente.' TYPE 'E'.
+ELSEIF sy-subrc = 0.
+  " Qui esegui le modifiche al database
+  " UPDATE vbak ...
+
+  " Sblocca sempre al termine
+  CALL FUNCTION 'DEQUEUE_EVVBAKE'
+    EXPORTING
+      mode_vbak = 'E'
+      vbeln     = '0000012345'.
+ENDIF.
+\`\`\`
+
+### 12.2. Aggiornamenti Asincroni (Update Task)
+
+Quando più scritture devono essere trattate come un'unica unità logica, si usa l'Update Task. Le funzioni vengono accodate e vengono eseguite fisicamente solo al \`COMMIT WORK\`.
+
+\`\`\`abap
+" La funzione viene accodata, non eseguita subito
+CALL FUNCTION 'Z_MIO_MODULO_AGGIORNAMENTO' IN UPDATE TASK
+  EXPORTING
+    is_testata  = gs_testata
+  TABLES
+    it_posizion = gt_posizioni.
+
+" Esecuzione fisica degli update accodati
+COMMIT WORK AND WAIT.
+
+IF sy-subrc = 0.
+  MESSAGE 'Aggiornamento completato con successo.' TYPE 'S'.
+ELSE.
+  ROLLBACK WORK.
+ENDIF.
+\`\`\`
+
+### 12.3. Elaborazione in Background (Batch Jobs)
+
+Molti report ABAP sono schedulati come job in \`SM36\`. In questi casi il programma non deve aprire popup, dynpro o controlli grafici, perché in background non esiste interazione utente.
+
+\`\`\`abap
+" sy-batch = X quando il programma gira in background
+
+IF sy-batch = abap_true.
+  " Logica per Job background
+  WRITE: / 'Elaborazione Job iniziata alle:', sy-uzeit.
+
+  " Evitare popup, ALV GUI, CALL SCREEN, ecc.
+ELSE.
+  " Logica online con interfaccia utente
+  PERFORM f_mostra_alv.
+ENDIF.
+\`\`\`
+
+### 12.4. Regole Pratiche Enterprise
+
+- Bloccare sempre l'oggetto prima di un aggiornamento sensibile.
+- Sbloccare sempre l'oggetto anche in caso di percorso alternativo o errore gestito.
+- Usare \`IN UPDATE TASK\` quando testata e posizioni devono essere persistite in modo coerente.
+- Evitare componenti GUI quando \`sy-batch = abap_true\`.
+- Distinguere sempre tra logica online e logica batch per evitare dump e comportamenti incoerenti.
 
 
 # Guida Completa alle Keyword ABAP
